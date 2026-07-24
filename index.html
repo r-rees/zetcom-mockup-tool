@@ -56,160 +56,232 @@
   .ovrow.sel span{font-weight:700;}
   #view{display:block;width:100%;height:100%;cursor:grab;}
   #view:active{cursor:grabbing;}
+  /* --- accordion sidebar --- */
+  .acc{border:1px solid var(--ink-100);border-radius:10px;margin-bottom:10px;overflow:hidden;background:#fff;}
+  .acc>summary{list-style:none;cursor:pointer;padding:11px 14px;font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:#000;font-weight:700;display:flex;align-items:center;gap:9px;
+    background:var(--gray);user-select:none;}
+  .acc>summary::-webkit-details-marker{display:none;}
+  .acc>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--ink-500);
+    border-bottom:2px solid var(--ink-500);transform:rotate(-45deg);transition:transform .15s;flex:0 0 auto;}
+  .acc[open]>summary::before{transform:rotate(45deg);}
+  .acc>summary .count{margin-left:auto;font-weight:400;letter-spacing:0;text-transform:none;
+    color:var(--ink-500);font-size:11px;}
+  .acc .accbody{padding:14px;}
+  .acc .accbody .field:last-child{margin-bottom:0;}
+  /* --- device instance manager --- */
+  .devlist{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .devitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ink-100);
+    border-radius:8px;background:var(--gray);cursor:pointer;font-size:13px;color:#000;}
+  .devitem.sel{border-color:#000;background:#fff;box-shadow:inset 0 0 0 1px #000;}
+  .devitem .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-300);flex:0 0 auto;}
+  .devitem.sel .dot{background:#000;}
+  .devitem .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .devitem .mini{font-size:11px;color:var(--ink-500);flex:0 0 auto;}
+  .devitem .x{flex:0 0 auto;border:0;background:none;color:var(--ink-300);font-size:16px;
+    cursor:pointer;line-height:1;padding:0 2px;}
+  .devitem .x:hover{color:#000;}
+  #sel{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 </style>
 </head>
 <body>
   <div class="panel">
     <h1>zetcom device mockup <b>v6</b></h1>
-    <p class="sub">Real screenshots dropped into hand-made device frames. Drag in the screen to pan, scroll to zoom, drag the frame to move it.</p>
+    <p class="sub">Real screenshots dropped into hand-made device frames. Add several devices to build a workflow or a device overview. Drag in the screen to pan, scroll to zoom, drag a frame to move it, click a device to select it.</p>
 
-    <div class="field"><label>Device</label>
-      <div class="btnrow">
-        <button class="selbtn devicebtn sel" data-device="desktop">Desktop</button>
-        <button class="selbtn devicebtn" data-device="laptop">Laptop</button>
-        <button class="selbtn devicebtn" data-device="phone">Phone</button>
-        <button class="selbtn devicebtn" data-device="window">Window</button>
-      </div></div>
-
-    <div class="field" id="viewField"><label>View</label>
-      <div class="btnrow">
-        <button class="selbtn viewbtn" data-view="left">Tilt left</button>
-        <button class="selbtn viewbtn sel" data-view="front">Front</button>
-        <button class="selbtn viewbtn" data-view="right">Tilt right</button>
-      </div></div>
-
-    <div class="field"><label>Frame</label>
-      <div class="btnrow">
-        <button class="selbtn framebtn" data-frame="plain">Plain</button>
-        <button class="selbtn framebtn sel" data-frame="shadow">Shadow</button>
-      </div></div>
-
-    <div class="field"><label>Screenshot</label>
-      <input type="file" id="file" accept="image/*">
-      <div class="zlabel">or paste (Ctrl+V) / drop anywhere</div></div>
-
-    <div class="field"><label>Screenshot fit</label>
-      <div class="btnrow">
-        <button class="selbtn fitbtn" data-fit="fill">Fill</button>
-        <button class="selbtn fitbtn" data-fit="fit">Fit</button>
-        <button class="selbtn fitbtn" data-fit="orig">100%</button>
-      </div>
-      <input type="range" id="zoom" min="10" max="400" value="100" style="margin-top:10px">
-      <div class="zlabel" id="zoomLabel">Zoom: — (100% = fill)</div></div>
-
-    <div class="field"><label>Tool</label>
-      <div class="btnrow">
-        <button class="selbtn toolbtn sel" data-tool="move">Move</button>
-        <button class="selbtn toolbtn" data-tool="erase">Eraser</button>
-      </div>
-      <div class="hideable" id="eraseRow">
-        <input type="range" id="brush" min="4" max="200" value="40" style="margin-top:10px">
-        <div class="zlabel" id="brushLabel">Brush: 40 px</div>
-        <div class="btnrow" style="margin-top:8px">
-          <button class="selbtn" id="eraseUndo">Undo</button>
-          <button class="selbtn" id="eraseReset">Reset erase</button>
+    <details class="acc" open>
+      <summary>Geräte <span class="count" id="devCount"></span></summary>
+      <div class="accbody">
+        <div class="devlist" id="devList"></div>
+        <div class="btnrow">
+          <button class="selbtn" id="addDevice">+ Gerät</button>
+          <button class="selbtn" id="arrangeDevices" title="Alle Geräte gleichmässig nebeneinander anordnen">Anordnen</button>
         </div>
-        <div class="zlabel">erased areas show the screen background color</div>
-      </div></div>
+        <div class="zlabel" style="margin-top:8px">Das aktive Gerät (markiert) wird unten bearbeitet. Ein Gerät im Canvas anklicken wählt es aus.</div>
 
-    <div class="field"><label>Overlay images</label>
-      <input type="file" id="ovFile" accept="image/*" multiple>
-      <div class="zlabel">logos/badges on top of everything — drag on canvas to move</div>
-      <div id="ovList"></div>
-      <div class="hideable" id="ovScaleRow">
-        <input type="range" id="ovScale" min="5" max="300" value="100" style="margin-top:10px">
-        <div class="zlabel">size of selected overlay</div>
-      </div></div>
+        <div class="field" style="margin-top:14px"><label>Device</label>
+          <div class="btnrow">
+            <button class="selbtn devicebtn sel" data-device="desktop">Desktop</button>
+            <button class="selbtn devicebtn" data-device="laptop">Laptop</button>
+            <button class="selbtn devicebtn" data-device="phone">Phone</button>
+            <button class="selbtn devicebtn" data-device="window">Window</button>
+          </div></div>
 
-    <div class="field"><label>Screen background</label>
-      <div class="row"><input type="color" id="bgColor" value="#ffffff"><input type="text" class="hex" id="bgHex" value="#ffffff"></div>
-      <div class="zlabel">fills any gap when the screenshot doesn't cover the screen</div></div>
+        <div class="field" id="viewField"><label>View</label>
+          <div class="btnrow">
+            <button class="selbtn viewbtn" data-view="left">Tilt left</button>
+            <button class="selbtn viewbtn sel" data-view="front">Front</button>
+            <button class="selbtn viewbtn" data-view="right">Tilt right</button>
+          </div></div>
 
-    <div class="field"><label>Browser chrome</label>
-      <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="chromeToggle"> show browser bar in screen</label>
-      <input type="text" id="url" value="collectionshub.com">
-      <div class="row" style="margin-top:8px"><input type="color" id="acColor" value="#f2f2f2"><input type="text" class="hex" id="acHex" value="#f2f2f2"></div>
-      <div class="swatches" id="chromeSwatches">
-        <div class="swatch sel" data-c="#f2f2f2" style="background:#f2f2f2" title="macOS light"></div>
-        <div class="swatch" data-c="#1e1e20" style="background:#1e1e20" title="dark"></div>
-        <div class="swatch" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
-        <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
-        <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
-        <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
-        <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
-        <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
-      </div></div>
-
-    <div class="field"><label>Canvas background</label>
-      <div class="btnrow">
-        <button class="selbtn bgbtn sel" data-bg="transparent">Transparent</button>
-        <button class="selbtn bgbtn" data-bg="color">Color</button>
+        <div class="field"><label>Frame</label>
+          <div class="btnrow">
+            <button class="selbtn framebtn" data-frame="plain">Plain</button>
+            <button class="selbtn framebtn sel" data-frame="shadow">Shadow</button>
+          </div></div>
       </div>
-      <div class="hideable" id="canvasColorRow">
-        <div class="row" style="margin-top:8px"><input type="color" id="canvasColor" value="#f7f7f7"><input type="text" class="hex" id="canvasHex" value="#f7f7f7"></div>
-        <div class="swatches" id="canvasSwatches">
-          <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="White"></div>
-          <div class="swatch sel" data-c="#f7f7f7" style="background:#f7f7f7" title="Section grey"></div>
-          <div class="swatch" data-c="#ededed" style="background:#ededed" title="Alt grey"></div>
-          <div class="swatch" data-c="#000000" style="background:#000000" title="Black"></div>
-          <div class="swatch" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
-          <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
-          <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
-          <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
-          <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
-          <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
-        </div>
-      </div></div>
+    </details>
 
-    <div class="field"><label>Output size</label>
-      <select id="size">
-        <option value="1000,1000">1:1 — sticky_scroll (1000×1000)</option>
-        <option value="1200,800" selected>3:2 — image_text (1200×800)</option>
-        <option value="1280,720">16:9 — benefits_slider (1280×720)</option>
-        <option value="1536,1024">3:2 — frame native (1536×1024)</option>
-        <option value="free">Free (custom W × H)</option>
-      </select>
-      <div class="row free" id="freeRow">
-        <input type="number" id="freeW" value="1200" min="200" max="4000" step="10">
-        <span style="color:var(--ink-300)">×</span>
-        <input type="number" id="freeH" value="800" min="200" max="4000" step="10">
-      </div></div>
+    <details class="acc" open>
+      <summary>Screenshot</summary>
+      <div class="accbody">
+        <div class="field"><label>Screenshot</label>
+          <input type="file" id="file" accept="image/*">
+          <div class="zlabel">or paste (Ctrl+V) / drop anywhere — loads into the active device</div></div>
 
-    <div class="field"><label>Device size</label>
-      <div class="btnrow">
-        <button class="selbtn sizebtn" data-size="100">100%</button>
-        <button class="selbtn sizebtn sel" data-size="80">80%</button>
-        <button class="selbtn sizebtn" data-size="75">75%</button>
-        <button class="selbtn sizebtn" data-size="custom">Custom</button>
-      </div>
-      <div class="hideable" id="devSizeRow">
-        <input type="range" id="devSize" min="40" max="170" value="80" style="margin-top:10px">
-      </div>
-      <button class="minor" id="resetLayout">Reset device position &amp; size</button></div>
+        <div class="field"><label>Screenshot fit</label>
+          <div class="btnrow">
+            <button class="selbtn fitbtn" data-fit="fill">Fill</button>
+            <button class="selbtn fitbtn" data-fit="fit">Fit</button>
+            <button class="selbtn fitbtn" data-fit="orig">100%</button>
+          </div>
+          <input type="range" id="zoom" min="10" max="400" value="100" style="margin-top:10px">
+          <div class="zlabel" id="zoomLabel">Zoom: — (100% = fill)</div></div>
 
-    <div class="field"><label>Export</label>
-      <input type="text" id="exportName" placeholder="filename (empty = automatic)">
-      <div class="btnrow" style="margin-top:8px">
-        <button class="selbtn fmtbtn sel" data-fmt="png">PNG</button>
-        <button class="selbtn fmtbtn" data-fmt="webp">WebP</button>
-        <button class="selbtn fmtbtn" data-fmt="jpeg">JPEG</button>
+        <div class="field"><label>Tool</label>
+          <div class="btnrow">
+            <button class="selbtn toolbtn sel" data-tool="move">Move</button>
+            <button class="selbtn toolbtn" data-tool="erase">Eraser</button>
+          </div>
+          <div class="hideable" id="eraseRow">
+            <input type="range" id="brush" min="4" max="200" value="40" style="margin-top:10px">
+            <div class="zlabel" id="brushLabel">Brush: 40 px</div>
+            <div class="btnrow" style="margin-top:8px">
+              <button class="selbtn" id="eraseUndo">Undo</button>
+              <button class="selbtn" id="eraseReset">Reset erase</button>
+            </div>
+            <div class="zlabel">erased areas show the screen background color</div>
+          </div></div>
       </div>
-      <div class="hideable" id="qualityRow">
-        <input type="range" id="quality" min="50" max="100" value="90" style="margin-top:10px">
-        <div class="zlabel" id="qualityLabel">Quality: 90%</div>
-        <div class="zlabel">JPEG has no transparency — transparent canvas exports on white</div>
-      </div>
-      <div class="zlabel" id="sizePreview" style="margin-top:6px">File size: …</div></div>
+    </details>
 
-    <button class="btn" id="export">Download @2x</button>
+    <details class="acc">
+      <summary>Position &amp; Größe</summary>
+      <div class="accbody">
+        <div class="field"><label>Ausrichtung (aktives Gerät)</label>
+          <div class="btnrow">
+            <button class="selbtn" id="centerBoth">Zentrieren</button>
+            <button class="selbtn" id="centerH" title="nur horizontal zentrieren">Horizontal</button>
+            <button class="selbtn" id="centerV" title="nur vertikal zentrieren">Vertikal</button>
+          </div>
+          <div class="zlabel">setzt das aktive Gerät zurück in die Canvas-Mitte (Größe bleibt)</div></div>
+
+        <div class="field"><label>Device size</label>
+          <div class="btnrow">
+            <button class="selbtn sizebtn" data-size="100">100%</button>
+            <button class="selbtn sizebtn sel" data-size="80">80%</button>
+            <button class="selbtn sizebtn" data-size="75">75%</button>
+            <button class="selbtn sizebtn" data-size="custom">Custom</button>
+          </div>
+          <div class="hideable" id="devSizeRow">
+            <input type="range" id="devSize" min="40" max="170" value="80" style="margin-top:10px">
+          </div>
+          <button class="minor" id="resetLayout">Reset device position &amp; size</button></div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>Bildschirm &amp; Chrome</summary>
+      <div class="accbody">
+        <div class="field"><label>Screen background</label>
+          <div class="row"><input type="color" id="bgColor" value="#ffffff"><input type="text" class="hex" id="bgHex" value="#ffffff"></div>
+          <div class="zlabel">fills any gap when the screenshot doesn't cover the screen</div></div>
+
+        <div class="field"><label>Browser chrome</label>
+          <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="chromeToggle"> show browser bar in screen</label>
+          <input type="text" id="url" value="collectionshub.com">
+          <div class="row" style="margin-top:8px"><input type="color" id="acColor" value="#f2f2f2"><input type="text" class="hex" id="acHex" value="#f2f2f2"></div>
+          <div class="swatches" id="chromeSwatches">
+            <div class="swatch sel" data-c="#f2f2f2" style="background:#f2f2f2" title="macOS light"></div>
+            <div class="swatch" data-c="#1e1e20" style="background:#1e1e20" title="dark"></div>
+            <div class="swatch" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
+            <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
+            <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
+            <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
+            <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
+            <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
+          </div></div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>Overlays</summary>
+      <div class="accbody">
+        <div class="field"><label>Overlay images</label>
+          <input type="file" id="ovFile" accept="image/*" multiple>
+          <div class="zlabel">logos/badges on top of everything — drag on canvas to move</div>
+          <div id="ovList"></div>
+          <div class="hideable" id="ovScaleRow">
+            <input type="range" id="ovScale" min="5" max="300" value="100" style="margin-top:10px">
+            <div class="zlabel">size of selected overlay</div>
+          </div></div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>Canvas &amp; Export</summary>
+      <div class="accbody">
+        <div class="field"><label>Canvas background</label>
+          <div class="btnrow">
+            <button class="selbtn bgbtn sel" data-bg="transparent">Transparent</button>
+            <button class="selbtn bgbtn" data-bg="color">Color</button>
+          </div>
+          <div class="hideable" id="canvasColorRow">
+            <div class="row" style="margin-top:8px"><input type="color" id="canvasColor" value="#f7f7f7"><input type="text" class="hex" id="canvasHex" value="#f7f7f7"></div>
+            <div class="swatches" id="canvasSwatches">
+              <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="White"></div>
+              <div class="swatch sel" data-c="#f7f7f7" style="background:#f7f7f7" title="Section grey"></div>
+              <div class="swatch" data-c="#ededed" style="background:#ededed" title="Alt grey"></div>
+              <div class="swatch" data-c="#000000" style="background:#000000" title="Black"></div>
+              <div class="swatch" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
+              <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
+              <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
+              <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
+              <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
+              <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
+            </div>
+          </div></div>
+
+        <div class="field"><label>Output size</label>
+          <select id="size">
+            <option value="1000,1000">1:1 — sticky_scroll (1000×1000)</option>
+            <option value="1200,800" selected>3:2 — image_text (1200×800)</option>
+            <option value="1280,720">16:9 — benefits_slider (1280×720)</option>
+            <option value="1536,1024">3:2 — frame native (1536×1024)</option>
+            <option value="free">Free (custom W × H)</option>
+          </select>
+          <div class="row free" id="freeRow">
+            <input type="number" id="freeW" value="1200" min="200" max="4000" step="10">
+            <span style="color:var(--ink-300)">×</span>
+            <input type="number" id="freeH" value="800" min="200" max="4000" step="10">
+          </div></div>
+
+        <div class="field"><label>Export</label>
+          <input type="text" id="exportName" placeholder="filename (empty = automatic)">
+          <div class="btnrow" style="margin-top:8px">
+            <button class="selbtn fmtbtn sel" data-fmt="png">PNG</button>
+            <button class="selbtn fmtbtn" data-fmt="webp">WebP</button>
+            <button class="selbtn fmtbtn" data-fmt="jpeg">JPEG</button>
+          </div>
+          <div class="hideable" id="qualityRow">
+            <input type="range" id="quality" min="50" max="100" value="90" style="margin-top:10px">
+            <div class="zlabel" id="qualityLabel">Quality: 90%</div>
+            <div class="zlabel">JPEG has no transparency — transparent canvas exports on white</div>
+          </div>
+          <div class="zlabel" id="sizePreview" style="margin-top:6px">File size: …</div></div>
+
+        <button class="btn" id="export">Download @2x</button>
+      </div>
+    </details>
+
     <p class="hint">Frames are your own PNGs (bezel + stand as a transparent cut-out, front / tilt left / tilt right,
     each plain or with baked shadow). The screenshot is projected into the tilted screen automatically.
     Preview and export run through the same canvas at 2×, so the download matches the preview exactly.
-    Transparent exports the chosen canvas size with alpha.</p>
+    Transparent exports the chosen canvas size with alpha. Several devices export together on one canvas.</p>
   </div>
 
   <div class="work">
-    <div id="stageWrap"><canvas id="view"></canvas></div>
+    <div id="stageWrap"><canvas id="view"></canvas><canvas id="sel"></canvas></div>
   </div>
 
 <script>
@@ -271,24 +343,38 @@ const OUTSET = 3;     // px (frame space) content extends under the bezel edge
 const ALPHA_MIN = 8;   // alpha threshold for the frame's opaque bounding box
 
 const $ = s => document.querySelector(s);
-const view = $("#view"), wrap = $("#stageWrap");
+const view = $("#view"), wrap = $("#stageWrap"), sel = $("#sel");
 const vctx = view.getContext("2d");
+const sctx = sel.getContext("2d");
 const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
 const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1]);
 
+/* ---------------- state ----------------
+   Global canvas/output settings live in `state`. Everything that belongs to a single
+   device (type, view, frame, its screenshot, position, zoom, chrome) lives on a device
+   instance so several devices can be composited onto one canvas.                       */
 const state = {
-  device:"desktop", view:"front", frame:"shadow",
-  url:"collectionshub.com", screenBg:"#ffffff", chromeAccent:"#f2f2f2", chromeOn:false,
   bgMode:"transparent", bgColor:"#f7f7f7",
   ratio:"1200,800", freeW:1200, freeH:800,
-  devScale:0.8, devX:0, devY:0, sizeMode:"80",
-  fitMode:"fill", ix:0, iy:0, is:1,       // in content px
   tool:"move", brush:40,
   exportName:"", exportFormat:"png", exportQuality:0.9
 };
-const IMG = { img:null, w:0, h:0 };
-let CUR = null;             // cached layout of last render
-let lastContentW = 0;       // for rescaling custom pan/zoom across views
+
+let idc = 0;
+function mkInst(over){
+  const i = {
+    id:++idc,
+    device:"desktop", view:"front", frame:"shadow",
+    devScale:0.8, devX:0, devY:0, sizeMode:"80",
+    url:"collectionshub.com", screenBg:"#ffffff", chromeAccent:"#f2f2f2", chromeOn:false,
+    fitMode:"fill", ix:0, iy:0, is:1,       // screenshot pan/zoom in content px
+    img:null, w:0, h:0, edit:null, undo:[],
+    L:null, lastContentW:0
+  };
+  return Object.assign(i, over || {});
+}
+const insts = [mkInst()];   // at least one device
+let act = insts[0];         // active device (edited by the sidebar)
 
 function lum(hex){
   let h = hex.replace("#","");
@@ -297,7 +383,7 @@ function lum(hex){
   return (0.2126*((n>>16)&255) + 0.7152*((n>>8)&255) + 0.0722*(n&255))/255;
 }
 const validHex = v => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v);
-function frameImg(){ return DEVICES[state.device][state.view][state.frame].img; }
+function frameImg(i){ return DEVICES[i.device][i.view][i.frame].img; }
 
 /* ---------------- layout ---------------- */
 function stageSize(){
@@ -312,14 +398,14 @@ function outsetQuad(q){
     return [x + (x-cx)/d*OUTSET, y + (y-cy)/d*OUTSET];
   });
 }
-function layout(){
-  const V = DEVICES[state.device][state.view], img = frameImg();
+function layout(i){
+  const V = DEVICES[i.device][i.view], img = frameImg(i);
   const [W,H] = stageSize();
   const fw = img.naturalWidth, fh = img.naturalHeight;
-  const bb = V[state.frame].bb || {x:0, y:0, w:fw, h:fh};
-  const gs = Math.min(W/bb.w, H/bb.h) * state.devScale;   // frame px -> output px, 1.0 = bbox fills canvas
-  const ox = W/2 - (bb.x + bb.w/2)*gs + state.devX;
-  const oy = H/2 - (bb.y + bb.h/2)*gs + state.devY;
+  const bb = V[i.frame].bb || {x:0, y:0, w:fw, h:fh};
+  const gs = Math.min(W/bb.w, H/bb.h) * i.devScale;   // frame px -> output px, 1.0 = bbox fills canvas
+  const ox = W/2 - (bb.x + bb.w/2)*gs + i.devX;
+  const oy = H/2 - (bb.y + bb.h/2)*gs + i.devY;
   const Q = outsetQuad(V.quad).map(([x,y]) => [(ox + x*gs)*RES, (oy + y*gs)*RES]);
   const xs = Q.map(p=>p[0]), ys = Q.map(p=>p[1]);
   const bbox = {
@@ -330,10 +416,10 @@ function layout(){
   const cw = clamp(Math.round(Math.max(dist(Q[0],Q[1]), dist(Q[3],Q[2]))), 64, 4096);
   const chh = clamp(Math.round(Math.max(dist(Q[0],Q[3]), dist(Q[1],Q[2]))), 64, 4096);
   const Hinv = computeH(Q, [[0,0],[cw,0],[cw,chh],[0,chh]]);   // canvas px -> content px
-  return {W, H, V, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv};
+  return {W, H, V, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv, bb};
 }
-function chromeH(L){ return state.chromeOn ? Math.round(L.chh * 0.062) : 0; }
-function effRect(L){ const ch = chromeH(L); return {x:0, y:ch, w:L.cw, h:L.chh - ch}; }
+function chromeH(L, i){ return i.chromeOn ? Math.round(L.chh * 0.062) : 0; }
+function effRect(L, i){ const ch = chromeH(L, i); return {x:0, y:ch, w:L.cw, h:L.chh - ch}; }
 
 /* ---------------- homography ---------------- */
 function computeH(src, dst){
@@ -373,13 +459,13 @@ const cctx = cont.getContext("2d");
 const MASK = document.createElement("canvas");   // scratch for silhouette-clipping green-screen devices
 const mctx = MASK.getContext("2d");
 
-function drawChrome(c, w, h){
-  const dark = lum(state.chromeAccent) < 0.5;
-  c.fillStyle = state.chromeAccent; c.fillRect(0, 0, w, h);
+function drawChrome(c, w, h, i){
+  const dark = lum(i.chromeAccent) < 0.5;
+  c.fillStyle = i.chromeAccent; c.fillRect(0, 0, w, h);
   c.fillStyle = "rgba(0,0,0,.10)"; c.fillRect(0, h-1, w, 1);
   const r = h*0.14, cy = h/2, pad = h*0.45;
-  ["#ff5f57","#febc2e","#28c840"].forEach((col,i)=>{
-    c.beginPath(); c.arc(pad + i*r*3.1, cy, r, 0, 7); c.fillStyle = col; c.fill();
+  ["#ff5f57","#febc2e","#28c840"].forEach((col,k)=>{
+    c.beginPath(); c.arc(pad + k*r*3.1, cy, r, 0, 7); c.fillStyle = col; c.fill();
   });
   const fx = pad + r*8.4, fw = w - fx - pad;
   c.beginPath(); c.roundRect(fx, h*0.22, fw, h*0.56, h*0.28);
@@ -389,17 +475,17 @@ function drawChrome(c, w, h){
   c.font = `400 ${Math.round(h*0.34)}px system-ui, "Segoe UI", sans-serif`;
   c.textBaseline = "middle"; c.textAlign = "left";
   c.save(); c.beginPath(); c.rect(fx, 0, fw - h*0.3, h); c.clip();
-  c.fillText(state.url, fx + h*0.36, cy + 1);
+  c.fillText(i.url, fx + h*0.36, cy + 1);
   c.restore();
 }
-function drawContent(L){
+function drawContent(L, i){
   cont.width = L.cw; cont.height = L.chh;
-  const c = cctx, ch = chromeH(L), e = effRect(L);
-  c.fillStyle = state.screenBg; c.fillRect(0, 0, L.cw, L.chh);
-  if(IMG.img){
+  const c = cctx, ch = chromeH(L, i), e = effRect(L, i);
+  c.fillStyle = i.screenBg; c.fillRect(0, 0, L.cw, L.chh);
+  if(i.img){
     c.save(); c.beginPath(); c.rect(e.x, e.y, e.w, e.h); c.clip();
-    c.translate(state.ix, state.iy); c.scale(state.is, state.is);
-    c.drawImage(IMG.edit || IMG.img, 0, 0);
+    c.translate(i.ix, i.iy); c.scale(i.is, i.is);
+    c.drawImage(i.edit || i.img, 0, 0);
     c.restore();
   } else {
     c.fillStyle = "#9a9aa2";
@@ -407,7 +493,7 @@ function drawContent(L){
     c.textAlign = "center"; c.textBaseline = "middle";
     c.fillText("Load a screenshot — click, Ctrl+V or drop", e.x + e.w/2, e.y + e.h/2);
   }
-  if(ch) drawChrome(c, L.cw, ch);
+  if(ch) drawChrome(c, L.cw, ch, i);
 }
 
 /* ---------------- WebGL warp ---------------- */
@@ -467,31 +553,26 @@ function warp(L){
 }
 
 /* ---------------- render ---------------- */
-function render(){
-  const img = frameImg();
+function drawInstance(i){
+  const img = frameImg(i);
   if(!img || !img.complete || !img.naturalWidth) return;
-  const L = layout();
+  const L = layout(i);
   // keep pan/zoom stable across content-size changes (view switches)
-  if(IMG.img){
-    if(state.fitMode !== "custom") applyFit(state.fitMode, L);
-    else if(lastContentW && Math.abs(lastContentW - L.cw) > 1){
-      const f = L.cw / lastContentW;
-      state.ix *= f; state.iy *= f; state.is *= f;
+  if(i.img){
+    if(i.fitMode !== "custom") applyFit(i.fitMode, i, L);
+    else if(i.lastContentW && Math.abs(i.lastContentW - L.cw) > 1){
+      const f = L.cw / i.lastContentW;
+      i.ix *= f; i.iy *= f; i.is *= f;
     }
   }
-  lastContentW = L.cw;
-  CUR = L;
-  drawContent(L);
+  i.lastContentW = L.cw;
+  i.L = L;
+  drawContent(L, i);
   warp(L);
-  view.width = L.W * RES; view.height = L.H * RES;
-  if(state.bgMode === "color"){
-    vctx.fillStyle = state.bgColor; vctx.fillRect(0, 0, view.width, view.height);
-  }
-  const sil = DEVICES[state.device][state.view][state.frame].sil;
+  const sil = DEVICES[i.device][i.view][i.frame].sil;
   if(sil){
-    // green-screen device (phone): the bezel is too thin to hide the OUTSET overshoot,
-    // so clip the warped content to the device silhouette before compositing — removes any
-    // bleed past the thin/rounded frame edge while keeping content under the (soft) bezel edge.
+    // green-screen device (phone/window): clip the warped content to the exact device
+    // silhouette before compositing so nothing bleeds past the thin/rounded bezel edge.
     MASK.width = view.width; MASK.height = view.height;
     mctx.clearRect(0, 0, view.width, view.height);
     mctx.drawImage(glc, L.bbox.x, L.bbox.y);
@@ -505,67 +586,172 @@ function render(){
   }
   vctx.imageSmoothingQuality = "high";
   vctx.drawImage(img, L.ox*RES, L.oy*RES, L.fw*L.gs*RES, L.fh*L.gs*RES);
+}
+function render(){
+  const [W,H] = stageSize();
+  view.width = W * RES; view.height = H * RES;
+  sel.width = W * RES; sel.height = H * RES;
+  if(state.bgMode === "color"){
+    vctx.fillStyle = state.bgColor; vctx.fillRect(0, 0, view.width, view.height);
+  }
+  // devices back-to-front; the active one stays on top for intuitive editing
+  for(const i of insts) if(i !== act) drawInstance(i);
+  drawInstance(act);
+  // overlays on top of every device
   for(const o of OVERLAYS)
     vctx.drawImage(o.img, o.x*RES, o.y*RES, o.img.naturalWidth*o.scale*RES, o.img.naturalHeight*o.scale*RES);
-  wrap.style.aspectRatio = L.W + "/" + L.H;
-  wrap.style.width = `min(100%, ${L.W}px, calc((100vh - 96px) * ${(L.W/L.H).toFixed(4)}))`;
+  drawSelection();
+  wrap.style.aspectRatio = W + "/" + H;
+  wrap.style.width = `min(100%, ${W}px, calc((100vh - 96px) * ${(W/H).toFixed(4)}))`;
   wrap.classList.toggle("transparent", state.bgMode === "transparent");
-  updateZoomUI(L); updateBtns(); updateSizePreview();
+  updateZoomUI(act.L); updateBtns(); updateSizePreview(); renderDevList();
+}
+/* selection outline lives on its own overlay canvas so it never lands in the export */
+function drawSelection(){
+  sctx.clearRect(0, 0, sel.width, sel.height);
+  if(insts.length < 2 || !act.L) return;
+  const L = act.L, bb = L.bb;
+  const x = (L.ox + bb.x*L.gs)*RES, y = (L.oy + bb.y*L.gs)*RES;
+  const w = bb.w*L.gs*RES, h = bb.h*L.gs*RES;
+  sctx.save();
+  sctx.strokeStyle = "#2a6cff"; sctx.lineWidth = 2*RES;
+  sctx.setLineDash([9*RES, 6*RES]);
+  sctx.strokeRect(x - 3, y - 3, w + 6, h + 6);
+  sctx.restore();
 }
 
 /* ---------------- fits + zoom ---------------- */
-function fillScale(L){ const e = effRect(L); return Math.max(e.w/IMG.w, e.h/IMG.h); }
-function applyFit(mode, L){
-  if(!IMG.img){ state.fitMode = mode; return; }
-  L = L || layout();
-  const e = effRect(L);
+function fillScale(L, i){ const e = effRect(L, i); return Math.max(e.w/i.w, e.h/i.h); }
+function applyFit(mode, i, L){
+  i = i || act;
+  if(!i.img){ i.fitMode = mode; return; }
+  L = L || layout(i);
+  const e = effRect(L, i);
   let is;
-  if(mode === "fill")      is = Math.max(e.w/IMG.w, e.h/IMG.h);
-  else if(mode === "fit")  is = Math.min(e.w/IMG.w, e.h/IMG.h);
-  else if(mode === "orig") is = 1;   // content px ≈ export px
+  if(mode === "fill")      is = Math.max(e.w/i.w, e.h/i.h);
+  else if(mode === "fit")  is = Math.min(e.w/i.w, e.h/i.h);
+  else if(mode === "orig") is = 1;
   else return;
-  state.is = is;
-  state.ix = e.x + (e.w - IMG.w*is)/2;
-  state.iy = e.y + (e.h - IMG.h*is)/2;
-  state.fitMode = mode;
+  i.is = is;
+  i.ix = e.x + (e.w - i.w*is)/2;
+  i.iy = e.y + (e.h - i.h*is)/2;
+  i.fitMode = mode;
 }
-function zoomAt(cp, k, L){
-  const f = fillScale(L);
-  const ns = clamp(state.is * k, f*0.08, f*10);
-  const kk = ns / state.is;
-  state.ix = cp.x - (cp.x - state.ix)*kk;
-  state.iy = cp.y - (cp.y - state.iy)*kk;
-  state.is = ns; state.fitMode = "custom";
+function zoomAt(cp, k, L, i){
+  i = i || act;
+  const f = fillScale(L, i);
+  const ns = clamp(i.is * k, f*0.08, f*10);
+  const kk = ns / i.is;
+  i.ix = cp.x - (cp.x - i.ix)*kk;
+  i.iy = cp.y - (cp.y - i.iy)*kk;
+  i.is = ns; i.fitMode = "custom";
   render();
 }
 function updateZoomUI(L){
-  if(!IMG.img){ $("#zoomLabel").textContent = "Zoom: — (100% = fill)"; return; }
-  const pct = Math.round(state.is / fillScale(L) * 100);
+  if(!act.img || !L){ $("#zoomLabel").textContent = "Zoom: — (100% = fill)"; return; }
+  const pct = Math.round(act.is / fillScale(L, act) * 100);
   $("#zoom").value = clamp(pct, 10, 400);
   $("#zoomLabel").textContent = `Zoom: ${pct}% (100% = fill)`;
 }
 function updateBtns(){
-  document.querySelectorAll(".fitbtn").forEach(b => b.classList.toggle("sel", b.dataset.fit === state.fitMode));
-  document.querySelectorAll(".devicebtn").forEach(b => b.classList.toggle("sel", b.dataset.device === state.device));
-  document.querySelectorAll(".viewbtn").forEach(b => b.classList.toggle("sel", b.dataset.view === state.view));
-  document.querySelectorAll(".framebtn").forEach(b => b.classList.toggle("sel", b.dataset.frame === state.frame));
+  document.querySelectorAll(".fitbtn").forEach(b => b.classList.toggle("sel", b.dataset.fit === act.fitMode));
+  document.querySelectorAll(".devicebtn").forEach(b => b.classList.toggle("sel", b.dataset.device === act.device));
+  document.querySelectorAll(".viewbtn").forEach(b => b.classList.toggle("sel", b.dataset.view === act.view));
+  document.querySelectorAll(".framebtn").forEach(b => b.classList.toggle("sel", b.dataset.frame === act.frame));
   document.querySelectorAll(".bgbtn").forEach(b => b.classList.toggle("sel", b.dataset.bg === state.bgMode));
-  document.querySelectorAll(".sizebtn").forEach(b => b.classList.toggle("sel", b.dataset.size === state.sizeMode));
+  document.querySelectorAll(".sizebtn").forEach(b => b.classList.toggle("sel", b.dataset.size === act.sizeMode));
   document.querySelectorAll(".toolbtn").forEach(b => b.classList.toggle("sel", b.dataset.tool === state.tool));
   document.querySelectorAll(".fmtbtn").forEach(b => b.classList.toggle("sel", b.dataset.fmt === state.exportFormat));
 }
 
+/* ---------------- device manager ---------------- */
+const DEV_NAMES = {desktop:"Desktop", laptop:"Laptop", phone:"Phone", window:"Window"};
+function renderDevList(){
+  const box = $("#devList"); if(!box) return;
+  box.innerHTML = "";
+  insts.forEach((i, idx) => {
+    const row = document.createElement("div");
+    row.className = "devitem" + (i === act ? " sel" : "");
+    row.onclick = e => { if(e.target.classList.contains("x")) return; setActive(i); };
+    const dot = document.createElement("span"); dot.className = "dot";
+    const nm = document.createElement("span"); nm.className = "nm";
+    nm.textContent = `${idx+1}. ${DEV_NAMES[i.device] || i.device}`;
+    const mini = document.createElement("span"); mini.className = "mini";
+    mini.textContent = i.img ? "●" : "○";
+    mini.title = i.img ? "has screenshot" : "empty";
+    row.append(dot, nm, mini);
+    if(insts.length > 1){
+      const x = document.createElement("button");
+      x.className = "x"; x.textContent = "×"; x.title = "Gerät entfernen";
+      x.onclick = () => removeInst(i);
+      row.append(x);
+    }
+    box.appendChild(row);
+  });
+  $("#devCount").textContent = insts.length > 1 ? insts.length + " Geräte" : "";
+}
+function setActive(i){ act = i; syncControls(); render(); }
+function syncControls(){
+  // reflect the active device's own settings back into the sidebar controls
+  $("#viewField").style.display = DEVICES[act.device].left ? "" : "none";
+  $("#url").value = act.url;
+  $("#chromeToggle").checked = act.chromeOn;
+  $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
+  $("#acColor").value = act.chromeAccent; $("#acHex").value = act.chromeAccent;
+  $("#devSize").value = Math.round(act.devScale*100);
+  $("#devSizeRow").classList.toggle("show", act.sizeMode === "custom");
+  $("#eraseRow").classList.toggle("show", state.tool === "erase");
+  document.querySelectorAll("#chromeSwatches .swatch").forEach(s =>
+    s.classList.toggle("sel", s.dataset.c.toLowerCase() === act.chromeAccent.toLowerCase()));
+}
+function addInst(){
+  const step = insts.length;
+  const i = mkInst({devX: step*48, devY: step*36});
+  insts.push(i);
+  setActive(i);
+}
+function removeInst(i){
+  if(insts.length <= 1) return;
+  const idx = insts.indexOf(i);
+  insts.splice(idx, 1);
+  if(act === i) act = insts[Math.max(0, idx-1)];
+  syncControls(); render();
+}
+/* spread every device evenly across the canvas, vertically centered — one click to lay out a workflow */
+function arrangeDevices(){
+  const n = insts.length; if(!n) return;
+  const [W,H] = stageSize();
+  const widths = insts.map(i => {
+    const V = DEVICES[i.device][i.view], img = frameImg(i);
+    const bb = V[i.frame].bb || {w:img.naturalWidth, h:img.naturalHeight};
+    const gs = Math.min(W/bb.w, H/bb.h) * i.devScale;
+    return bb.w * gs;
+  });
+  const gap = Math.max(20, W*0.03);
+  const total = widths.reduce((a,b)=>a+b, 0) + gap*(n-1);
+  let x = -total/2;
+  insts.forEach((i, idx) => {
+    i.devX = x + widths[idx]/2;   // devX = horizontal offset of the frame center from canvas center
+    i.devY = 0;
+    x += widths[idx] + gap;
+  });
+  render();
+}
+$("#addDevice").addEventListener("click", addInst);
+$("#arrangeDevices").addEventListener("click", arrangeDevices);
+
 /* ---------------- image loading ---------------- */
-function loadScreenshot(f){
+function loadScreenshot(f, i){
+  i = i || act;
   if(!f || !f.type.startsWith("image/")) return;
   const im = new Image();
   im.onload = () => {
-    IMG.img = im; IMG.w = im.naturalWidth; IMG.h = im.naturalHeight;
-    IMG.edit = document.createElement("canvas");
-    IMG.edit.width = IMG.w; IMG.edit.height = IMG.h;
-    IMG.edit.getContext("2d").drawImage(im, 0, 0);
-    UNDO.length = 0;
-    state.fitMode = "fill"; render();
+    i.img = im; i.w = im.naturalWidth; i.h = im.naturalHeight;
+    i.edit = document.createElement("canvas");
+    i.edit.width = i.w; i.edit.height = i.h;
+    i.edit.getContext("2d").drawImage(im, 0, 0);
+    i.undo.length = 0;
+    i.fitMode = "fill"; render();
   };
   im.src = URL.createObjectURL(f);
 }
@@ -583,38 +769,52 @@ function evtPoint(e){
   return { x:(e.clientX - r.left) * view.width / r.width,
            y:(e.clientY - r.top) * view.height / r.height };
 }
-function toContent(p){ return applyH(CUR.Hinv, p.x, p.y); }
-function toFrame(p){ return { x:(p.x/RES - CUR.ox)/CUR.gs, y:(p.y/RES - CUR.oy)/CUR.gs }; }
+function toContentL(p, L){ return applyH(L.Hinv, p.x, p.y); }
+function toFrameL(p, L){ return { x:(p.x/RES - L.ox)/L.gs, y:(p.y/RES - L.oy)/L.gs }; }
 const inRect = (p,r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+
+/* find the top-most device under a point — screens win over frames, later devices win over earlier */
+function pickDevice(p){
+  for(let k = insts.length-1; k >= 0; k--){
+    const i = insts[k], L = i.L; if(!L) continue;
+    const cp = toContentL(p, L);
+    if(cp.x >= 0 && cp.x <= L.cw && cp.y >= 0 && cp.y <= L.chh) return {inst:i, type:"screen", cp, L};
+  }
+  for(let k = insts.length-1; k >= 0; k--){
+    const i = insts[k], L = i.L; if(!L) continue;
+    const fp = toFrameL(p, L);
+    if(fp.x >= 0 && fp.x <= L.fw && fp.y >= 0 && fp.y <= L.fh) return {inst:i, type:"frame", fp, L};
+  }
+  return null;
+}
 
 let drag = null;
 view.addEventListener("pointerdown", e => {
-  if(e.button !== 0 || !CUR) return;
-  const p = evtPoint(e), cp = toContent(p), fp = toFrame(p);
-  const inHole = cp.x >= 0 && cp.x <= CUR.cw && cp.y >= 0 && cp.y <= CUR.chh;
-  if(state.tool === "erase" && IMG.img && inHole){
-    pushUndo();
-    const ip = toImagePx(cp);
-    eraseStroke(ip, ip);
-    drag = {t:"erase", last:ip, moved:true};
+  if(e.button !== 0) return;
+  const p = evtPoint(e);
+  // overlays sit above every device
+  for(let idx = OVERLAYS.length - 1; idx >= 0; idx--){
+    const o = OVERLAYS[idx];
+    if(inRect({x:p.x/RES, y:p.y/RES}, {x:o.x, y:o.y, w:o.img.naturalWidth*o.scale, h:o.img.naturalHeight*o.scale})){
+      ovSel = idx; renderOvList();
+      drag = {t:"ov", o, p0:p, x0:o.x, y0:o.y, moved:false};
+      view.setPointerCapture(e.pointerId); e.preventDefault(); return;
+    }
+  }
+  const hit = pickDevice(p);
+  if(!hit){ drag = null; return; }
+  if(hit.inst !== act) setActive(hit.inst);
+  const i = hit.inst;
+  if(hit.type === "screen" && state.tool === "erase" && i.img){
+    pushUndo(i);
+    const ip = toImagePx(hit.cp, i);
+    eraseStroke(ip, ip, i);
+    drag = {t:"erase", i, last:ip, moved:true};
     render();
+  } else if(hit.type === "screen" && i.img){
+    drag = {t:"pan", i, cp0:hit.cp, ix:i.ix, iy:i.iy, moved:false};
   } else {
-    drag = null;
-    for(let i = OVERLAYS.length - 1; i >= 0; i--){
-      const o = OVERLAYS[i];
-      if(inRect({x:p.x/RES, y:p.y/RES}, {x:o.x, y:o.y, w:o.img.naturalWidth*o.scale, h:o.img.naturalHeight*o.scale})){
-        ovSel = i; renderOvList();
-        drag = {t:"ov", o, p0:p, x0:o.x, y0:o.y, moved:false};
-        break;
-      }
-    }
-    if(!drag){
-      if(IMG.img && inHole)
-        drag = {t:"pan", cp0:cp, ix:state.ix, iy:state.iy, moved:false};
-      else if(inRect(fp, {x:0, y:0, w:CUR.fw, h:CUR.fh}))
-        drag = {t:"dev", p0:p, dx:state.devX, dy:state.devY, moved:false};
-      else return;
-    }
+    drag = {t:"dev", i, p0:p, dx:i.devX, dy:i.devY, moved:false};
   }
   view.setPointerCapture(e.pointerId);
   e.preventDefault();
@@ -623,8 +823,8 @@ view.addEventListener("pointermove", e => {
   if(!drag) return;
   const p = evtPoint(e);
   if(drag.t === "erase"){
-    const ip = toImagePx(toContent(p));
-    eraseStroke(drag.last, ip);
+    const ip = toImagePx(toContentL(p, drag.i.L), drag.i);
+    eraseStroke(drag.last, ip, drag.i);
     drag.last = ip;
     render();
   } else if(drag.t === "ov"){
@@ -633,50 +833,47 @@ view.addEventListener("pointermove", e => {
     drag.moved = true;
     render();
   } else if(drag.t === "pan"){
-    const cp = toContent(p);
+    const cp = toContentL(p, drag.i.L);
     if(Math.abs(cp.x - drag.cp0.x) + Math.abs(cp.y - drag.cp0.y) > 1) drag.moved = true;
-    state.ix = drag.ix + (cp.x - drag.cp0.x);
-    state.iy = drag.iy + (cp.y - drag.cp0.y);
-    state.fitMode = "custom";
+    drag.i.ix = drag.ix + (cp.x - drag.cp0.x);
+    drag.i.iy = drag.iy + (cp.y - drag.cp0.y);
+    drag.i.fitMode = "custom";
     render();
   } else {
     if(Math.abs(p.x - drag.p0.x) + Math.abs(p.y - drag.p0.y) > 2) drag.moved = true;
-    state.devX = drag.dx + (p.x - drag.p0.x)/RES;
-    state.devY = drag.dy + (p.y - drag.p0.y)/RES;
-    if(drag.moved && state.sizeMode !== "custom"){
-      state.sizeMode = "custom";
-      $("#devSizeRow").classList.add("show");
-    }
+    drag.i.devX = drag.dx + (p.x - drag.p0.x)/RES;
+    drag.i.devY = drag.dy + (p.y - drag.p0.y)/RES;
     render();
   }
 });
 view.addEventListener("pointerup", () => {
-  if(drag && !drag.moved && !IMG.img) $("#file").click();
+  if(drag && drag.t === "dev" && !drag.moved && !drag.i.img) $("#file").click();
   drag = null;
 });
 view.addEventListener("wheel", e => {
-  if(!IMG.img || !CUR) return;
-  const cp = toContent(evtPoint(e));
-  if(!(cp.x >= 0 && cp.x <= CUR.cw && cp.y >= 0 && cp.y <= CUR.chh)) return;
+  const p = evtPoint(e);
+  const hit = pickDevice(p);
+  if(!hit || hit.type !== "screen" || !hit.inst.img) return;
   e.preventDefault();
-  zoomAt(cp, Math.exp(-e.deltaY * 0.0012), CUR);
+  if(hit.inst !== act) setActive(hit.inst);
+  zoomAt(hit.cp, Math.exp(-e.deltaY * 0.0012), hit.L, hit.inst);
 }, {passive:false});
 
 /* ---------------- controls ---------------- */
 document.querySelectorAll(".devicebtn").forEach(b =>
   b.addEventListener("click", () => {
-    state.device = b.dataset.device;
-    const dev = DEVICES[state.device];
-    if(!dev[state.view]) state.view = "front";   // single-view devices (window) fall back to front
-    $("#viewField").style.display = dev.left ? "" : "none";   // hide tilt buttons when unavailable
+    act.device = b.dataset.device;
+    const dev = DEVICES[act.device];
+    if(!dev[act.view]) act.view = "front";   // single-view devices (window) fall back to front
+    $("#viewField").style.display = dev.left ? "" : "none";
     render();
   }));
 document.querySelectorAll(".viewbtn").forEach(b =>
-  b.addEventListener("click", () => { state.view = b.dataset.view; render(); }));
+  b.addEventListener("click", () => { act.view = b.dataset.view; render(); }));
 document.querySelectorAll(".framebtn").forEach(b =>
-  b.addEventListener("click", () => { state.frame = b.dataset.frame; render(); }));
+  b.addEventListener("click", () => { act.frame = b.dataset.frame; render(); }));
 document.querySelectorAll(".fitbtn").forEach(b =>
-  b.addEventListener("click", () => { applyFit(b.dataset.fit); render(); }));
+  b.addEventListener("click", () => { applyFit(b.dataset.fit, act); render(); }));
 document.querySelectorAll(".bgbtn").forEach(b =>
   b.addEventListener("click", () => {
     state.bgMode = b.dataset.bg;
@@ -684,10 +881,10 @@ document.querySelectorAll(".bgbtn").forEach(b =>
     render();
   }));
 $("#zoom").addEventListener("input", e => {
-  if(!IMG.img || !CUR) return;
-  const e2 = effRect(CUR);
-  const target = e.target.value/100 * fillScale(CUR);
-  zoomAt({x:e2.x + e2.w/2, y:e2.y + e2.h/2}, target/state.is, CUR);
+  if(!act.img || !act.L) return;
+  const e2 = effRect(act.L, act);
+  const target = e.target.value/100 * fillScale(act.L, act);
+  zoomAt({x:e2.x + e2.w/2, y:e2.y + e2.h/2}, target/act.is, act.L, act);
 });
 $("#size").addEventListener("change", e => {
   state.ratio = e.target.value;
@@ -697,10 +894,10 @@ $("#size").addEventListener("change", e => {
 $("#freeW").addEventListener("input", e => { state.freeW = clamp(+e.target.value||1200,200,4000); render(); });
 $("#freeH").addEventListener("input", e => { state.freeH = clamp(+e.target.value||800,200,4000); render(); });
 function setDevPreset(mode){
-  state.sizeMode = mode;
+  act.sizeMode = mode;
   $("#devSizeRow").classList.toggle("show", mode === "custom");
   if(mode !== "custom"){
-    state.devScale = (+mode)/100; state.devX = 0; state.devY = 0;
+    act.devScale = (+mode)/100; act.devX = 0; act.devY = 0;
     $("#devSize").value = +mode;
   }
   render();
@@ -708,62 +905,66 @@ function setDevPreset(mode){
 document.querySelectorAll(".sizebtn").forEach(b =>
   b.addEventListener("click", () => setDevPreset(b.dataset.size)));
 $("#devSize").addEventListener("input", e => {
-  state.devScale = e.target.value/100; state.sizeMode = "custom"; render();
+  act.devScale = e.target.value/100; act.sizeMode = "custom"; render();
 });
 $("#resetLayout").addEventListener("click", () => {
-  state.devX = 0; state.devY = 0;
+  act.devX = 0; act.devY = 0;
   setDevPreset("80");
-  applyFit("fill"); render();
+  applyFit("fill", act); render();
 });
-$("#url").addEventListener("input", e => { state.url = e.target.value; render(); });
-$("#chromeToggle").addEventListener("change", e => { state.chromeOn = e.target.checked; render(); });
+/* centering — put the active device back in the middle without touching its size */
+$("#centerBoth").addEventListener("click", () => { act.devX = 0; act.devY = 0; render(); });
+$("#centerH").addEventListener("click", () => { act.devX = 0; render(); });
+$("#centerV").addEventListener("click", () => { act.devY = 0; render(); });
+$("#url").addEventListener("input", e => { act.url = e.target.value; render(); });
+$("#chromeToggle").addEventListener("change", e => { act.chromeOn = e.target.checked; render(); });
 
-function bindColor(colorId, hexId, key){
+function bindColor(colorId, hexId, apply){
   $(colorId).addEventListener("input", e => {
-    state[key] = e.target.value; $(hexId).value = e.target.value; render();
+    apply(e.target.value); $(hexId).value = e.target.value; render();
   });
   $(hexId).addEventListener("input", e => {
     const v = e.target.value.trim();
     if(validHex(v)){
-      state[key] = v;
+      apply(v);
       $(colorId).value = v.length === 4 ? "#" + [...v.slice(1)].map(c=>c+c).join("") : v;
       render();
     }
   });
 }
-bindColor("#bgColor", "#bgHex", "screenBg");
-bindColor("#acColor", "#acHex", "chromeAccent");
-bindColor("#canvasColor", "#canvasHex", "bgColor");
+bindColor("#bgColor", "#bgHex", v => act.screenBg = v);
+bindColor("#acColor", "#acHex", v => act.chromeAccent = v);
+bindColor("#canvasColor", "#canvasHex", v => state.bgColor = v);
 
-function bindSwatches(containerId, colorId, hexId, key){
+function bindSwatches(containerId, colorId, hexId, apply){
   $(containerId).addEventListener("click", e => {
     const s = e.target.closest(".swatch"); if(!s) return;
     $(containerId).querySelectorAll(".swatch").forEach(x => x.classList.remove("sel"));
     s.classList.add("sel");
-    state[key] = s.dataset.c;
+    apply(s.dataset.c);
     $(colorId).value = s.dataset.c; $(hexId).value = s.dataset.c;
     render();
   });
 }
-bindSwatches("#chromeSwatches", "#acColor", "#acHex", "chromeAccent");
-bindSwatches("#canvasSwatches", "#canvasColor", "#canvasHex", "bgColor");
+bindSwatches("#chromeSwatches", "#acColor", "#acHex", v => act.chromeAccent = v);
+bindSwatches("#canvasSwatches", "#canvasColor", "#canvasHex", v => state.bgColor = v);
 
 /* ---------------- eraser ---------------- */
-const UNDO = [];
-function pushUndo(){
-  if(!IMG.edit) return;
+function pushUndo(i){
+  i = i || act; if(!i.edit) return;
   const c = document.createElement("canvas");
-  c.width = IMG.edit.width; c.height = IMG.edit.height;
-  c.getContext("2d").drawImage(IMG.edit, 0, 0);
-  UNDO.push(c); if(UNDO.length > 10) UNDO.shift();
+  c.width = i.edit.width; c.height = i.edit.height;
+  c.getContext("2d").drawImage(i.edit, 0, 0);
+  i.undo.push(c); if(i.undo.length > 10) i.undo.shift();
 }
-function toImagePx(cp){ return { x:(cp.x - state.ix)/state.is, y:(cp.y - state.iy)/state.is }; }
-function eraseStroke(a, b){
-  const x = IMG.edit.getContext("2d");
+function toImagePx(cp, i){ i = i || act; return { x:(cp.x - i.ix)/i.is, y:(cp.y - i.iy)/i.is }; }
+function eraseStroke(a, b, i){
+  i = i || act;
+  const x = i.edit.getContext("2d");
   x.save();
   x.globalCompositeOperation = "destination-out";
   x.strokeStyle = "#000"; x.lineCap = "round"; x.lineJoin = "round";
-  x.lineWidth = Math.max(1, state.brush / state.is);
+  x.lineWidth = Math.max(1, state.brush / i.is);
   x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
   x.restore();
 }
@@ -778,15 +979,15 @@ $("#brush").addEventListener("input", e => {
   $("#brushLabel").textContent = `Brush: ${state.brush} px`;
 });
 $("#eraseUndo").addEventListener("click", () => {
-  const c = UNDO.pop(); if(!c || !IMG.edit) return;
-  const x = IMG.edit.getContext("2d");
-  x.clearRect(0, 0, IMG.edit.width, IMG.edit.height); x.drawImage(c, 0, 0); render();
+  const c = act.undo.pop(); if(!c || !act.edit) return;
+  const x = act.edit.getContext("2d");
+  x.clearRect(0, 0, act.edit.width, act.edit.height); x.drawImage(c, 0, 0); render();
 });
 $("#eraseReset").addEventListener("click", () => {
-  if(!IMG.edit) return;
-  pushUndo();
-  const x = IMG.edit.getContext("2d");
-  x.clearRect(0, 0, IMG.edit.width, IMG.edit.height); x.drawImage(IMG.img, 0, 0); render();
+  if(!act.edit) return;
+  pushUndo(act);
+  const x = act.edit.getContext("2d");
+  x.clearRect(0, 0, act.edit.width, act.edit.height); x.drawImage(act.img, 0, 0); render();
 });
 
 /* ---------------- overlays ---------------- */
@@ -849,7 +1050,10 @@ function exportFilename(){
   const custom = state.exportName.trim()
     .replace(/[\\/:*?"<>|]/g, "")
     .replace(/\.(png|webp|jpe?g)$/i, "");
-  const base = custom || `zetcom-mockup-${state.device}-${state.view}-${state.frame}-${W}x${H}@2x`;
+  const desc = insts.length > 1
+    ? `layout-${insts.length}devices`
+    : `${act.device}-${act.view}-${act.frame}`;
+  const base = custom || `zetcom-mockup-${desc}-${W}x${H}@2x`;
   return `${base}.${ext}`;
 }
 function exportCanvas(){
@@ -963,7 +1167,7 @@ for(const dev of Object.values(DEVICES)){
       im.onload = () => {
         slot.bb = frameBBox(im);
         if(green) slot.sil = frameSil(im);
-        if(--pending === 0){ render(); if(document.fonts?.ready) document.fonts.ready.then(render); }
+        if(--pending === 0){ syncControls(); render(); if(document.fonts?.ready) document.fonts.ready.then(render); }
       };
       im.src = slot.src;
       slot.img = im;
