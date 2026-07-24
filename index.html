@@ -123,6 +123,32 @@
     </details>
 
     <details class="acc" open>
+      <summary>Position &amp; Größe</summary>
+      <div class="accbody">
+        <div class="field"><label>Ausrichtung (aktives Gerät)</label>
+          <div class="btnrow">
+            <button class="selbtn" id="centerBoth">Zentrieren</button>
+            <button class="selbtn" id="centerH" title="nur horizontal zentrieren">Horizontal</button>
+            <button class="selbtn" id="centerV" title="nur vertikal zentrieren">Vertikal</button>
+          </div>
+          <div class="zlabel">setzt das aktive Gerät zurück in die Canvas-Mitte (Größe bleibt)</div></div>
+
+        <div class="field"><label>Device size</label>
+          <div class="btnrow">
+            <button class="selbtn sizebtn" data-size="100">100%</button>
+            <button class="selbtn sizebtn sel" data-size="80">80%</button>
+            <button class="selbtn sizebtn" data-size="75">75%</button>
+            <button class="selbtn sizebtn" data-size="custom">Custom</button>
+          </div>
+          <div class="hideable" id="devSizeRow">
+            <input type="range" id="devSize" min="40" max="170" value="80" style="margin-top:10px">
+            <div class="zlabel" id="devSizeLabel">Größe: 80%</div>
+          </div>
+          <button class="minor" id="resetLayout">Reset device position &amp; size</button></div>
+      </div>
+    </details>
+
+    <details class="acc" open>
       <summary>Screenshot</summary>
       <div class="accbody">
         <div class="field"><label>Screenshot</label>
@@ -152,31 +178,6 @@
             </div>
             <div class="zlabel">erased areas show the screen background color</div>
           </div></div>
-      </div>
-    </details>
-
-    <details class="acc">
-      <summary>Position &amp; Größe</summary>
-      <div class="accbody">
-        <div class="field"><label>Ausrichtung (aktives Gerät)</label>
-          <div class="btnrow">
-            <button class="selbtn" id="centerBoth">Zentrieren</button>
-            <button class="selbtn" id="centerH" title="nur horizontal zentrieren">Horizontal</button>
-            <button class="selbtn" id="centerV" title="nur vertikal zentrieren">Vertikal</button>
-          </div>
-          <div class="zlabel">setzt das aktive Gerät zurück in die Canvas-Mitte (Größe bleibt)</div></div>
-
-        <div class="field"><label>Device size</label>
-          <div class="btnrow">
-            <button class="selbtn sizebtn" data-size="100">100%</button>
-            <button class="selbtn sizebtn sel" data-size="80">80%</button>
-            <button class="selbtn sizebtn" data-size="75">75%</button>
-            <button class="selbtn sizebtn" data-size="custom">Custom</button>
-          </div>
-          <div class="hideable" id="devSizeRow">
-            <input type="range" id="devSize" min="40" max="170" value="80" style="margin-top:10px">
-          </div>
-          <button class="minor" id="resetLayout">Reset device position &amp; size</button></div>
       </div>
     </details>
 
@@ -699,6 +700,7 @@ function syncControls(){
   $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
   $("#acColor").value = act.chromeAccent; $("#acHex").value = act.chromeAccent;
   $("#devSize").value = Math.round(act.devScale*100);
+  $("#devSizeLabel").textContent = "Größe: " + Math.round(act.devScale*100) + "%";
   $("#devSizeRow").classList.toggle("show", act.sizeMode === "custom");
   $("#eraseRow").classList.toggle("show", state.tool === "erase");
   document.querySelectorAll("#chromeSwatches .swatch").forEach(s =>
@@ -893,6 +895,7 @@ $("#size").addEventListener("change", e => {
 });
 $("#freeW").addEventListener("input", e => { state.freeW = clamp(+e.target.value||1200,200,4000); render(); });
 $("#freeH").addEventListener("input", e => { state.freeH = clamp(+e.target.value||800,200,4000); render(); });
+function updateDevSizeLabel(){ $("#devSizeLabel").textContent = "Größe: " + Math.round(act.devScale*100) + "%"; }
 function setDevPreset(mode){
   act.sizeMode = mode;
   $("#devSizeRow").classList.toggle("show", mode === "custom");
@@ -900,12 +903,13 @@ function setDevPreset(mode){
     act.devScale = (+mode)/100; act.devX = 0; act.devY = 0;
     $("#devSize").value = +mode;
   }
+  updateDevSizeLabel();
   render();
 }
 document.querySelectorAll(".sizebtn").forEach(b =>
   b.addEventListener("click", () => setDevPreset(b.dataset.size)));
 $("#devSize").addEventListener("input", e => {
-  act.devScale = e.target.value/100; act.sizeMode = "custom"; render();
+  act.devScale = e.target.value/100; act.sizeMode = "custom"; updateDevSizeLabel(); render();
 });
 $("#resetLayout").addEventListener("click", () => {
   act.devX = 0; act.devY = 0;
