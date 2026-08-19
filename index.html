@@ -63,6 +63,14 @@
   #view{display:block;width:100%;height:100%;cursor:grab;}
   #view:active{cursor:grabbing;}
   #view.markmode,#view.markmode:active{cursor:crosshair;}
+  .sizes{width:100%;border-collapse:collapse;font-size:11px;}
+  .sizes tr{cursor:pointer;border-bottom:1px solid var(--ink-100);}
+  .sizes tr:hover{background:var(--gray);}
+  .sizes td{padding:4px 4px 4px 0;color:#000;vertical-align:top;}
+  .sizes td.g{color:var(--ink-500);text-transform:uppercase;letter-spacing:.06em;font-size:10px;white-space:nowrap;}
+  .sizes td.n{white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .sizes td.f{color:var(--ink-500);white-space:nowrap;}
+  .minor[disabled]{opacity:.45;cursor:default;}
   .zlabel.warn{color:#b40000;}
   /* --- accordion sidebar --- */
   .acc{border:1px solid var(--ink-100);border-radius:10px;margin-bottom:10px;overflow:hidden;background:#fff;}
@@ -96,6 +104,8 @@
   <div class="panel">
     <h1>zetcom device mockup <b>v6</b></h1>
     <p class="sub">Real screenshots dropped into hand-made device frames. Add several devices to build a workflow or a device overview. Drag in the screen to pan, scroll to zoom, drag a frame to move it, click a device to select it.</p>
+
+    <button class="minor" id="undoBtn" style="margin:0 0 12px" disabled>↺ Rückgängig</button>
 
     <details class="acc" open>
       <summary>Geräte <span class="count" id="devCount"></span></summary>
@@ -345,6 +355,15 @@
             <div class="zlabel">JPEG has no transparency — transparent canvas exports on white</div>
           </div>
           <div class="zlabel" id="sizePreview" style="margin-top:6px">File size: …</div></div>
+
+        <div class="field"><label>Zielort</label>
+          <label class="toggle"><input type="checkbox" id="askPath" checked> Ordner und Dateinamen abfragen</label>
+          <div class="zlabel" id="askPathHint">Ohne Haekchen landet die Datei im Download-Ordner.</div></div>
+
+        <div class="field"><label>Empfohlene Groessen</label>
+          <div class="zlabel" style="margin-bottom:6px">Eine Zeile anklicken setzt das Ausgabemass.
+          Die Maße stammen aus den Vault-Standards, die KB-Angaben sind Richtwerte.</div>
+          <table class="sizes" id="sizeTable"></table></div>
 
         <button class="btn" id="export">Download @2x</button>
       </div>
@@ -815,6 +834,7 @@ function applyFit(mode, i, L){
 }
 function zoomAt(cp, k, L, i){
   i = i || act;
+  snap("zoom");
   const f = fillScale(L, i);
   const ns = clamp(i.is * k, f*0.08, f*10);
   const kk = ns / i.is;
@@ -889,6 +909,7 @@ function addInst(){
 }
 function removeInst(i){
   if(insts.length <= 1) return;
+  snap("removeDevice");
   const idx = insts.indexOf(i);
   insts.splice(idx, 1);
   if(act === i) act = insts[Math.max(0, idx-1)];
@@ -914,8 +935,8 @@ function arrangeDevices(){
   });
   render();
 }
-$("#addDevice").addEventListener("click", addInst);
-$("#arrangeDevices").addEventListener("click", arrangeDevices);
+$("#addDevice").addEventListener("click", () => { snap("addDevice"); addInst(); });
+$("#arrangeDevices").addEventListener("click", () => { snap("arrange"); arrangeDevices(); });
 
 /* ---------------- image loading ---------------- */
 function loadScreenshot(f, i){
@@ -969,8 +990,15 @@ let drag = null;
 view.addEventListener("pointerdown", e => {
   if(e.button !== 0) return;
   const p = evtPoint(e);
+  // eine bestehende Markierung liegt ueber allem und wird in jedem Werkzeug angefasst
+  const mh = markHit(p);
+  if(mh){
+    snap("markDrag"); drag = mh;
+    view.setPointerCapture(e.pointerId); e.preventDefault();
+    return;
+  }
   if(state.tool === "mark"){
-    drag = markDown(p);
+    snap("markNeu"); drag = markNeu(p);
     view.setPointerCapture(e.pointerId); e.preventDefault();
     return;
   }
@@ -979,6 +1007,7 @@ view.addEventListener("pointerdown", e => {
     const o = OVERLAYS[idx];
     if(inRect({x:p.x/RES, y:p.y/RES}, {x:o.x, y:o.y, w:o.img.naturalWidth*o.scale, h:o.img.naturalHeight*o.scale})){
       ovSel = idx; renderOvList();
+      snap("ovDrag");
       drag = {t:"ov", o, p0:p, x0:o.x, y0:o.y, moved:false};
       view.setPointerCapture(e.pointerId); e.preventDefault(); return;
     }
@@ -994,8 +1023,10 @@ view.addEventListener("pointerdown", e => {
     drag = {t:"erase", i, last:ip, moved:true};
     render();
   } else if(hit.type === "screen" && i.img){
+    snap("pan");
     drag = {t:"pan", i, cp0:hit.cp, ix:i.ix, iy:i.iy, moved:false};
   } else {
+    snap("devDrag");
     drag = {t:"dev", i, p0:p, dx:i.devX, dy:i.devY, moved:false};
   }
   view.setPointerCapture(e.pointerId);
@@ -1047,6 +1078,7 @@ view.addEventListener("wheel", e => {
 /* ---------------- controls ---------------- */
 document.querySelectorAll(".devicebtn").forEach(b =>
   b.addEventListener("click", () => {
+    snap("device");
     act.device = b.dataset.device;
     const dev = DEVICES[act.device];
     if(!dev[act.view]) act.view = "front";   // devices without the current view fall back to front
@@ -1055,11 +1087,11 @@ document.querySelectorAll(".devicebtn").forEach(b =>
     render();
   }));
 document.querySelectorAll(".viewbtn").forEach(b =>
-  b.addEventListener("click", () => { act.view = b.dataset.view; render(); }));
+  b.addEventListener("click", () => { snap("view"); act.view = b.dataset.view; render(); }));
 document.querySelectorAll(".framebtn").forEach(b =>
-  b.addEventListener("click", () => { act.frame = b.dataset.frame; render(); }));
+  b.addEventListener("click", () => { snap("frame"); act.frame = b.dataset.frame; render(); }));
 document.querySelectorAll(".fitbtn").forEach(b =>
-  b.addEventListener("click", () => { applyFit(b.dataset.fit, act); render(); }));
+  b.addEventListener("click", () => { snap("fit"); applyFit(b.dataset.fit, act); render(); }));
 document.querySelectorAll(".bgbtn").forEach(b =>
   b.addEventListener("click", () => {
     state.bgMode = b.dataset.bg;
@@ -1073,6 +1105,7 @@ $("#zoom").addEventListener("input", e => {
   zoomAt({x:e2.x + e2.w/2, y:e2.y + e2.h/2}, target/act.is, act.L, act);
 });
 $("#size").addEventListener("change", e => {
+  snap("ratio");
   state.ratio = e.target.value;
   $("#freeRow").classList.toggle("show", state.ratio === "free");
   render();
@@ -1081,6 +1114,7 @@ $("#freeW").addEventListener("input", e => { state.freeW = clamp(+e.target.value
 $("#freeH").addEventListener("input", e => { state.freeH = clamp(+e.target.value||800,200,4000); render(); });
 function updateDevSizeLabel(){ $("#devSizeLabel").textContent = "Größe: " + Math.round(act.devScale*100) + "%"; }
 function setDevPreset(mode){
+  snap("devSize");
   act.sizeMode = mode;
   $("#devSizeRow").classList.toggle("show", mode === "custom");
   if(mode !== "custom"){
@@ -1093,17 +1127,19 @@ function setDevPreset(mode){
 document.querySelectorAll(".sizebtn").forEach(b =>
   b.addEventListener("click", () => setDevPreset(b.dataset.size)));
 $("#devSize").addEventListener("input", e => {
+  snap("devSizeSlider");
   act.devScale = e.target.value/100; act.sizeMode = "custom"; updateDevSizeLabel(); render();
 });
 $("#resetLayout").addEventListener("click", () => {
+  snap("reset");   // setDevPreset sichert gleich darauf, der andere Schluessel faellt in die Sperrzeit
   act.devX = 0; act.devY = 0;
   setDevPreset("80");
   applyFit("fill", act); render();
 });
 /* centering — put the active device back in the middle without touching its size */
-$("#centerBoth").addEventListener("click", () => { act.devX = 0; act.devY = 0; render(); });
-$("#centerH").addEventListener("click", () => { act.devX = 0; render(); });
-$("#centerV").addEventListener("click", () => { act.devY = 0; render(); });
+$("#centerBoth").addEventListener("click", () => { snap("center"); act.devX = 0; act.devY = 0; render(); });
+$("#centerH").addEventListener("click", () => { snap("center"); act.devX = 0; render(); });
+$("#centerV").addEventListener("click", () => { snap("center"); act.devY = 0; render(); });
 $("#url").addEventListener("input", e => { act.url = e.target.value; render(); });
 $("#chromeToggle").addEventListener("change", e => { act.chromeOn = e.target.checked; render(); });
 
@@ -1156,13 +1192,14 @@ function eraseStroke(a, b, i){
   x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
   x.restore();
 }
+function setTool(t){
+  state.tool = t;
+  $("#eraseRow").classList.toggle("show", t === "erase");
+  view.classList.toggle("markmode", t === "mark");
+  updateBtns(); render();
+}
 document.querySelectorAll(".toolbtn").forEach(b =>
-  b.addEventListener("click", () => {
-    state.tool = b.dataset.tool;
-    $("#eraseRow").classList.toggle("show", state.tool === "erase");
-    view.classList.toggle("markmode", state.tool === "mark");
-    updateBtns(); render();
-  }));
+  b.addEventListener("click", () => setTool(b.dataset.tool)));
 $("#brush").addEventListener("input", e => {
   state.brush = +e.target.value;
   $("#brushLabel").textContent = `Brush: ${state.brush} px`;
@@ -1331,18 +1368,27 @@ function drawMarkHandles(){
   sctx.restore();
 }
 
-/* ---- Zeigerarbeit im Modus Markieren ---- */
-function markDown(p){
-  const q = {x:p.x/RES, y:p.y/RES}, nah = 9;
+/* ---- Zeigerarbeit ----
+   Eine bestehende Markierung ist in JEDEM Werkzeug anfassbar, sonst waere Markieren ein
+   Dauerzustand, in dem sich nichts anderes mehr bewegen laesst. Gegriffen wird an der
+   Rahmenkante, am Label und an den Anfassern. Die Innenflaeche greift absichtlich nicht:
+   durch sie hindurch schiebt und zoomt man weiter den Screenshot.                       */
+const MARK_FASSEN = 8;      // Toleranz um die Rahmenlinie, in 1x-Pixeln
+function aufKante(q, R, tol){
+  const aussen = q.x < R.x - tol || q.x > R.x + R.w + tol || q.y < R.y - tol || q.y > R.y + R.h + tol;
+  const innen  = q.x > R.x + tol && q.x < R.x + R.w - tol && q.y > R.y + tol && q.y < R.y + R.h - tol;
+  return !aussen && !innen;
+}
+function markHit(p){
+  const q = {x:p.x/RES, y:p.y/RES};
   // Anfasser der Auswahl haben Vorrang
   if(markSel >= 0 && markSel < MARKS.length){
     const m = MARKS[markSel], g = markGriffe(m);
     for(let k = 0; k < 4; k++){
-      if(Math.hypot(q.x - g[k][0], q.y - g[k][1]) <= nah)
+      if(Math.hypot(q.x - g[k][0], q.y - g[k][1]) <= MARK_FASSEN + 1)
         return {t:"markResize", m, k, x0:m.x, y0:m.y, w0:m.w, h0:m.h, q0:q};
     }
   }
-  // Label, dann Rechteck, jeweils von oben nach unten
   for(let i = MARKS.length - 1; i >= 0; i--){
     const m = MARKS[i];
     if(m.label && inRect(q, markLabelBox(m))){
@@ -1352,12 +1398,16 @@ function markDown(p){
   }
   for(let i = MARKS.length - 1; i >= 0; i--){
     const m = MARKS[i];
-    if(inRect(q, markRect(m))){
+    if(aufKante(q, markRect(m), MARK_FASSEN)){
       markSel = i; syncMark(); renderMarkList(); render();
       return {t:"markMove", m, x0:m.x, y0:m.y, lx0:m.lx, ly0:m.ly, q0:q};
     }
   }
-  // leere Flaeche: neue Markierung aufziehen
+  return null;
+}
+/* Nur im Werkzeug Markieren, und nur auf leerer Flaeche: eine neue Markierung aufziehen. */
+function markNeu(p){
+  const q = {x:p.x/RES, y:p.y/RES};
   const m = mkMark({x:q.x, y:q.y, w:1, h:1, lx:q.x, ly:q.y});
   MARKS.push(m); markSel = MARKS.length - 1;
   syncMark(); renderMarkList();
@@ -1388,11 +1438,15 @@ function markDrag(p, d){
   render();
 }
 function markUp(d){
-  // ein Klick ohne Zug ist keine Markierung
-  if(d.t === "markNew" && (d.m.w < 6 || d.m.h < 6)){
+  if(d.t !== "markNew") return;
+  if(d.m.w < 6 || d.m.h < 6){
+    // ein Klick ohne Zug ist keine Markierung
     MARKS.pop(); markSel = MARKS.length - 1;
     syncMark(); renderMarkList(); render();
+    return;
   }
+  // Aufziehen ist ein Einmal-Modus: danach wieder schieben koennen, ohne umzuschalten
+  setTool("move");
 }
 
 /* ---- Kontrast, damit ein Label nicht unlesbar rausgeht ---- */
@@ -1427,7 +1481,8 @@ function renderMarkList(){
     mini.className = "mini"; mini.textContent = Math.round(m.w) + "×" + Math.round(m.h);
     const x = document.createElement("button");
     x.className = "x"; x.textContent = "×"; x.title = "Markierung entfernen";
-    x.onclick = () => { MARKS.splice(i,1); if(markSel >= MARKS.length) markSel = MARKS.length-1;
+    x.onclick = () => { snap("delMark"); MARKS.splice(i,1);
+                        if(markSel >= MARKS.length) markSel = MARKS.length-1;
                         syncMark(); renderMarkList(); render(); };
     row.append(dot, nm, mini, x);
     box.appendChild(row);
@@ -1467,10 +1522,6 @@ function syncMark(){
   $("#markKontrast").classList.toggle("warn", !ok);
 }
 function addMark(){
-  // der Knopf schaltet auch das Werkzeug um, sonst legt man eine Markierung an und kann sie nicht anfassen
-  state.tool = "mark";
-  $("#eraseRow").classList.remove("show");
-  view.classList.add("markmode");
   const v = MARKS[MARKS.length-1];
   const m = mkMark(v ? {x: v.x + 24, y: v.y + 24, linie: v.linie, flaeche: v.flaeche,
                         textFarbe: v.textFarbe, staerke: v.staerke, groesse: v.groesse,
@@ -1478,6 +1529,75 @@ function addMark(){
   MARKS.push(m); markSel = MARKS.length - 1;
   syncMark(); renderMarkList(); updateBtns(); render();
 }
+
+/* ---------------- Rueckgaengig ----------------
+   Gesichert wird der Zustand, nicht das Bild: Geraete mit Lage, Groesse, Ansicht und
+   Zoom, alle Markierungen, alle Overlays, dazu Canvasformat und Hintergrund. Die
+   Radierstriche haben ihren eigenen Stapel, weil sie Pixel im Screenshot aendern und
+   nicht Zustand; deshalb holt Strg+Z sie nicht zurueck, der Knopf im Radierer schon.
+   Ein Zug oder ein Reglerweg ist ein Schritt: derselbe Schluessel innerhalb von 900 ms
+   sichert nicht erneut, sonst waere jede Reglerbewegung dreissig Schritte.            */
+const HIST = [];
+const HIST_MAX = 40;
+let histKey = "", histZeit = 0;
+const INST_SKALARE = ["device","view","frame","devScale","devX","devY","sizeMode","url",
+  "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW"];
+
+function snap(key){
+  const jetzt = Date.now();
+  if(key && key === histKey && jetzt - histZeit < 900){ histZeit = jetzt; return; }
+  histKey = key || ""; histZeit = jetzt;
+  HIST.push({
+    state: {bgMode:state.bgMode, bgColor:state.bgColor, ratio:state.ratio,
+            freeW:state.freeW, freeH:state.freeH},
+    insts: insts.map(i => {
+      const sk = {};
+      for(const k of INST_SKALARE) sk[k] = i[k];
+      return {ref:i, sk};
+    }),
+    act,
+    marks: MARKS.map(m => Object.assign({}, m)),
+    ovs: OVERLAYS.map(o => ({ref:o, x:o.x, y:o.y, scale:o.scale})),
+    markSel, ovSel
+  });
+  if(HIST.length > HIST_MAX) HIST.shift();
+  updateUndoBtn();
+}
+function undo(){
+  const h = HIST.pop();
+  if(!h) return;
+  Object.assign(state, h.state);
+  insts.length = 0;
+  for(const e of h.insts){ Object.assign(e.ref, e.sk); insts.push(e.ref); }
+  act = insts.indexOf(h.act) >= 0 ? h.act : insts[0];
+  MARKS.length = 0; for(const m of h.marks) MARKS.push(m);
+  OVERLAYS.length = 0;
+  for(const e of h.ovs){ e.ref.x = e.x; e.ref.y = e.y; e.ref.scale = e.scale; OVERLAYS.push(e.ref); }
+  markSel = Math.min(h.markSel, MARKS.length - 1);
+  ovSel = Math.min(h.ovSel, OVERLAYS.length - 1);
+  histKey = ""; histZeit = 0;
+  // Bedienelemente nachziehen, sonst zeigen sie den verworfenen Stand
+  $("#size").value = state.ratio;
+  $("#freeRow").classList.toggle("show", state.ratio === "free");
+  $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
+  $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
+  syncControls(); syncMark(); renderMarkList(); renderOvList();
+  updateUndoBtn(); render();
+}
+function updateUndoBtn(){
+  const b = $("#undoBtn"); if(!b) return;
+  b.disabled = !HIST.length;
+  b.textContent = HIST.length ? "\u21ba R\u00fcckg\u00e4ngig (" + HIST.length + ")" : "\u21ba R\u00fcckg\u00e4ngig";
+}
+$("#undoBtn").addEventListener("click", undo);
+window.addEventListener("keydown", e => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey){
+    const t = e.target.tagName;
+    if(t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;   // dort gilt das Textfeld-Undo
+    e.preventDefault(); undo();
+  }
+});
 
 /* ---------------- export ---------------- */
 const MIME = {png:"image/png", webp:"image/webp", jpeg:"image/jpeg"};
@@ -1528,40 +1648,114 @@ $("#quality").addEventListener("input", e => {
   updateSizePreview();
 });
 $("#exportName").addEventListener("input", e => { state.exportName = e.target.value; });
+/* Zielort: mit der File System Access API fragt der Browser Ordner und Namen ab, statt
+   blind in den Download-Ordner zu schreiben. Der letzte Griff dient als Startpunkt, damit
+   man nicht jedes Mal neu hinnavigiert. Kann der Browser es nicht, ist das Haekchen aus
+   und ausgegraut, und es laeuft wie vorher ueber den Download-Ordner.                   */
+const KANN_ZIELORT = typeof window.showSaveFilePicker === "function";
+let letzterGriff = null;
+const ENDUNG = {png:[".png"], webp:[".webp"], jpeg:[".jpg", ".jpeg"]};
+function speichern(blob, name){
+  const a = document.createElement("a");
+  a.download = name; a.href = URL.createObjectURL(blob);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+async function speichernMitDialog(blob, name){
+  const opt = {
+    suggestedName: name,
+    types: [{description: state.exportFormat.toUpperCase(),
+             accept: {[MIME[state.exportFormat]]: ENDUNG[state.exportFormat]}}]
+  };
+  if(letzterGriff) opt.startIn = letzterGriff;
+  let griff;
+  try{
+    griff = await window.showSaveFilePicker(opt);
+  } catch(err){
+    if(err && err.name === "AbortError") return;   // abgebrochen heisst: nichts speichern
+    speichern(blob, name); return;                 // sonst der alte Weg, lieber Datei als nichts
+  }
+  const w = await griff.createWritable();
+  await w.write(blob); await w.close();
+  letzterGriff = griff;
+}
 $("#export").addEventListener("click", () => {
   render();
   const q = state.exportFormat === "png" ? undefined : state.exportQuality;
+  const name = exportFilename();
   exportCanvas().toBlob(blob => {
     if(!blob) return;
-    const a = document.createElement("a");
-    a.download = exportFilename();
-    a.href = URL.createObjectURL(blob);
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    if(KANN_ZIELORT && $("#askPath").checked) speichernMitDialog(blob, name);
+    else speichern(blob, name);
   }, MIME[state.exportFormat], q);
 });
 
 /* ---------------- Markierungen: Bedienelemente ---------------- */
 $("#markWeight").innerHTML = STAERKEN
   .map(([w, nm]) => `<option value="${w}">${w} ${nm}</option>`).join("");
-$("#addMark").addEventListener("click", addMark);
-function markSet(fn){
+$("#addMark").addEventListener("click", () => { snap("addMark"); addMark(); });
+function markSet(fn, key){
   const m = MARKS[markSel]; if(!m) return;
+  snap(key || "markSet");
   fn(m); syncMark(); renderMarkList(); render();
 }
-$("#markText").addEventListener("input", e => markSet(m => m.label = e.target.value));
-$("#markWeight").addEventListener("change", e => markSet(m => m.staerke = +e.target.value));
-$("#markSize").addEventListener("input", e => markSet(m => m.groesse = +e.target.value));
-$("#markWidth").addEventListener("input", e => markSet(m => m.breite = +e.target.value));
-$("#markRadius").addEventListener("input", e => markSet(m => m.radius = +e.target.value));
-$("#markConn").addEventListener("change", e => markSet(m => m.verbindung = e.target.checked));
-$("#markConnWidth").addEventListener("input", e => markSet(m => m.verbBreite = +e.target.value));
+$("#markText").addEventListener("input", e => markSet(m => m.label = e.target.value, "markText"));
+$("#markWeight").addEventListener("change", e => markSet(m => m.staerke = +e.target.value, "markWeight"));
+$("#markSize").addEventListener("input", e => markSet(m => m.groesse = +e.target.value, "markSize"));
+$("#markWidth").addEventListener("input", e => markSet(m => m.breite = +e.target.value, "markWidth"));
+$("#markRadius").addEventListener("input", e => markSet(m => m.radius = +e.target.value, "markRadius"));
+$("#markConn").addEventListener("change", e => markSet(m => m.verbindung = e.target.checked, "markConn"));
+$("#markConnWidth").addEventListener("input", e => markSet(m => m.verbBreite = +e.target.value, "markConnW"));
 bindColor("#markColor", "#markHex", v => { const m = MARKS[markSel]; if(m){ m.linie = v; m.flaeche = v; } });
 bindColor("#markTextColor", "#markTextHex", v => { const m = MARKS[markSel]; if(m) m.textFarbe = v; });
 bindSwatches("#markSwatches", "#markColor", "#markHex",
   v => { const m = MARKS[markSel]; if(m){ m.linie = v; m.flaeche = v; } });
 bindSwatches("#markTextSwatches", "#markTextColor", "#markTextHex",
   v => { const m = MARKS[markSel]; if(m) m.textFarbe = v; });
+
+/* ---------------- Empfohlene Groessen ----------------
+   Maße aus den Vault-Standards: Website aus Image Standards (Panel, Ratio, Template),
+   Social aus LinkedIn CI, Folie aus den slide-Tokens (33,87 x 19,05 cm sind 16:9).
+   Die Gewichte sind Richtwerte fuer Bildschirmaufnahmen, die flaechig sind und gut
+   komprimieren, keine gemessene Vorgabe. Was die Datei wirklich wiegt, steht darueber
+   in der Dateigroessen-Vorschau.                                                      */
+const GROESSEN = [
+  ["Website", "image_text 3:2", 2126, 1417, "WebP q75 bis 80", "unter 300 KB"],
+  ["Website", "benefits 16:9",  2200, 1238, "WebP q75 bis 80", "unter 300 KB"],
+  ["Website", "sticky 1:1",     1500, 1500, "WebP q75 bis 80", "unter 250 KB"],
+  ["Website", "card 3:2",       1080,  716, "WebP q75 bis 80", "unter 150 KB"],
+  ["Website", "panel_image breit", 1920, 1080, "WebP q75 bis 80", "unter 350 KB"],
+  ["Social",  "OG / Link-Vorschau", 1200, 630, "JPEG q90", "unter 200 KB"],
+  ["Social",  "LinkedIn Post 1:1",  1200, 1200, "PNG oder WebP", "unter 500 KB"],
+  ["Social",  "LinkedIn Post 4:5",  1200, 1500, "PNG oder WebP", "unter 500 KB"],
+  ["Social",  "LinkedIn Banner",    1584,  396, "PNG oder WebP", "unter 300 KB"],
+  ["Folie",   "16:9 Vollbild",      1920, 1080, "PNG", "unter 600 KB"],
+  ["Folie",   "16:9 scharf",        2560, 1440, "PNG", "unter 1 MB"],
+  ["Doku",    "Word, halbe Breite", 1200,  800, "PNG", "unter 400 KB"]
+];
+(function baueGroessen(){
+  const t = $("#sizeTable"); if(!t) return;
+  let letzte = "";
+  t.innerHTML = GROESSEN.map(([g, was, w, h, fmt, kb]) => {
+    const kopf = g === letzte ? "" : g; letzte = g;
+    return `<tr data-w="${w}" data-h="${h}" title="Ausgabemass auf ${w}\u00d7${h} setzen">
+      <td class="g">${kopf}</td><td>${was}</td><td class="n">${w}\u00d7${h}</td>
+      <td class="f">${fmt}</td><td class="f">${kb}</td></tr>`;
+  }).join("");
+  t.addEventListener("click", e => {
+    const tr = e.target.closest("tr"); if(!tr) return;
+    snap("groesse");
+    state.ratio = "free"; state.freeW = +tr.dataset.w; state.freeH = +tr.dataset.h;
+    $("#size").value = "free";
+    $("#freeRow").classList.add("show");
+    $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+    render();
+  });
+})();
+if(!KANN_ZIELORT){
+  $("#askPath").checked = false; $("#askPath").disabled = true;
+  $("#askPathHint").textContent = "Dieser Browser kann keinen Zielort abfragen, die Datei landet im Download-Ordner.";
+}
 
 /* ---------------- init ---------------- */
 function frameBBox(im){
