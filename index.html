@@ -248,9 +248,10 @@
 
         <div class="devlist" id="markList"></div>
         <button class="selbtn" id="addMark" style="width:100%">+ Markierung</button>
-        <div class="zlabel" style="margin-top:8px">Der Knopf legt eine Markierung in die Bildmitte und schaltet
-        auf das Werkzeug Markieren. Dort legt Ziehen im Bild eine weitere an, ein Klick waehlt sie, die vier
-        Ecken aendern die Groesse, das Label zieht separat.</div>
+        <div class="zlabel" style="margin-top:8px">Der Knopf legt eine Markierung in die Bildmitte.
+        Im Werkzeug <b>Markieren</b> zieht man weitere im Bild auf. Angefasst wird eine Markierung in
+        jedem Werkzeug: an der Rahmenkante schieben, an den vier Ecken die Groesse aendern, das Label
+        zieht separat. Durch die Innenflaeche hindurch schiebt man weiter den Screenshot.</div>
 
         <div class="hideable" id="markEdit">
           <div class="field" style="margin-top:14px"><label>Label</label>
@@ -1306,14 +1307,26 @@ function markLabelBox(m){
 }
 const markRect = m => ({x:m.x, y:m.y, w:m.w, h:m.h});
 const boxMitte = b => ({x:b.x + b.w/2, y:b.y + b.h/2});
-/* Punkt, an dem der Strahl von der Boxmitte in Richtung Ziel die Box verlaesst. */
+/* Punkt, an dem der Strahl von der Boxmitte in Richtung Ziel die Box verlaesst, plus die
+   Achse der getroffenen Kante: "y" fuer oben/unten, "x" fuer links/rechts. */
 function boxAustritt(b, ziel){
   const c = boxMitte(b), dx = ziel.x - c.x, dy = ziel.y - c.y;
-  if(!dx && !dy) return c;
+  if(!dx && !dy) return {x:c.x, y:c.y, achse:"y"};
   const tx = dx ? (b.w/2) / Math.abs(dx) : Infinity;
   const ty = dy ? (b.h/2) / Math.abs(dy) : Infinity;
   const t = Math.min(tx, ty);
-  return {x:c.x + dx*t, y:c.y + dy*t};
+  return {x:c.x + dx*t, y:c.y + dy*t, achse: tx <= ty ? "x" : "y"};
+}
+/* Wie weit die flache Kappe eines Strichs der Breite w ueber den Endpunkt hinausgeschoben
+   werden muss, damit sie eine Kante voll erreicht. Die Kappe steht senkrecht zum Strich,
+   die Kante nicht: schraeg bleibt sonst ein keilfoermiger Spalt, und genau der fiel bei
+   dicker Linie auf. In einer Linie mit der Kante ist der Wert null, deshalb sah es dort
+   immer richtig aus. Begrenzt, damit ein fast kantenparalleler Strich nicht ausufert.  */
+function kappenVersatz(ux, uy, achse, w){
+  const laengs = achse === "y" ? Math.abs(ux) : Math.abs(uy);   // Anteil entlang der Kante
+  const quer   = achse === "y" ? Math.abs(uy) : Math.abs(ux);   // Anteil auf die Kante zu
+  if(quer < 1e-4) return w*2;
+  return Math.min(w/2 * laengs / quer, w*2 + 4);
 }
 const boxUeberlappt = (a,b) => a.x < b.x+b.w && b.x < a.x+a.w && a.y < b.y+b.h && b.y < a.y+a.h;
 
@@ -1323,9 +1336,29 @@ function drawMarks(){
     // Verbindungslinie zuerst, damit sie unter Rahmen und Label endet
     if(m.verbindung && m.label && !boxUeberlappt(L, R)){
       const a = boxAustritt(L, boxMitte(R)), b = boxAustritt(R, boxMitte(L));
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+      const ux = dx/len, uy = dy/len, w = m.verbBreite;
+      /* Beide Enden werden ueber die Kante hinaus verlaengert, damit die flache Kappe die
+         Kante auch schraeg voll erreicht. Am Label ist das gefahrlos, die Flaeche wird
+         danach darueber gefuellt. Am Rahmen nicht: dort stand bei dicker Linie ein Stummel
+         im Rechteck. Deshalb wird auf alles AUSSERHALB der Rahmen-Innenkante beschnitten,
+         die Linie darf die Rahmenlinie decken, die Innenflaeche nie.                      */
+      const ea = kappenVersatz(ux, uy, a.achse, w);
+      const eb = kappenVersatz(ux, uy, b.achse, w) + m.breite;
+      const inn = m.breite/2;
       vctx.save();
-      vctx.strokeStyle = m.linie; vctx.lineWidth = m.verbBreite*RES;
-      vctx.beginPath(); vctx.moveTo(a.x*RES, a.y*RES); vctx.lineTo(b.x*RES, b.y*RES); vctx.stroke();
+      if(R.w > 2*inn + 2 && R.h > 2*inn + 2){
+        vctx.beginPath();
+        vctx.rect(0, 0, view.width, view.height);
+        vctx.roundRect((R.x+inn)*RES, (R.y+inn)*RES, (R.w-2*inn)*RES, (R.h-2*inn)*RES,
+                       Math.max(0, m.radius - inn)*RES);
+        vctx.clip("evenodd");
+      }
+      vctx.strokeStyle = m.linie; vctx.lineWidth = w*RES;
+      vctx.beginPath();
+      vctx.moveTo((a.x - ux*ea)*RES, (a.y - uy*ea)*RES);
+      vctx.lineTo((b.x + ux*eb)*RES, (b.y + uy*eb)*RES);
+      vctx.stroke();
       vctx.restore();
     }
     // Rahmen: immer ein Rechteck, die Linie sitzt mittig auf der Kante
@@ -1352,7 +1385,9 @@ function drawMarks(){
 const markGriffe = m => [[m.x, m.y], [m.x+m.w, m.y], [m.x+m.w, m.y+m.h], [m.x, m.y+m.h]];
 /* Anfasser nur auf der Auswahl-Ebene, sie landen nie im Export. */
 function drawMarkHandles(){
-  if(state.tool !== "mark" || markSel < 0 || markSel >= MARKS.length) return;
+  // Sichtbar sobald etwas ausgewaehlt ist, in JEDEM Werkzeug. Vorher hingen sie am
+  // Markiermodus: die Groesse liess sich aendern, man sah nur nicht, wo man greifen muss.
+  if(markSel < 0 || markSel >= MARKS.length) return;
   const m = MARKS[markSel], R = markRect(m), L = markLabelBox(m);
   sctx.save();
   sctx.strokeStyle = "#2a6cff"; sctx.lineWidth = 1*RES; sctx.setLineDash([6*RES, 4*RES]);
@@ -1439,14 +1474,16 @@ function markDrag(p, d){
 }
 function markUp(d){
   if(d.t !== "markNew") return;
+  // ein Klick ohne Zug ist keine Markierung
   if(d.m.w < 6 || d.m.h < 6){
-    // ein Klick ohne Zug ist keine Markierung
     MARKS.pop(); markSel = MARKS.length - 1;
     syncMark(); renderMarkList(); render();
-    return;
   }
-  // Aufziehen ist ein Einmal-Modus: danach wieder schieben koennen, ohne umzuschalten
-  setTool("move");
+  /* Kein Rueckschalten auf Move. Der erste Versuch tat das und nahm damit das Zeichnen
+     weg: nach dem ersten Rahmen zog der naechste Zug den Screenshot. Das Werkzeug bleibt
+     stehen, bis man es umschaltet. Dass Markieren nichts blockiert, loesen die beiden
+     anderen Regeln: eine Markierung ist in jedem Werkzeug anfassbar, und ihre
+     Innenflaeche greift nicht, durch sie hindurch schiebt man weiter den Screenshot.  */
 }
 
 /* ---- Kontrast, damit ein Label nicht unlesbar rausgeht ---- */
