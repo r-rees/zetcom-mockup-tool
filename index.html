@@ -2753,28 +2753,34 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
    WERKBANK
    Fuer ein Werkzeug, das keine Zeilen zeigt, sondern eine
    Flaeche bearbeiten laesst. Ergaenzt 28.08.2026 fuers Device
-   Mockup Tool, am 29.08.2026 auf Robins Vorgabe umgebaut.
+   Mockup Tool, am 29.08.2026 zweimal auf Robins Vorgabe umgebaut.
 
-   Aufbau, drei Zonen und genau EINE Navigation:
+   Aufbau, zwei Zonen unter einer Kopfleiste:
      .z-app.z-app--werkbank
-       header.z-appbar        Marke, Reiter, Schritte, Abgabe
+       header.z-appbar        Marke links, Werkzeuge und Abgabe rechts
        .z-werkbank
-         nav.z-werkzeuge      die Werkzeuge, senkrecht links
-         .z-buehne            die Flaeche selbst
-         aside.z-panel        die Einstellungen des Reiters
+         aside.z-panel        links: Reiter oben, darunter die
+                              Einstellungen des Reiters
+         .z-buehne            rechts: die Flaeche selbst
 
-   Warum Reiter und nicht die Seitenleiste, entgegen der Regel in
-   werkzeug-ux.md: links steht schon eine Leiste, und die traegt
-   die Werkzeuge. Zwei senkrechte Leisten nebeneinander waeren
-   zwei Leisten, und die Regel verbietet vor allem das. Die
-   Reiterzeile bleibt deshalb bei HOECHSTENS VIER Zielen; alles
-   Weitere (Projekt, Hilfe) steht rechts in der Leiste und ist
-   kein Ort, sondern eine Handlung.
+   DIE EINSTELLUNGEN STEHEN LINKS, die Flaeche nimmt den ganzen
+   Rest. Das ist die Aufteilung, die jedes Zeichenprogramm zeigt,
+   und sie hat einen messbaren Grund: die Flaeche ist das, was
+   waechst, und sie waechst nach rechts unten. Ein Panel rechts
+   klemmt sie zwischen zwei Kanten.
 
-   Die Werkzeugleiste ist keine Navigation: sie schaltet nicht
-   den Ort um, sondern was ein Zug auf der Flaeche bedeutet.
-   Deshalb steht sie neben der Reiterzeile, ohne dass daraus zwei
-   Navigationen fuer dieselbe Ebene werden.
+   Genau EINE Navigation, und sie steht im Panel: die Reiterzeile
+   ueber den Einstellungen. Vier Ziele, mehr erlaubt die Regel in
+   werkzeug-ux.md nicht; alles Weitere (Projekt, Hilfe) steht
+   rechts in der Kopfleiste und ist kein Ort, sondern eine
+   Handlung.
+
+   Die Werkzeugleiste ist keine Navigation: sie schaltet nicht den
+   Ort um, sondern was ein Zug auf der Flaeche bedeutet. Deshalb
+   darf sie in der Kopfleiste neben der Abgabe stehen, ohne dass
+   daraus zwei Navigationen fuer dieselbe Ebene werden. Sie liegt
+   dort, wo die Hand ohnehin hinfaehrt: ueber der Flaeche, nicht
+   an ihrem Rand.
    ============================================================ */
 
 .z-app--werkbank {
@@ -2789,36 +2795,29 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
 }
 .z-werkbank {
   display: grid;
-  grid-template-columns: var(--ui-rail-breite) minmax(0, 1fr) var(--ui-panel-breite);
+  grid-template-columns: var(--ui-panel-breite) minmax(0, 1fr);
   min-height: 0;
 }
-/* Reiter in der Kopfleiste, nicht als eigene Zeile darunter: das
-   spart 40px Hoehe, die auf einer Zeichenflaeche fehlen. Sie
-   bringen dort weder Rand noch Grund mit, beides hat schon die
-   Leiste. */
-.z-appbar .z-tabs {
-  padding: 0;
-  border-bottom: 0;
-  background: none;
-  gap: var(--space-component-xs);
-}
-.z-appbar .z-tab { padding: var(--space-component-xxs) 0; align-self: stretch; }
-.z-appbar .z-rechts { margin-left: auto; display: flex; align-items: center; gap: var(--space-component-xxs); }
+.z-appbar .z-rechts { display: flex; align-items: center; gap: var(--space-component-xxs); }
 .z-appbar .z-rechts > * { flex: none; }
 
 /* Die Werkzeuge. Wort statt Glyphe, und das ist eine Entscheidung
    und kein Notbehelf: der zetcom-Iconsatz kennt weder Zeiger noch
    Hand noch Radierer, freihaendig dazuzeichnen ist verboten, und
    ein Wort muss niemand lernen. Wer das Werkzeug taeglich nutzt,
-   greift ohnehin zur Taste, die im Titel steht. */
-.z-werkzeuge {
+   greift ohnehin zur Taste, die im Titel steht.
+
+   In der Kopfleiste liegen sie waagerecht und ruecken mit der
+   Abgabe nach rechts zusammen: erst was ein Zug bedeutet, dann
+   Rueckgaengig, dann der Stand, dann Download. Eine Reihenfolge,
+   die dem Arbeitsgang folgt. */
+.z-appbar .z-werkzeuge {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-component-xxs) 6px;
-  border-right: var(--border-width) solid var(--border-subtle);
-  overflow-y: auto;
-  min-height: 0;
+  align-items: stretch;
+  gap: var(--space-component-xxs);
+  margin-left: auto;
+  padding: 0;
+  border: 0;
 }
 .z-werkzeuge button {
   font-family: var(--font-sans);
@@ -2832,13 +2831,14 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   padding: var(--space-component-xxs);
   min-height: 34px;
 }
+.z-appbar .z-werkzeuge button { padding: var(--space-component-xxs) var(--space-component-xs); }
 .z-werkzeuge button:hover { color: var(--text-strong); background: var(--surface-sunken); }
 .z-werkzeuge button[aria-pressed="true"] {
   color: var(--text-strong);
   font-weight: var(--weight-semibold);
   border-left-color: var(--accent);
 }
-/* Einstellung, die zu genau einem Werkzeug gehoert, steht unter
+/* Einstellung, die zu genau einem Werkzeug gehoert, steht neben
    ihm und nicht in einem fernen Panel. Das ist die Werkzeugoption,
    wie sie jedes Zeichenprogramm zeigt. */
 .z-werkzeuge .z-option { padding: var(--space-component-xxs) var(--space-component-xxs) 0; }
@@ -2848,13 +2848,38 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   color: var(--text-muted);
   margin-bottom: 4px;
 }
+.z-appbar .z-werkzeuge .z-option {
+  align-items: center;
+  gap: var(--space-component-xxs);
+  padding: 0 0 0 var(--space-component-xxs);
+}
+.z-appbar .z-werkzeuge .z-option.show { display: flex; }
+.z-appbar .z-werkzeuge .z-option label { margin-bottom: 0; white-space: nowrap; }
+.z-appbar .z-werkzeuge .z-option .z-regler { width: 96px; }
 
 .z-panel {
   min-height: 0;
   overflow-y: auto;
-  border-left: var(--border-width) solid var(--border-subtle);
-  padding: var(--space-component-xs) var(--space-component-s) var(--space-component-m);
+  border-right: var(--border-width) solid var(--border-subtle);
+  padding: 0 var(--space-component-s) var(--space-component-m);
 }
+/* Die Reiterzeile bleibt stehen, waehrend die Einstellungen unter
+   ihr scrollen. Sonst verliert man auf einem langen Panel den
+   Absender des Inhalts. */
+.z-panel > .z-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 calc(var(--space-component-s) * -1) var(--space-component-xs);
+  /* Links buendig mit dem Inhalt darunter, rechts offen: vier Reiter
+     plus ihre Zahlen brauchen jeden Punkt der 300px. Der kleine
+     Abstand und das Umbrechen sind die Reserve, damit ein Reiter
+     nie abgeschnitten wird, wenn die Zahlen dazukommen. */
+  padding: 0 0 0 var(--space-component-s);
+  gap: 0 var(--space-component-xxs);
+  flex-wrap: wrap;
+}
+.z-panel > .z-tabs .z-tab { padding: var(--space-component-xxs) 4px; }
 .z-panel > h2 {
   font-size: var(--doc-h4);
   font-weight: var(--weight-semibold);
@@ -3133,11 +3158,15 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   <header class="z-appbar">
     <img class="z-logo z-logo--pfeil" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTA0IiBoZWlnaHQ9IjUwNCIgdmlld0JveD0iMCAwIDUwNCA1MDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQo8cmVjdCB4PSIyMDEuNjAyIiB5PSIxMDAuOCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyMDEuNjAyIDEwMC44KSIgZmlsbD0iI0QxMzNDMyI+PC9yZWN0Pg0KPHJlY3QgeD0iMzAyLjQwMiIgeT0iMTAwLjgiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMzAyLjQwMiAxMDAuOCkiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjQwMy4xOTkiIHk9IjEwMC44IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDQwMy4xOTkgMTAwLjgpIiBmaWxsPSIjRkY1OTAwIj48L3JlY3Q+DQo8cmVjdCB4PSIzMDIuNDAyIiB5PSIyMDEuNiIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAzMDIuNDAyIDIwMS42KSIgZmlsbD0iIzY0MzJDOSI+PC9yZWN0Pg0KPHJlY3QgeD0iNDAzLjE5OSIgeT0iMjAxLjYiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgNDAzLjE5OSAyMDEuNikiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjIwMS42MDIiIHk9IjMwMi40IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDIwMS42MDIgMzAyLjQpIiBmaWxsPSIjRjVCNDAwIj48L3JlY3Q+DQo8cmVjdCB4PSI0MDMuMTk5IiB5PSIzMDIuNCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCA0MDMuMTk5IDMwMi40KSIgZmlsbD0iIzJBOTFGRiI+PC9yZWN0Pg0KPC9zdmc+" alt="zetcom">
 
-    <nav class="z-tabs" role="tablist" aria-label="Sections">
-      <button class="z-tab" role="tab" data-bereich="geraet" aria-selected="true">Device <span class="z-zahl" id="devCount"></span></button>
-      <button class="z-tab" role="tab" data-bereich="markierung" aria-selected="false">Callouts <span class="z-zahl" id="markCount"></span></button>
-      <button class="z-tab" role="tab" data-bereich="overlay" aria-selected="false">Overlays <span class="z-zahl" id="ovCount"></span></button>
-      <button class="z-tab" role="tab" data-bereich="ausgabe" aria-selected="false">Output</button>
+    <nav class="z-werkzeuge" aria-label="Tools">
+      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)">Select</button>
+      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)">Erase</button>
+      <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)">Callout</button>
+      <button class="toolbtn" data-tool="hand"  aria-pressed="false" title="Move the view. Holding the space bar does the same in any tool (H)">Pan</button>
+      <div class="z-option hideable" id="brushOption">
+        <label for="brush" id="brushLabel">Brush 40 px</label>
+        <input type="range" class="z-regler" id="brush" min="4" max="200" value="40">
+      </div>
     </nav>
 
     <span class="z-rechts">
@@ -3158,38 +3187,14 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
 
   <div class="z-werkbank">
 
-    <nav class="z-werkzeuge" aria-label="Tools">
-      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)">Select</button>
-      <button class="toolbtn" data-tool="hand"  aria-pressed="false" title="Move the view. Holding the space bar does the same in any tool (H)">Pan</button>
-      <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)">Callout</button>
-      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)">Erase</button>
-      <div class="z-option hideable" id="brushOption">
-        <label for="brush" id="brushLabel">Brush 40 px</label>
-        <input type="range" class="z-regler" id="brush" min="4" max="200" value="40">
-      </div>
-    </nav>
-
-    <div class="z-buehne" id="buehne" data-werkzeug="move">
-      <div id="stageWrap"><canvas id="view"></canvas><canvas id="sel"></canvas></div>
-      <div id="ablage">
-        <div>
-          <p><strong>Drop a screenshot here.</strong></p>
-          <p class="z-meta">Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.</p>
-        </div>
-      </div>
-      <div class="zoomfeld" role="group" aria-label="View zoom">
-        <button class="z-btn z-btn--text z-btn--glyph" id="zoomAus" title="Zoom out (Ctrl and minus)" aria-label="Zoom out">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" aria-hidden="true"><path d="M5 12 H19"/></svg>
-        </button>
-        <span class="wert" id="zoomWert">100 %</span>
-        <button class="z-btn z-btn--text z-btn--glyph" id="zoomEin" title="Zoom in (Ctrl and plus)" aria-label="Zoom in">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" aria-hidden="true"><path d="M12 5 V19"/><path d="M5 12 H19"/></svg>
-        </button>
-        <button class="z-btn z-btn--text" id="zoomFit" title="Show the whole output area (key 0)">Fit</button>
-      </div>
-    </div>
-
     <aside class="z-panel" id="panel">
+
+        <nav class="z-tabs" role="tablist" aria-label="Sections">
+          <button class="z-tab" role="tab" data-bereich="geraet" aria-selected="true">Device <span class="z-zahl" id="devCount"></span></button>
+          <button class="z-tab" role="tab" data-bereich="markierung" aria-selected="false">Callouts <span class="z-zahl" id="markCount"></span></button>
+          <button class="z-tab" role="tab" data-bereich="overlay" aria-selected="false">Overlays <span class="z-zahl" id="ovCount"></span></button>
+          <button class="z-tab" role="tab" data-bereich="ausgabe" aria-selected="false">Output</button>
+        </nav>
 
         <!-- ============ DEVICE ============ -->
         <section data-bereich="geraet" class="aktiv">
@@ -3621,6 +3626,26 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         </section>
 
       </aside>
+
+    <div class="z-buehne" id="buehne" data-werkzeug="move">
+      <div id="stageWrap"><canvas id="view"></canvas><canvas id="sel"></canvas></div>
+      <div id="ablage">
+        <div>
+          <p><strong>Drop a screenshot here.</strong></p>
+          <p class="z-meta">Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.</p>
+        </div>
+      </div>
+      <div class="zoomfeld" role="group" aria-label="View zoom">
+        <button class="z-btn z-btn--text z-btn--glyph" id="zoomAus" title="Zoom out (Ctrl and minus)" aria-label="Zoom out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" aria-hidden="true"><path d="M5 12 H19"/></svg>
+        </button>
+        <span class="wert" id="zoomWert">100 %</span>
+        <button class="z-btn z-btn--text z-btn--glyph" id="zoomEin" title="Zoom in (Ctrl and plus)" aria-label="Zoom in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" aria-hidden="true"><path d="M12 5 V19"/><path d="M5 12 H19"/></svg>
+        </button>
+        <button class="z-btn z-btn--text" id="zoomFit" title="Show the whole output area (key 0)">Fit</button>
+      </div>
+    </div>
 
     </div>
   </div>
