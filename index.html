@@ -45,6 +45,8 @@
   .selbtn{flex:1;padding:7px 0;border:1px solid var(--ink-100);background:var(--gray);font-family:inherit;
     font-size:12px;cursor:pointer;border-radius:8px;color:#000;}
   .selbtn.sel{background:#000;color:#fff;border-color:#000;}
+  /* Empfehlung wird umrahmt, nicht gesetzt: der Knopf bleibt waehlbar, die Wahl bleibt beim Nutzer */
+  .selbtn.tipp{outline:2px solid #ff5900;outline-offset:2px;}
   /* Ausrichten: schmale Knopfreihen, damit fuenf Ziele nebeneinander in die 320px-Leiste passen */
   .alnrow{display:flex;gap:5px;margin-top:6px;}
   button.aln{flex:1;min-width:0;padding:7px 0;border:1px solid var(--ink-100);background:var(--gray);
@@ -69,13 +71,6 @@
   #view{display:block;width:100%;height:100%;cursor:grab;}
   #view:active{cursor:grabbing;}
   #view.markmode,#view.markmode:active{cursor:crosshair;}
-  .sizes{width:100%;border-collapse:collapse;font-size:11px;}
-  .sizes tr{cursor:pointer;border-bottom:1px solid var(--ink-100);}
-  .sizes tr:hover{background:var(--gray);}
-  .sizes td{padding:4px 4px 4px 0;color:#000;vertical-align:top;}
-  .sizes td.g{color:var(--ink-500);text-transform:uppercase;letter-spacing:.06em;font-size:10px;white-space:nowrap;}
-  .sizes td.n{white-space:nowrap;font-variant-numeric:tabular-nums;}
-  .sizes td.f{color:var(--ink-500);white-space:nowrap;}
   .minor[disabled]{opacity:.45;cursor:default;}
   .zlabel.warn{color:#b40000;}
   /* --- accordion sidebar --- */
@@ -130,6 +125,11 @@
             <button class="selbtn devicebtn" data-device="phone">Phone</button>
             <button class="selbtn devicebtn" data-device="window">Window</button>
             <button class="selbtn devicebtn" data-device="browser" title="Nur der Screenshot mit Browserleiste, ohne Geräterahmen. Schatten über Frame: Shadow">Browser</button>
+          </div>
+          <div class="hideable" id="fitFrameRow" style="margin-top:10px">
+            <label class="toggle"><input type="checkbox" id="fitFrame"> Fenstergroesse an den Screenshot anpassen</label>
+            <div class="zlabel" id="fitFrameHint">Das Fenster nimmt das Seitenverhaeltnis des Screenshots an,
+            statt ihn zu beschneiden. Nur fuer Window und Browser, ein Geraetebildschirm hat ein echtes Mass.</div>
           </div>
           <div class="zlabel">Browser = kein Geräterahmen: der Screenshot selbst mit Browserleiste, kantigen Ecken (CD-Radius 0) und (über Frame &gt; Shadow) weichem Schatten. Tilt left/right neigen ganz leicht, ohne dass die Flächigkeit auffällt.</div></div>
 
@@ -470,18 +470,18 @@
           </div></div>
 
         <div class="field"><label>Output size</label>
-          <select id="size">
-            <option value="1000,1000">1:1 — sticky_scroll (1000×1000)</option>
-            <option value="1200,800" selected>3:2 — image_text (1200×800)</option>
-            <option value="1280,720">16:9 — benefits_slider (1280×720)</option>
-            <option value="1536,1024">3:2 — frame native (1536×1024)</option>
-            <option value="free">Free (custom W × H)</option>
-          </select>
+          <select id="size"></select>
           <div class="row free" id="freeRow">
             <input type="number" id="freeW" value="1200" min="200" max="4000" step="10">
             <span style="color:var(--ink-300)">×</span>
             <input type="number" id="freeH" value="800" min="200" max="4000" step="10">
-          </div></div>
+          </div>
+          <div class="zlabel" id="freeHint"></div>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="selbtn scalebtn" data-scale="1" title="Die Datei hat genau das Ausgabemass">@1x</button>
+            <button class="selbtn scalebtn sel" data-scale="2" title="Doppelte Kantenlaenge, fuer Retina und zum spaeteren Verkleinern">@2x</button>
+          </div>
+          <div class="zlabel" id="exportDim">Export: …</div></div>
 
         <div class="field"><label>Export</label>
           <input type="text" id="exportName" placeholder="filename (empty = automatic)">
@@ -490,23 +490,20 @@
             <button class="selbtn fmtbtn" data-fmt="webp">WebP</button>
             <button class="selbtn fmtbtn" data-fmt="jpeg">JPEG</button>
           </div>
+          <div class="zlabel" id="fmtTipp"></div>
           <div class="hideable" id="qualityRow">
             <input type="range" id="quality" min="50" max="100" value="90" style="margin-top:10px">
             <div class="zlabel" id="qualityLabel">Quality: 90%</div>
             <div class="zlabel">JPEG has no transparency — transparent canvas exports on white</div>
           </div>
-          <div class="zlabel" id="sizePreview" style="margin-top:6px">File size: …</div></div>
+          <div class="zlabel" id="sizePreview" style="margin-top:6px">Dateigroesse: …</div>
+          <div class="zlabel" id="sizeTipp"></div></div>
 
         <div class="field"><label>Zielort</label>
           <label class="toggle"><input type="checkbox" id="askPath" checked> Ordner und Dateinamen abfragen</label>
           <div class="zlabel" id="askPathHint">Ohne Haekchen landet die Datei im Download-Ordner.</div></div>
 
-        <div class="field"><label>Empfohlene Groessen</label>
-          <div class="zlabel" style="margin-bottom:6px">Eine Zeile anklicken setzt das Ausgabemass.
-          Die Maße stammen aus den Vault-Standards, die KB-Angaben sind Richtwerte.</div>
-          <table class="sizes" id="sizeTable"></table></div>
-
-        <button class="btn" id="export">Download @2x</button>
+        <button class="btn" id="export">Download</button>
       </div>
     </details>
 
@@ -519,8 +516,11 @@
     rectangle, or align the labels to one another. Label fill, label outline and connector line each carry their own colour,
     coupled to the rectangle colour until you set one by hand; the fill can be switched off so the label is outline only. Projekt saves the whole working state, screenshots included, as a .zdm.json you can reload later.
     The screenshot is projected into the tilted screen automatically.
-    Preview and export run through the same canvas at 2×, so the download matches the preview exactly.
-    Transparent exports the chosen canvas size with alpha. Several devices export together on one canvas.</p>
+    Preview and export run through the same canvas, so the download matches the preview exactly; @1x delivers the
+    output size itself, @2x doubles it. Window and Browser can take the screenshot's own aspect ratio instead of
+    cropping it, and the output size can follow the content, in which case the export is cropped to whatever is
+    actually drawn (the dashed line shows where).
+    Transparent exports with alpha. Several devices export together on one canvas.</p>
   </div>
 
   <div class="work">
@@ -597,17 +597,17 @@ const WIN_SHADOW = [[0,36,.14],[22,66,.22]];   // [offsetY, blur, alpha] — amb
 const WIN_REACH = WIN_SHADOW.reduce((r, [dy, blur]) => ({
   x: Math.max(r.x, blur*1.2), top: Math.max(r.top, (blur-dy)*1.2), bottom: Math.max(r.bottom, (blur+dy)*1.2)
 }), {x:0, top:0, bottom:0});
-function winCanvas(){
+function winCanvas(w, h){
   const c = document.createElement("canvas");
-  c.width = WIN_FW; c.height = WIN_FH;
+  c.width = w || WIN_FW; c.height = h || WIN_FH;
   // the render pipeline reads frames as <img>; a canvas needs these three to walk the same path
-  c.naturalWidth = WIN_FW; c.naturalHeight = WIN_FH; c.complete = true;
+  c.naturalWidth = c.width; c.naturalHeight = c.height; c.complete = true;
   return c;
 }
 /* the far edge keeps its vertical centre and loses height — that is exactly the projection of a
    flat plane turned about its vertical axis, so the homography does the foreshortening itself. */
-function winQuad(v){
-  const R = WIN_RECT, yc = R.y + R.h/2, near = R.h/2, far = R.h*(1 - WIN_TILT)/2;
+function winQuad(v, rect){
+  const R = rect || WIN_RECT, yc = R.y + R.h/2, near = R.h/2, far = R.h*(1 - WIN_TILT)/2;
   const x1 = R.x, x2 = R.x + R.w;
   if(v === "left")  return [[x1, yc-far], [x2, yc-near], [x2, yc+near], [x1, yc+far]];
   if(v === "right") return [[x1, yc-near], [x2, yc-far], [x2, yc+far], [x1, yc+near]];
@@ -636,18 +636,18 @@ function winPath(c, q, inset){
   }
   c.closePath();
 }
-function winFrame(q, withShadow){
+function winFrame(q, withShadow, cw, ch){
   const xs = q.map(p=>p[0]), ys = q.map(p=>p[1]);
   const bb = {x:Math.min(...xs), y:Math.min(...ys),
               w:Math.max(...xs)-Math.min(...xs), h:Math.max(...ys)-Math.min(...ys)};
-  const top = winCanvas(), tx = top.getContext("2d");
+  const top = winCanvas(cw, ch), tx = top.getContext("2d");
   winPath(tx, q, 1); tx.strokeStyle = "rgba(0,0,0,.14)"; tx.lineWidth = 2; tx.stroke();
-  const sil = winCanvas(), sx = sil.getContext("2d");
+  const sil = winCanvas(cw, ch), sx = sil.getContext("2d");
   winPath(sx, q, 0); sx.fillStyle = "#ffffff"; sx.fill();
   const slot = {img:top, sil, bb};
   if(withShadow){
     // ambient + key pass, then the interior is punched out so the shadow never darkens the screenshot
-    const back = winCanvas(), bx = back.getContext("2d");
+    const back = winCanvas(cw, ch), bx = back.getContext("2d");
     WIN_SHADOW.forEach(([dy, blur, a]) => {
       bx.save();
       bx.shadowColor = `rgba(0,0,0,${a})`; bx.shadowBlur = blur; bx.shadowOffsetY = dy;
@@ -669,6 +669,112 @@ for(const v of ["front","left","right"]){
 }
 const DEVICES = { desktop: VIEWS, laptop: LAPTOP, phone: PHONE, window: WINDOW, browser: BROWSER };
 
+/* ---------------- Fenstergroesse an den Screenshot (seit 28.08.2026) ----------------
+   Window und Browser rahmen Inhalt, sie bilden kein Geraet nach: ihr Seitenverhaeltnis
+   ist eine Setzung, keine Bauform. Passt sie nicht zum Screenshot, wird beschnitten
+   (Fill) oder es bleiben Balken (Fit). Mit dem Haken folgt der Rahmen dem Bild.
+   Desktop, Laptop und Phone bleiben aussen vor, ihr Bildschirm hat ein echtes Mass.
+
+   Beide Rahmen tragen dasselbe Grundverhaeltnis, deshalb genuegt eine Zahl: der Faktor
+   auf die Hoehe ist WIN_BASIS geteilt durch das Zielverhaeltnis.                      */
+const WIN_BASIS = 1675/997;   // Screenquad des Window-PNG (front), zugleich das des Browsers
+const WIN_BAND = 60;          // px im Rahmenbild, die oben und unten unveraendert stehen bleiben
+const winZiel = r => clamp(WIN_BASIS / r, 0.22, 4.5);
+
+/* Der Browser ist im Code gezeichnet: ein anderes Rechteck genuegt, alles andere
+   (Tilt, Schatten, Silhouette, Haarlinie) faellt aus den bestehenden Funktionen.     */
+function browserSlot(view, frame, ratio){
+  const h = WIN_RECT.w / ratio;
+  const rect = {x:WIN_RECT.x, y:WIN_RECT.y, w:WIN_RECT.w, h};
+  const ch = Math.round(h + WIN_RECT.y*2);
+  const q = winQuad(view, rect);
+  const slot = winFrame(q, frame === "shadow", WIN_FW, ch);
+  slot.quad = q;
+  return slot;
+}
+
+/* Das Window ist Robins PNG und wird nicht gezerrt: der Glasrand ist rund 20 px breit,
+   die Ecken sind gerundet, ein Zerren nimmt beides sichtbar mit. Stattdessen wird
+   SPALTENWEISE dreigeteilt. Oben und unten bleibt ein Band von WIN_BAND in Originalhoehe
+   stehen, das traegt Rand, Eckenrundung und Schatten; nur das Stueck dazwischen wird
+   gedehnt oder gestaucht, und das ist gerader Rand, dem man es nicht ansieht.
+
+   Spaltenweise, weil die Kanten der getilteten Ansichten schraeg laufen: ein waagerechter
+   Schnitt wuerde sie durchtrennen. Je Spalte sind Ober- und Unterkante genau ein Punkt.
+
+   Gedehnt wird um die HORIZONTLINIE, nicht um die Bildkante. Bei einer Drehung um die
+   senkrechte Achse skaliert die projizierte Hoehe exakt linear um diese Linie, und die
+   Linie liegt fuer jede Spalte gleich (Mittel aus Ober- und Unterkante). Damit ist die
+   Streckung geometrisch richtig und nicht nur ungefaehr: das Ergebnis ist dieselbe
+   Scheibe in derselben Drehung, nur hoeher oder flacher.                              */
+function kanteY(q, a, b, x){
+  const [x0,y0] = q[a], [x1,y1] = q[b];
+  if(Math.abs(x1 - x0) < 1e-6) return (y0 + y1)/2;
+  return y0 + (y1 - y0)*(x - x0)/(x1 - x0);
+}
+function bandStrecken(src, q, s, off, H2){
+  const W = src.naturalWidth || src.width, H = src.naturalHeight || src.height;
+  const y0 = ((q[0][1] + q[3][1])/2 + (q[1][1] + q[2][1])/2)/2;
+  const out = winCanvas(W, H2), cx = out.getContext("2d");
+  cx.imageSmoothingQuality = "high";
+  for(let x = 0; x < W; x++){
+    const t = kanteY(q, 0, 1, x), b = kanteY(q, 3, 2, x);
+    const nt = y0 + (t - y0)*s, nb = y0 + (b - y0)*s;
+    const kt = Math.min(Math.max(t + WIN_BAND, 1), H);      // Ende des oberen Bandes
+    const kb = Math.max(Math.min(b - WIN_BAND, H - 1), 0);   // Anfang des unteren Bandes
+    cx.drawImage(src, x, 0, 1, kt, x, off + nt - t, 1, kt);
+    cx.drawImage(src, x, kb, 1, H - kb, x, off + kb + nb - b, 1, H - kb);
+    const mh = kb - kt, nmh = (nb - WIN_BAND) - (nt + WIN_BAND);
+    if(mh > 0 && nmh > 0) cx.drawImage(src, x, kt, 1, mh, x, off + nt + WIN_BAND, 1, nmh);
+  }
+  return out;
+}
+function windowSlot(view, frame, ratio){
+  const V = DEVICES.window[view], slot = V[frame], q = V.quad, s = winZiel(ratio);
+  const H = slot.img.naturalHeight;
+  const y0 = ((q[0][1] + q[3][1])/2 + (q[1][1] + q[2][1])/2)/2;
+  const neu = y => y0 + (y - y0)*s;
+  /* Wie weit oben und unten Platz gebraucht wird: die Baender wandern mit ihrer Kante,
+     also verschiebt sich Bildoberkante um (neu(t)-t) und Unterkante um (neu(b)-b). Die
+     Extremwerte stehen an den Quad-Ecken, dazwischen laeuft alles linear.              */
+  const dTop = Math.min(neu(q[0][1]) - q[0][1], neu(q[1][1]) - q[1][1]);
+  const dBot = Math.max(neu(q[3][1]) - q[3][1], neu(q[2][1]) - q[2][1]);
+  const off = Math.ceil(Math.max(0, -dTop));
+  const H2 = Math.ceil(H + off + Math.max(0, dBot));
+  const out = {img: bandStrecken(slot.img, q, s, off, H2)};
+  if(slot.sil)  out.sil  = bandStrecken(slot.sil, q, s, off, H2);
+  if(slot.back) out.back = bandStrecken(slot.back, q, s, off, H2);
+  out.quad = q.map(([x,y]) => [x, neu(y) + off]);
+  out.bb = frameBBox(out.img);
+  return out;
+}
+/* Cache je Geraet, Ansicht, Rahmen und Verhaeltnis. Ein Neubau kostet einen vollen
+   Bilddurchlauf, das darf nicht in jedem Renderdurchgang passieren.                   */
+const ADAPT = new Map();
+function adaptSlot(dev, view, frame, ratio){
+  const r = Math.round(ratio*1000)/1000;
+  const key = dev + "|" + view + "|" + frame + "|" + r;
+  if(!ADAPT.has(key)){
+    if(ADAPT.size > 24) ADAPT.clear();
+    ADAPT.set(key, dev === "browser" ? browserSlot(view, frame, r) : windowSlot(view, frame, r));
+  }
+  return ADAPT.get(key);
+}
+const KANN_ANPASSEN = d => d === "window" || d === "browser";
+/* Das Verhaeltnis kommt aus dem Screenshot, sonst gibt es nichts anzupassen. */
+function adaptRatio(i){
+  if(!i.fitFrame || !KANN_ANPASSEN(i.device) || !i.img || !i.w || !i.h) return 0;
+  return i.w / i.h;
+}
+/* Einziger Ort, an dem ein Rahmen nachgeschlagen wird: statisch aus DEVICES oder
+   angepasst aus dem Cache. Quad, bb, Silhouette und Hintergrund kommen mit.          */
+function frameSlot(i){
+  const r = adaptRatio(i);
+  if(r) return adaptSlot(i.device, i.view, i.frame, r);
+  const V = DEVICES[i.device][i.view], slot = V[i.frame];
+  return {img:slot.img, bb:slot.bb, sil:slot.sil, back:slot.back, quad:V.quad};
+}
+
 const RES = 2;        // internal render = export scale
 const OUTSET = 3;     // px (frame space) content extends under the bezel edge
 const ALPHA_MIN = 8;   // alpha threshold for the frame's opaque bounding box
@@ -688,7 +794,7 @@ const state = {
   bgMode:"transparent", bgColor:"#f7f7f7",
   ratio:"1200,800", freeW:1200, freeH:800,
   tool:"move", brush:40,
-  exportName:"", exportFormat:"png", exportQuality:0.9
+  exportName:"", exportFormat:"png", exportQuality:0.9, exportScale:2
 };
 
 let idc = 0;
@@ -696,6 +802,7 @@ function mkInst(over){
   const i = {
     id:++idc,
     device:"desktop", view:"front", frame:"shadow",
+    fitFrame:false,          // Fenstergroesse folgt dem Screenshot (nur Window und Browser)
     devScale:0.8, devX:0, devY:0, sizeMode:"80",
     url:"collectionshub.com", screenBg:"#ffffff", chromeAccent:"#f2f2f2", chromeOn:false,
     fitMode:"fill", ix:0, iy:0, is:1,       // screenshot pan/zoom in content px
@@ -714,11 +821,13 @@ function lum(hex){
   return (0.2126*((n>>16)&255) + 0.7152*((n>>8)&255) + 0.0722*(n&255))/255;
 }
 const validHex = v => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v);
-function frameImg(i){ return DEVICES[i.device][i.view][i.frame].img; }
+function frameImg(i){ return frameSlot(i).img; }
 
 /* ---------------- layout ---------------- */
+/* "content" hat kein eigenes Mass: der Zuschnitt entsteht erst beim Export, gearbeitet
+   wird weiter auf einer richtigen Flaeche. Die steht in freeW/freeH wie bei "free".   */
 function stageSize(){
-  if(state.ratio === "free") return [state.freeW, state.freeH];
+  if(state.ratio === "free" || state.ratio === "content") return [state.freeW, state.freeH];
   return state.ratio.split(",").map(Number);
 }
 function outsetQuad(q){
@@ -730,14 +839,14 @@ function outsetQuad(q){
   });
 }
 function layout(i){
-  const V = DEVICES[i.device][i.view], img = frameImg(i);
+  const S = frameSlot(i), img = S.img;
   const [W,H] = stageSize();
   const fw = img.naturalWidth, fh = img.naturalHeight;
-  const bb = V[i.frame].bb || {x:0, y:0, w:fw, h:fh};
+  const bb = S.bb || {x:0, y:0, w:fw, h:fh};
   const gs = Math.min(W/bb.w, H/bb.h) * i.devScale;   // frame px -> output px, 1.0 = bbox fills canvas
   const ox = W/2 - (bb.x + bb.w/2)*gs + i.devX;
   const oy = H/2 - (bb.y + bb.h/2)*gs + i.devY;
-  const Q = outsetQuad(V.quad).map(([x,y]) => [(ox + x*gs)*RES, (oy + y*gs)*RES]);
+  const Q = outsetQuad(S.quad).map(([x,y]) => [(ox + x*gs)*RES, (oy + y*gs)*RES]);
   const xs = Q.map(p=>p[0]), ys = Q.map(p=>p[1]);
   const bbox = {
     x: Math.floor(Math.min(...xs)) - 2, y: Math.floor(Math.min(...ys)) - 2,
@@ -747,7 +856,7 @@ function layout(i){
   const cw = clamp(Math.round(Math.max(dist(Q[0],Q[1]), dist(Q[3],Q[2]))), 64, 4096);
   const chh = clamp(Math.round(Math.max(dist(Q[0],Q[3]), dist(Q[1],Q[2]))), 64, 4096);
   const Hinv = computeH(Q, [[0,0],[cw,0],[cw,chh],[0,chh]]);   // canvas px -> content px
-  return {W, H, V, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv, bb};
+  return {W, H, S, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv, bb};
 }
 function chromeH(L, i){ return i.chromeOn ? Math.round(L.chh * 0.062) : 0; }
 function effRect(L, i){ const ch = chromeH(L, i); return {x:0, y:ch, w:L.cw, h:L.chh - ch}; }
@@ -900,7 +1009,7 @@ function drawInstance(i){
   i.L = L;
   drawContent(L, i);
   warp(L);
-  const slot = DEVICES[i.device][i.view][i.frame];
+  const slot = L.S;
   if(slot.back){
     // baked backdrop (browser window): the drop shadow lives behind the content
     vctx.imageSmoothingQuality = "high";
@@ -948,6 +1057,17 @@ function render(){
 /* selection outline lives on its own overlay canvas so it never lands in the export */
 function drawSelection(){
   sctx.clearRect(0, 0, sel.width, sel.height);
+  /* Beim Zuschnitt auf den Inhalt bleibt die Arbeitsflaeche stehen und nur der Export
+     wird beschnitten. Ohne sichtbare Linie waere das ein unsichtbarer Zustand.       */
+  if(state.ratio === "content"){
+    const r = inhaltsRahmen();
+    if(r){
+      sctx.save();
+      sctx.strokeStyle = "#ff5900"; sctx.lineWidth = 2*RES; sctx.setLineDash([12*RES, 8*RES]);
+      sctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+      sctx.restore();
+    }
+  }
   drawMarkHandles();
   if(insts.length < 2 || !act.L) return;
   const L = act.L, bb = L.bb;
@@ -1003,6 +1123,7 @@ function updateBtns(){
   document.querySelectorAll(".sizebtn").forEach(b => b.classList.toggle("sel", b.dataset.size === act.sizeMode));
   document.querySelectorAll(".toolbtn").forEach(b => b.classList.toggle("sel", b.dataset.tool === state.tool));
   document.querySelectorAll(".fmtbtn").forEach(b => b.classList.toggle("sel", b.dataset.fmt === state.exportFormat));
+  document.querySelectorAll(".scalebtn").forEach(b => b.classList.toggle("sel", +b.dataset.scale === state.exportScale));
 }
 
 /* ---------------- device manager ---------------- */
@@ -1035,6 +1156,16 @@ function setActive(i){ act = i; syncControls(); render(); }
 function syncControls(){
   // reflect the active device's own settings back into the sidebar controls
   $("#viewField").style.display = DEVICES[act.device].left ? "" : "none";
+  $("#fitFrameRow").classList.toggle("show", KANN_ANPASSEN(act.device));
+  $("#fitFrame").checked = !!act.fitFrame;
+  if(KANN_ANPASSEN(act.device)){
+    $("#fitFrameHint").textContent = !act.fitFrame
+      ? "Das Fenster nimmt das Seitenverhaeltnis des Screenshots an, statt ihn zu beschneiden."
+      : act.img
+        ? "Angepasst an " + act.w + "×" + act.h + " (" + (act.w/act.h).toFixed(2).replace(".", ",")
+          + " zu 1). Ohne Haken sind es 1,68 zu 1."
+        : "Kein Screenshot geladen, das Fenster bleibt bei 1,68 zu 1.";
+  }
   $("#url").value = act.url;
   $("#chromeToggle").checked = act.chromeOn;
   $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
@@ -1065,8 +1196,8 @@ function arrangeDevices(){
   const n = insts.length; if(!n) return;
   const [W,H] = stageSize();
   const widths = insts.map(i => {
-    const V = DEVICES[i.device][i.view], img = frameImg(i);
-    const bb = V[i.frame].bb || {w:img.naturalWidth, h:img.naturalHeight};
+    const S = frameSlot(i);
+    const bb = S.bb || {w:S.img.naturalWidth, h:S.img.naturalHeight};
     const gs = Math.min(W/bb.w, H/bb.h) * i.devScale;
     return bb.w * gs;
   });
@@ -1094,7 +1225,9 @@ function loadScreenshot(f, i){
     i.edit.width = i.w; i.edit.height = i.h;
     i.edit.getContext("2d").drawImage(im, 0, 0);
     i.undo.length = 0;
-    i.fitMode = "fill"; render();
+    i.fitMode = "fill";
+    if(i === act) syncControls();   // der Hinweis zur Fensteranpassung nennt das neue Mass
+    render();
   };
   im.src = URL.createObjectURL(f);
 }
@@ -1259,10 +1392,28 @@ $("#zoom").addEventListener("input", e => {
 });
 $("#size").addEventListener("change", e => {
   snap("ratio");
+  const vorher = stageSize();
   state.ratio = e.target.value;
-  $("#freeRow").classList.toggle("show", state.ratio === "free");
+  /* Beim Wechsel auf ein Mass nach Mass die bisherige Flaeche uebernehmen, sonst
+     springt die Canvas auf einen alten Wert und die Anordnung verrutscht.            */
+  if(state.ratio === "free" || state.ratio === "content"){
+    state.freeW = Math.round(vorher[0]); state.freeH = Math.round(vorher[1]);
+    $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  }
+  syncGroesse();
   render();
 });
+/* Die Freimass-Zeile und ihr Hinweis haengen an derselben Entscheidung, deshalb an
+   einer Stelle. Bei "An den Inhalt anpassen" ist das Freimass die Arbeitsflaeche,
+   nicht das Ergebnis: das sagt der Hinweis, sonst sucht man den Zuschnitt hier.      */
+function syncGroesse(){
+  const nachMass = state.ratio === "free" || state.ratio === "content";
+  $("#freeRow").classList.toggle("show", nachMass);
+  $("#freeHint").textContent = state.ratio === "content"
+    ? "Arbeitsflaeche. Der Export nimmt davon nur, was belegt ist: Geraete, Markierungen, Overlays samt Schatten. Die gestrichelte Linie im Bild zeigt den Ausschnitt."
+    : "";
+  updateExportInfo();
+}
 $("#freeW").addEventListener("input", e => { state.freeW = clamp(+e.target.value||1200,200,4000); render(); });
 $("#freeH").addEventListener("input", e => { state.freeH = clamp(+e.target.value||800,200,4000); render(); });
 function updateDevSizeLabel(){ $("#devSizeLabel").textContent = "Größe: " + Math.round(act.devScale*100) + "%"; }
@@ -1295,6 +1446,13 @@ $("#centerH").addEventListener("click", () => { snap("center"); act.devX = 0; re
 $("#centerV").addEventListener("click", () => { snap("center"); act.devY = 0; render(); });
 $("#url").addEventListener("input", e => { act.url = e.target.value; render(); });
 $("#chromeToggle").addEventListener("change", e => { act.chromeOn = e.target.checked; render(); });
+$("#fitFrame").addEventListener("change", e => {
+  snap("fitFrame");
+  act.fitFrame = e.target.checked;
+  // Nach dem Umbau passt das Bild genau, also wieder fuellen statt den alten Zoom halten
+  applyFit("fill", act);
+  syncControls(); render();
+});
 
 function bindColor(colorId, hexId, apply){
   $(colorId).addEventListener("input", e => {
@@ -1995,7 +2153,7 @@ function addMark(){
 const HIST = [];
 const HIST_MAX = 40;
 let histKey = "", histZeit = 0;
-const INST_SKALARE = ["device","view","frame","devScale","devX","devY","sizeMode","url",
+const INST_SKALARE = ["device","view","frame","fitFrame","devScale","devX","devY","sizeMode","url",
   "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW"];
 
 function snap(key){
@@ -2036,8 +2194,8 @@ function undo(){
   histKey = ""; histZeit = 0;
   // Bedienelemente nachziehen, sonst zeigen sie den verworfenen Stand
   $("#size").value = state.ratio;
-  $("#freeRow").classList.toggle("show", state.ratio === "free");
   $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  syncGroesse();
   $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
   $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
   syncControls(); syncMark(); renderMarkList(); renderOvList();
@@ -2059,8 +2217,46 @@ window.addEventListener("keydown", e => {
 
 /* ---------------- export ---------------- */
 const MIME = {png:"image/png", webp:"image/webp", jpeg:"image/jpeg"};
+/* ---- Was tatsaechlich exportiert wird ----
+   Zwei Dinge koennen das Ausgabemass verlassen: der Zuschnitt auf den Inhalt und die
+   Skala. Beide laufen ueber dieselbe Funktion, damit Vorschau, Dateigroesse, Dateiname
+   und Download nie auseinanderlaufen.                                                 */
+function inhaltsRahmen(){
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const nimm = (x, y, w, h) => {
+    if(!(w > 0) || !(h > 0)) return;
+    x0 = Math.min(x0, x); y0 = Math.min(y0, y);
+    x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h);
+  };
+  for(const i of insts){
+    const L = i.L; if(!L) continue;
+    const b = L.bb;   // opake Huelle des Rahmens, Schatten inbegriffen
+    nimm((L.ox + b.x*L.gs)*RES, (L.oy + b.y*L.gs)*RES, b.w*L.gs*RES, b.h*L.gs*RES);
+  }
+  for(const o of OVERLAYS)
+    nimm(o.x*RES, o.y*RES, o.img.naturalWidth*o.scale*RES, o.img.naturalHeight*o.scale*RES);
+  for(const m of MARKS){
+    const R = markRect(m), s = m.breite/2;
+    nimm((R.x - s)*RES, (R.y - s)*RES, (R.w + m.breite)*RES, (R.h + m.breite)*RES);
+    if(m.label){ const L = markLabelBox(m); nimm(L.x*RES, L.y*RES, L.w*RES, L.h*RES); }
+  }
+  if(!isFinite(x0)) return null;
+  // Ausserhalb der Canvas ist nichts gezeichnet, dort waere der Zuschnitt leer
+  x0 = clamp(Math.floor(x0), 0, view.width);  y0 = clamp(Math.floor(y0), 0, view.height);
+  x1 = clamp(Math.ceil(x1), 0, view.width);   y1 = clamp(Math.ceil(y1), 0, view.height);
+  if(x1 - x0 < 2 || y1 - y0 < 2) return null;
+  return {x:x0, y:y0, w:x1 - x0, h:y1 - y0};
+}
+/* Der Ausschnitt in Canvaspunkten, danach die Zielgroesse in Dateipunkten. */
+function exportRahmen(){
+  const zu = state.ratio === "content" ? inhaltsRahmen() : null;
+  const q = zu || {x:0, y:0, w:view.width, h:view.height};
+  const k = state.exportScale / RES;
+  return {q, w: Math.max(1, Math.round(q.w*k)), h: Math.max(1, Math.round(q.h*k)),
+          zugeschnitten: !!zu};
+}
 function exportFilename(){
-  const [W, H] = stageSize();
+  const R = exportRahmen();
   const ext = state.exportFormat === "jpeg" ? "jpg" : state.exportFormat;
   const custom = state.exportName.trim()
     .replace(/[\\/:*?"<>|]/g, "")
@@ -2068,29 +2264,70 @@ function exportFilename(){
   const desc = insts.length > 1
     ? `layout-${insts.length}devices`
     : `${act.device}-${act.view}-${act.frame}`;
-  const base = custom || `zetcom-mockup-${desc}-${W}x${H}@2x`;
+  const skala = state.exportScale === 2 ? "@2x" : "";
+  const base = custom || `zetcom-mockup-${desc}-${R.w}x${R.h}${skala}`;
   return `${base}.${ext}`;
 }
 function exportCanvas(){
-  if(state.exportFormat !== "jpeg") return view;
+  const R = exportRahmen();
+  const voll = !R.zugeschnitten && R.w === view.width && R.h === view.height;
+  if(voll && state.exportFormat !== "jpeg") return view;
   const c = document.createElement("canvas");
-  c.width = view.width; c.height = view.height;
+  c.width = R.w; c.height = R.h;
   const x = c.getContext("2d");
-  x.fillStyle = state.bgMode === "color" ? state.bgColor : "#ffffff";
-  x.fillRect(0, 0, c.width, c.height);
-  x.drawImage(view, 0, 0);
+  if(state.exportFormat === "jpeg"){
+    x.fillStyle = state.bgMode === "color" ? state.bgColor : "#ffffff";
+    x.fillRect(0, 0, c.width, c.height);
+  }
+  x.imageSmoothingQuality = "high";
+  x.drawImage(view, R.q.x, R.q.y, R.q.w, R.q.h, 0, 0, R.w, R.h);
   return c;
 }
 let sizeTimer = 0, sizeToken = 0;
 function fmtBytes(n){ return n > 1048576 ? (n/1048576).toFixed(2) + " MB" : Math.round(n/1024) + " KB"; }
+/* Empfehlung des gewaehlten Ausgabemasses: Format und Gewicht haengen als data-Attribut
+   an der Option, damit die Liste die einzige Stelle bleibt, an der beides gepflegt wird. */
+function ausgabeEmpfehlung(){
+  const o = $("#size").selectedOptions[0];
+  if(!o || !o.dataset.tippFmt) return null;
+  return {fmt:o.dataset.tippFmt, kb: o.dataset.tippKb ? +o.dataset.tippKb : null, name:o.textContent};
+}
+function updateExportInfo(){
+  const R = exportRahmen(), e = ausgabeEmpfehlung();
+  $("#exportDim").textContent = "Export: " + R.w + " × " + R.h + " px"
+    + (R.zugeschnitten ? " (auf den Inhalt zugeschnitten)" : "")
+    + (state.exportScale === 2 ? ", doppelte Kantenlaenge" : "");
+  // Empfohlenes Format umrahmen, nicht setzen: die Wahl bleibt beim Nutzer
+  document.querySelectorAll(".fmtbtn").forEach(b =>
+    b.classList.toggle("tipp", !!e && b.dataset.fmt === e.fmt && state.exportFormat !== e.fmt));
+  $("#fmtTipp").textContent = !e ? ""
+    : state.exportFormat === e.fmt ? "Empfohlen und gewaehlt: " + FMT_GRUND[e.fmt] + "."
+    : "Empfohlen waere " + FMT_NAME[e.fmt] + " — " + FMT_GRUND[e.fmt] + ".";
+  $("#fmtTipp").classList.toggle("warn", !!e && state.exportFormat !== e.fmt);
+}
 function updateSizePreview(){
+  updateExportInfo();
   clearTimeout(sizeTimer);
   sizeTimer = setTimeout(() => {
     const t = ++sizeToken;
     const q = state.exportFormat === "png" ? undefined : state.exportQuality;
     exportCanvas().toBlob(blob => {
       if(t !== sizeToken || !blob) return;
-      $("#sizePreview").textContent = `File size: ≈ ${fmtBytes(blob.size)} (${state.exportFormat.toUpperCase()} @2x)`;
+      $("#sizePreview").textContent = "Dateigroesse: ≈ " + fmtBytes(blob.size)
+        + " (" + FMT_NAME[state.exportFormat] + ")";
+      const e = ausgabeEmpfehlung();
+      const tip = $("#sizeTipp");
+      if(!e || !e.kb){ tip.textContent = ""; tip.classList.remove("warn"); return; }
+      if(state.exportScale !== 1){
+        tip.textContent = "Empfohlen: unter " + e.kb + " KB — gilt fuer @1x, "
+          + "die doppelte Kantenlaenge darf entsprechend mehr wiegen.";
+        tip.classList.remove("warn");
+        return;
+      }
+      const drueber = blob.size > e.kb*1024;
+      tip.textContent = "Empfohlen: unter " + e.kb + " KB"
+        + (drueber ? " — zu schwer, Qualitaet senken oder Format wechseln." : " — eingehalten.");
+      tip.classList.toggle("warn", drueber);
     }, MIME[state.exportFormat], q);
   }, 400);
 }
@@ -2098,6 +2335,11 @@ document.querySelectorAll(".fmtbtn").forEach(b =>
   b.addEventListener("click", () => {
     state.exportFormat = b.dataset.fmt;
     $("#qualityRow").classList.toggle("show", state.exportFormat !== "png");
+    updateBtns(); updateSizePreview();
+  }));
+document.querySelectorAll(".scalebtn").forEach(b =>
+  b.addEventListener("click", () => {
+    state.exportScale = +b.dataset.scale;
     updateBtns(); updateSizePreview();
   }));
 $("#quality").addEventListener("input", e => {
@@ -2154,7 +2396,7 @@ $("#export").addEventListener("click", () => {
    muss. Gesichert wird die Arbeitsfassung des Screenshots (i.edit), nicht das Original:
    sie traegt die Radierstriche. Der Preis steht in der Notiz, die Datei wird gross, und
    der Radierer faengt nach dem Laden bei diesem Stand an statt beim unberuehrten Bild. */
-const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 2;   // v2: Labelrahmen und eigene Farbe der Verbindungslinie
+const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 3;   // v2: Labelrahmen, Farbe der Verbindungslinie. v3: Fensteranpassung, Exportskala, Zuschnitt auf den Inhalt
 const PROJEKT_TYPEN = [{description:"zetcom Device-Mockup-Projekt",
                         accept:{"application/json":[".json"]}}];
 function bildAusURL(url){
@@ -2176,7 +2418,8 @@ function projektStand(){
     app: PROJEKT_APP, version: PROJEKT_VERSION, savedAt: new Date().toISOString(),
     state: {bgMode:state.bgMode, bgColor:state.bgColor, ratio:state.ratio, freeW:state.freeW,
             freeH:state.freeH, tool:state.tool, brush:state.brush, exportName:state.exportName,
-            exportFormat:state.exportFormat, exportQuality:state.exportQuality},
+            exportFormat:state.exportFormat, exportQuality:state.exportQuality,
+            exportScale:state.exportScale},
     aktiv: Math.max(0, insts.indexOf(act)),
     geraete: insts.map(i => {
       const g = {};
@@ -2221,6 +2464,7 @@ async function projektAnwenden(P){
   state.exportName = s.exportName || "";
   state.exportFormat = MIME[s.exportFormat] ? s.exportFormat : "png";
   state.exportQuality = s.exportQuality != null ? s.exportQuality : 0.9;
+  state.exportScale = s.exportScale === 1 ? 1 : 2;   // aeltere Dateien kannten nur @2x
 
   // ---- Geraete: erst alle Bilder holen, dann tauschen, damit ein Fehler nichts zerreisst ----
   const neu = [];
@@ -2265,8 +2509,8 @@ async function projektAnwenden(P){
   // ---- Bedienelemente auf den geladenen Stand ziehen ----
   if([...$("#size").options].some(o => o.value === state.ratio)) $("#size").value = state.ratio;
   else { state.ratio = "free"; $("#size").value = "free"; }
-  $("#freeRow").classList.toggle("show", state.ratio === "free");
   $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  syncGroesse();
   $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
   $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
   document.querySelectorAll("#canvasSwatches .swatch").forEach(x =>
@@ -2407,44 +2651,66 @@ document.querySelectorAll("#markAlign .aln").forEach(b => b.addEventListener("cl
   else if(d.lv) labelVerteilen(d.lv);
 }));
 
-/* ---------------- Empfohlene Groessen ----------------
-   Maße aus den Vault-Standards: Website aus Image Standards (Panel, Ratio, Template),
+/* ---------------- Ausgabemasse ----------------
+   Seit 28.08.2026 stehen sie in der Auswahlliste statt in einer Tabelle darunter: die
+   Tabelle war ein zweiter Ort fuer dieselbe Entscheidung, man setzte das Mass dort und
+   sah oben "Free" stehen. Jetzt ist die Liste die einzige Stelle.
+
+   Masse aus den Vault-Standards: Website aus Image Standards (Panel, Ratio, Template),
    Social aus LinkedIn CI, Folie aus den slide-Tokens (33,87 x 19,05 cm sind 16:9).
-   Die Gewichte sind Richtwerte fuer Bildschirmaufnahmen, die flaechig sind und gut
-   komprimieren, keine gemessene Vorgabe. Was die Datei wirklich wiegt, steht darueber
-   in der Dateigroessen-Vorschau.                                                      */
+
+   Je Mass haengen zwei Empfehlungen daran, weil sie sich je Plattform unterscheiden:
+   das Dateiformat (die Website nimmt WebP, eine Link-Vorschau muss JPEG sein, Folie und
+   Word wollen PNG) und ein Richtwert fuers Gewicht. Der Richtwert gilt fuer die Datei im
+   Ausgabemass, also @1x; @2x hat die vierfache Punktzahl und darf entsprechend mehr
+   wiegen, deshalb wird dort nicht verglichen. Die Gewichte sind Richtwerte fuer
+   Bildschirmaufnahmen, die flaechig sind und gut komprimieren, keine gemessene Vorgabe. */
 const GROESSEN = [
-  ["Website", "image_text 3:2", 2126, 1417, "WebP q75 bis 80", "unter 300 KB"],
-  ["Website", "benefits 16:9",  2200, 1238, "WebP q75 bis 80", "unter 300 KB"],
-  ["Website", "sticky 1:1",     1500, 1500, "WebP q75 bis 80", "unter 250 KB"],
-  ["Website", "card 3:2",       1080,  716, "WebP q75 bis 80", "unter 150 KB"],
-  ["Website", "panel_image breit", 1920, 1080, "WebP q75 bis 80", "unter 350 KB"],
-  ["Social",  "OG / Link-Vorschau", 1200, 630, "JPEG q90", "unter 200 KB"],
-  ["Social",  "LinkedIn Post 1:1",  1200, 1200, "PNG oder WebP", "unter 500 KB"],
-  ["Social",  "LinkedIn Post 4:5",  1200, 1500, "PNG oder WebP", "unter 500 KB"],
-  ["Social",  "LinkedIn Banner",    1584,  396, "PNG oder WebP", "unter 300 KB"],
-  ["Folie",   "16:9 Vollbild",      1920, 1080, "PNG", "unter 600 KB"],
-  ["Folie",   "16:9 scharf",        2560, 1440, "PNG", "unter 1 MB"],
-  ["Doku",    "Word, halbe Breite", 1200,  800, "PNG", "unter 400 KB"]
+  ["Allgemein", "1:1 quadratisch",    1000, 1000, "png",  null],
+  ["Allgemein", "3:2 quer",           1200,  800, "png",  null],
+  ["Allgemein", "16:9 quer",          1280,  720, "png",  null],
+  ["Allgemein", "3:2 Frame nativ",    1536, 1024, "png",  null],
+  ["Website",   "image_text 3:2",     2126, 1417, "webp", 300],
+  ["Website",   "benefits 16:9",      2200, 1238, "webp", 300],
+  ["Website",   "sticky 1:1",         1500, 1500, "webp", 250],
+  ["Website",   "card 3:2",           1080,  716, "webp", 150],
+  ["Website",   "panel_image 16:9",   1920, 1080, "webp", 350],
+  ["Social",    "OG / Link-Vorschau", 1200,  630, "jpeg", 200],
+  ["Social",    "LinkedIn Post 1:1",  1200, 1200, "png",  500],
+  ["Social",    "LinkedIn Post 4:5",  1200, 1500, "png",  500],
+  ["Social",    "LinkedIn Banner",    1584,  396, "png",  300],
+  ["Folie",     "16:9 Vollbild",      1920, 1080, "png",  600],
+  ["Folie",     "16:9 scharf",        2560, 1440, "png", 1000],
+  ["Doku",      "Word, halbe Breite", 1200,  800, "png",  400]
 ];
-(function baueGroessen(){
-  const t = $("#sizeTable"); if(!t) return;
-  let letzte = "";
-  t.innerHTML = GROESSEN.map(([g, was, w, h, fmt, kb]) => {
-    const kopf = g === letzte ? "" : g; letzte = g;
-    return `<tr data-w="${w}" data-h="${h}" title="Ausgabemass auf ${w}\u00d7${h} setzen">
-      <td class="g">${kopf}</td><td>${was}</td><td class="n">${w}\u00d7${h}</td>
-      <td class="f">${fmt}</td><td class="f">${kb}</td></tr>`;
-  }).join("");
-  t.addEventListener("click", e => {
-    const tr = e.target.closest("tr"); if(!tr) return;
-    snap("groesse");
-    state.ratio = "free"; state.freeW = +tr.dataset.w; state.freeH = +tr.dataset.h;
-    $("#size").value = "free";
-    $("#freeRow").classList.add("show");
-    $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
-    render();
-  });
+const FMT_NAME = {png:"PNG", webp:"WebP", jpeg:"JPEG"};
+const FMT_GRUND = {
+  webp: "WebP, der Website-Standard im Vault (q75 bis 80)",
+  jpeg: "JPEG, eine Link-Vorschau muss JPEG sein und braucht keine Transparenz",
+  png:  "PNG, verlustfrei, fuer Folie, Word und LinkedIn"
+};
+(function baueGroessenListe(){
+  const s = $("#size"); if(!s) return;
+  let gruppe = null, og = null;
+  for(const [g, was, w, h, fmt, kb] of GROESSEN){
+    if(g !== gruppe){ gruppe = g; og = document.createElement("optgroup"); og.label = g; s.appendChild(og); }
+    const o = document.createElement("option");
+    o.value = w + "," + h;
+    o.textContent = was + " — " + w + "×" + h;
+    // Eigene Namen, nicht fmt/kb: data-fmt gehoert den Formatknoepfen, und ein
+    // Selektor [data-fmt] wuerde sonst zuerst eine Option treffen.
+    o.dataset.tippFmt = fmt;
+    if(kb) o.dataset.tippKb = kb;
+    og.appendChild(o);
+  }
+  const extra = document.createElement("optgroup"); extra.label = "Nach Mass";
+  for(const [v, t] of [["free", "Frei, eigene Breite × Höhe"],
+                       ["content", "An den Inhalt anpassen"]]){
+    const o = document.createElement("option"); o.value = v; o.textContent = t;
+    extra.appendChild(o);
+  }
+  s.appendChild(extra);
+  s.value = "1200,800";
 })();
 if(!KANN_ZIELORT){
   $("#askPath").checked = false; $("#askPath").disabled = true;
