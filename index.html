@@ -340,7 +340,7 @@
             </div>
           </div>
 
-          <div class="field"><label>Labelflaeche</label>
+          <div class="field"><label>Labelflaeche und Labelrahmen</label>
             <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="markFillOn" checked> Flaeche hinter dem Label zeichnen</label>
             <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="markFillAuto" checked> Farbe wie Rahmen und Linie</label>
             <div class="hideable" id="markFillRow">
@@ -354,6 +354,26 @@
                 <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
                 <div class="swatch" data-c="#000000" style="background:#000000" title="Schwarz"></div>
                 <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="Weiss"></div>
+              </div>
+            </div>
+            <label class="toggle" style="margin:12px 0 8px"><input type="checkbox" id="markBorderOn"> Rahmen um das Label</label>
+            <div class="zlabel">Flaeche aus plus Rahmen an ergibt ein Label, das nur umrandet ist.</div>
+            <div class="hideable" id="markBorderCtl">
+              <input type="range" id="markBorderWidth" min="1" max="12" value="2" style="margin-top:10px">
+              <div class="zlabel" id="markBorderWidthLabel">Rahmenbreite</div>
+              <label class="toggle" style="margin:8px 0"><input type="checkbox" id="markBorderAuto" checked> Farbe wie Rahmen und Linie</label>
+              <div class="hideable" id="markBorderRow">
+                <div class="row"><input type="color" id="markBorder" value="#ff5900"><input type="text" class="hex" id="markBorderHex" value="#ff5900"></div>
+                <div class="swatches" id="markBorderSwatches">
+                  <div class="swatch sel" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
+                  <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
+                  <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
+                  <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
+                  <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
+                  <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
+                  <div class="swatch" data-c="#000000" style="background:#000000" title="Schwarz"></div>
+                  <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="Weiss"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -390,6 +410,20 @@
             <input type="range" id="markConnWidth" min="1" max="12" value="1" style="margin-top:10px">
             <div class="zlabel" id="markConnWidthLabel">Linienbreite</div>
             <div class="zlabel">erscheint nur, wenn das Label ausserhalb des Rahmens liegt</div>
+            <label class="toggle" style="margin:10px 0 8px"><input type="checkbox" id="markConnAuto" checked> Farbe wie Rahmen</label>
+            <div class="hideable" id="markConnRow">
+              <div class="row"><input type="color" id="markConnColor" value="#ff5900"><input type="text" class="hex" id="markConnHex" value="#ff5900"></div>
+              <div class="swatches" id="markConnSwatches">
+                <div class="swatch sel" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
+                <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
+                <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
+                <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
+                <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
+                <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
+                <div class="swatch" data-c="#000000" style="background:#000000" title="Schwarz"></div>
+                <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="Weiss"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -482,8 +516,8 @@
     Markierungen draws zetcom website callouts on top of everything: a rectangle around the element, a label outside it,
     and a straight line between them when they do not touch, one pixel by default and adjustable.
     Hold Ctrl or Shift while clicking to select several callouts, then align their rectangles, snap each label to its own
-    rectangle, or align the labels to one another; the label fill is coloured separately from the rectangle and can be
-    switched off entirely. Projekt saves the whole working state, screenshots included, as a .zdm.json you can reload later.
+    rectangle, or align the labels to one another. Label fill, label outline and connector line each carry their own colour,
+    coupled to the rectangle colour until you set one by hand; the fill can be switched off so the label is outline only. Projekt saves the whole working state, screenshots included, as a .zdm.json you can reload later.
     The screenshot is projected into the tilted screen automatically.
     Preview and export run through the same canvas at 2×, so the download matches the preview exactly.
     Transparent exports the chosen canvas size with alpha. Several devices export together on one canvas.</p>
@@ -1410,7 +1444,12 @@ function mkMark(over){
        zusammen, solange niemand sie trennt: das ist der alte Stand und bleibt die Vorgabe.
        flaecheAn aus heisst Text ohne Flaeche, fuer Label direkt auf hellem Screenshot.  */
     flaeche: MARK_ORANGE, flaecheAuto: true, flaecheAn: true,
+    /* Labelrahmen: aus, sonst haette jedes bestehende Label ploetzlich eine Kontur. An
+       plus Flaeche aus ergibt das nur umrandete Label. Farbe wieder gekoppelt wie oben. */
+    randAn: false, randBreite: 2, randFarbe: MARK_ORANGE, randAuto: true,
     staerke: 600, groesse: 16, verbindung: true, verbBreite: 1,
+    // Die Verbindungslinie ist ein eigener Strich und darf eine eigene Farbe tragen.
+    verbFarbe: MARK_ORANGE, verbAuto: true,
     abstand: 8,                      // Luecke fuer "aussen"/"darueber"/"darunter"
     lx: null, ly: null
   };
@@ -1426,7 +1465,10 @@ function markLabelBox(m){
   vctx.font = m.staerke + " " + (m.groesse*RES) + "px " + MARK_FONT;
   const tw = vctx.measureText(m.label || " ").width / RES;
   vctx.restore();
-  const padX = m.groesse*0.55, padY = m.groesse*0.30;
+  /* Ein Labelrahmen frisst den Innenabstand auf, deshalb waechst die Box um seine Breite.
+     Er sitzt innen: ohne diesen Zuschlag klebt die Schrift bei dicker Kontur daran.    */
+  const rand = m.randAn ? m.randBreite : 0;
+  const padX = m.groesse*0.55 + rand, padY = m.groesse*0.30 + rand;
   return {x:m.lx, y:m.ly, w:tw + padX*2, h:m.groesse*1.30 + padY*2, padX, padY};
 }
 const markRect = m => ({x:m.x, y:m.y, w:m.w, h:m.h});
@@ -1468,8 +1510,10 @@ function drawMarks(){
          im Rechteck. Deshalb wird auf alles AUSSERHALB der Rahmen-Innenkante beschnitten,
          die Linie darf die Rahmenlinie decken, die Innenflaeche nie.                      */
       /* Ohne Labelflaeche deckt spaeter nichts mehr zu, dann darf das Labelende der Linie
-         nicht ueber die Kante hinausstehen, sonst laeuft sie in die Schrift.            */
-      const ea = m.flaecheAn === false ? 0 : kappenVersatz(ux, uy, a.achse, w);
+         nicht ueber die Kante hinausstehen, sonst laeuft sie in die Schrift. Ein
+         Labelrahmen deckt sie zwar, aber nur so weit wie er breit ist: auch dann bleibt
+         das Ende an der Kante, damit nichts durch die Kontur ins Label laeuft.         */
+      const ea = (m.flaecheAn === false || m.randAn) ? 0 : kappenVersatz(ux, uy, a.achse, w);
       const eb = kappenVersatz(ux, uy, b.achse, w) + m.breite;
       const inn = m.breite/2;
       vctx.save();
@@ -1480,7 +1524,7 @@ function drawMarks(){
                        Math.max(0, m.radius - inn)*RES);
         vctx.clip("evenodd");
       }
-      vctx.strokeStyle = m.linie; vctx.lineWidth = w*RES;
+      vctx.strokeStyle = markVerb(m); vctx.lineWidth = w*RES;
       vctx.beginPath();
       vctx.moveTo((a.x - ux*ea)*RES, (a.y - uy*ea)*RES);
       vctx.lineTo((b.x + ux*eb)*RES, (b.y + uy*eb)*RES);
@@ -1501,6 +1545,17 @@ function drawMarks(){
         vctx.fillStyle = markFlaeche(m);
         vctx.beginPath(); vctx.roundRect(L.x*RES, L.y*RES, L.w*RES, L.h*RES, m.radius*RES);
         vctx.fill();
+      }
+      /* Der Labelrahmen sitzt INNEN, um die halbe Breite eingerueckt. Damit ist die
+         Aussenkante genau die Labelbox: das Ausrichten misst weiter dieselbe Kante, und
+         eine dickere Kontur waechst nach innen statt das Label groesser zu machen.     */
+      if(m.randAn){
+        const inn = m.randBreite/2;
+        vctx.strokeStyle = markRand(m); vctx.lineWidth = m.randBreite*RES;
+        vctx.beginPath();
+        vctx.roundRect((L.x+inn)*RES, (L.y+inn)*RES, (L.w-2*inn)*RES, (L.h-2*inn)*RES,
+                       Math.max(0, m.radius - inn)*RES);
+        vctx.stroke();
       }
       vctx.fillStyle = m.textFarbe;
       vctx.font = m.staerke + " " + (m.groesse*RES) + "px " + MARK_FONT;
@@ -1670,7 +1725,12 @@ function kontrast(a, b){
   const l1 = relLum(a), l2 = relLum(b);
   return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
 }
+/* Drei Farben haengen voreingestellt an der Rahmenfarbe und loesen sich, sobald jemand sie
+   von Hand setzt: Labelflaeche, Labelrahmen, Verbindungslinie. Ein Getter je Farbe, damit
+   die Kopplung an genau einer Stelle steht und nicht in jedem Zeichenschritt neu.      */
 const markFlaeche = m => (m.flaecheAuto === false ? m.flaeche : m.linie);
+const markRand    = m => (m.randAuto    === false ? m.randFarbe : m.linie);
+const markVerb    = m => (m.verbAuto    === false ? m.verbFarbe : m.linie);
 
 /* ---- Ausrichten ----
    Drei Ebenen, absichtlich getrennt, weil sie drei verschiedene Fragen beantworten:
@@ -1852,6 +1912,17 @@ function syncMark(){
   $("#markFillAuto").checked = m.flaecheAuto !== false;
   $("#markFillRow").classList.toggle("show", m.flaecheAn !== false && m.flaecheAuto === false);
   $("#markFill").value = markFlaeche(m); $("#markFillHex").value = markFlaeche(m);
+  $("#markBorderOn").checked = !!m.randAn;
+  $("#markBorderCtl").classList.toggle("show", !!m.randAn);
+  $("#markBorderAuto").checked = m.randAuto !== false;
+  $("#markBorderRow").classList.toggle("show", !!m.randAn && m.randAuto === false);
+  $("#markBorder").value = markRand(m); $("#markBorderHex").value = markRand(m);
+  $("#markBorderWidth").value = m.randBreite;
+  $("#markBorderWidthLabel").textContent = "Rahmenbreite: " + m.randBreite + " px bei 1×, "
+    + (m.randBreite*RES) + " px im Export";
+  $("#markConnAuto").checked = m.verbAuto !== false;
+  $("#markConnRow").classList.toggle("show", m.verbAuto === false);
+  $("#markConnColor").value = markVerb(m); $("#markConnHex").value = markVerb(m);
   $("#markGap").value = m.abstand;
   $("#markGapLabel").textContent = "Abstand aussen: " + m.abstand + " px bei 1× — gilt fuer "
     + "aussen links/rechts und darueber/darunter";
@@ -1880,6 +1951,10 @@ function syncMarkKontrast(){
     s.classList.toggle("sel", s.dataset.c.toLowerCase() === m.linie.toLowerCase()));
   document.querySelectorAll("#markFillSwatches .swatch").forEach(s =>
     s.classList.toggle("sel", s.dataset.c.toLowerCase() === markFlaeche(m).toLowerCase()));
+  document.querySelectorAll("#markBorderSwatches .swatch").forEach(s =>
+    s.classList.toggle("sel", s.dataset.c.toLowerCase() === markRand(m).toLowerCase()));
+  document.querySelectorAll("#markConnSwatches .swatch").forEach(s =>
+    s.classList.toggle("sel", s.dataset.c.toLowerCase() === markVerb(m).toLowerCase()));
   document.querySelectorAll("#markTextSwatches .swatch").forEach(s =>
     s.classList.toggle("sel", s.dataset.c.toLowerCase() === m.textFarbe.toLowerCase()));
   const px = m.groesse*RES;
@@ -1901,6 +1976,8 @@ function addMark(){
   const v = MARKS[MARKS.length-1];
   const m = mkMark(v ? {x: v.x + 24, y: v.y + 24, linie: v.linie, flaeche: v.flaeche,
                         flaecheAuto: v.flaecheAuto, flaecheAn: v.flaecheAn,
+                        randAn: v.randAn, randBreite: v.randBreite, randFarbe: v.randFarbe,
+                        randAuto: v.randAuto, verbFarbe: v.verbFarbe, verbAuto: v.verbAuto,
                         textFarbe: v.textFarbe, staerke: v.staerke, groesse: v.groesse,
                         breite: v.breite, radius: v.radius, verbBreite: v.verbBreite,
                         abstand: v.abstand} : null);
@@ -2077,7 +2154,7 @@ $("#export").addEventListener("click", () => {
    muss. Gesichert wird die Arbeitsfassung des Screenshots (i.edit), nicht das Original:
    sie traegt die Radierstriche. Der Preis steht in der Notiz, die Datei wird gross, und
    der Radierer faengt nach dem Laden bei diesem Stand an statt beim unberuehrten Bild. */
-const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 1;
+const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 2;   // v2: Labelrahmen und eigene Farbe der Verbindungslinie
 const PROJEKT_TYPEN = [{description:"zetcom Device-Mockup-Projekt",
                         accept:{"application/json":[".json"]}}];
 function bildAusURL(url){
@@ -2257,15 +2334,30 @@ $("#markFillAuto").addEventListener("change", e => markSet(m => {
   m.flaecheAuto = e.target.checked;
   if(m.flaecheAuto) m.flaeche = m.linie;   // wieder angekoppelt heisst: Linienfarbe gewinnt
 }, "markFillAuto"));
+$("#markBorderOn").addEventListener("change", e => markSet(m => m.randAn = e.target.checked, "markBorderOn"));
+$("#markBorderWidth").addEventListener("input", e => markSet(m => m.randBreite = +e.target.value, "markBorderW"));
+$("#markBorderAuto").addEventListener("change", e => markSet(m => {
+  m.randAuto = e.target.checked;
+  if(m.randAuto) m.randFarbe = m.linie;
+}, "markBorderAuto"));
+$("#markConnAuto").addEventListener("change", e => markSet(m => {
+  m.verbAuto = e.target.checked;
+  if(m.verbAuto) m.verbFarbe = m.linie;
+}, "markConnAuto"));
 /* Die Linienfarbe zieht die Flaeche nur mit, solange die Kopplung steht. Ist sie geloest,
    bleibt die Flaeche, wo sie ist: genau dafuer wurde sie geloest.                       */
 function setLinie(v){
   const m = MARKS[markSel]; if(!m) return;
   for(const z of markZiele()){
     z.linie = v;
+    // Was noch gekoppelt ist, zieht mit. Was geloest wurde, bleibt stehen.
     if(z.flaecheAuto !== false) z.flaeche = v;
+    if(z.randAuto    !== false) z.randFarbe = v;
+    if(z.verbAuto    !== false) z.verbFarbe = v;
   }
   if(m.flaecheAuto !== false){ $("#markFill").value = v; $("#markFillHex").value = v; }
+  if(m.randAuto !== false){ $("#markBorder").value = v; $("#markBorderHex").value = v; }
+  if(m.verbAuto !== false){ $("#markConnColor").value = v; $("#markConnHex").value = v; }
   syncMarkKontrast(); renderMarkList();
 }
 function setFlaeche(v){
@@ -2276,13 +2368,31 @@ function setFlaeche(v){
   $("#markFillRow").classList.toggle("show", m.flaecheAn !== false);
   syncMarkKontrast();
 }
+function setLabelRand(v){
+  const m = MARKS[markSel]; if(!m) return;
+  for(const z of markZiele()){ z.randFarbe = v; z.randAuto = false; }
+  $("#markBorderAuto").checked = false;
+  $("#markBorderRow").classList.toggle("show", !!m.randAn);
+  syncMarkKontrast();
+}
+function setVerbFarbe(v){
+  const m = MARKS[markSel]; if(!m) return;
+  for(const z of markZiele()){ z.verbFarbe = v; z.verbAuto = false; }
+  $("#markConnAuto").checked = false;
+  $("#markConnRow").classList.add("show");
+  syncMarkKontrast();
+}
 const setTextFarbe = v => { if(MARKS[markSel]){ for(const z of markZiele()) z.textFarbe = v;
                                                 syncMarkKontrast(); } };
 bindColor("#markColor", "#markHex", setLinie);
 bindColor("#markFill", "#markFillHex", setFlaeche);
+bindColor("#markBorder", "#markBorderHex", setLabelRand);
+bindColor("#markConnColor", "#markConnHex", setVerbFarbe);
 bindColor("#markTextColor", "#markTextHex", setTextFarbe);
 bindSwatches("#markSwatches", "#markColor", "#markHex", setLinie);
 bindSwatches("#markFillSwatches", "#markFill", "#markFillHex", setFlaeche);
+bindSwatches("#markBorderSwatches", "#markBorder", "#markBorderHex", setLabelRand);
+bindSwatches("#markConnSwatches", "#markConnColor", "#markConnHex", setVerbFarbe);
 bindSwatches("#markTextSwatches", "#markTextColor", "#markTextHex", setTextFarbe);
 
 /* Ausrichten: eine Reihe Knoepfe, ein Verhalten. Die Zuordnung steht im HTML als
