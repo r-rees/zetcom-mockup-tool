@@ -45,6 +45,12 @@
   .selbtn{flex:1;padding:7px 0;border:1px solid var(--ink-100);background:var(--gray);font-family:inherit;
     font-size:12px;cursor:pointer;border-radius:8px;color:#000;}
   .selbtn.sel{background:#000;color:#fff;border-color:#000;}
+  /* Ausrichten: schmale Knopfreihen, damit fuenf Ziele nebeneinander in die 320px-Leiste passen */
+  .alnrow{display:flex;gap:5px;margin-top:6px;}
+  button.aln{flex:1;min-width:0;padding:7px 0;border:1px solid var(--ink-100);background:var(--gray);
+    font-family:inherit;font-size:14px;line-height:1;cursor:pointer;border-radius:8px;color:#000;}
+  button.aln:hover:not([disabled]){background:#fff;border-color:#000;}
+  button.aln[disabled]{opacity:.32;cursor:default;}
   .minor{width:100%;padding:7px;border:1px solid var(--ink-100);background:#fff;font-family:inherit;
     font-size:12px;cursor:pointer;border-radius:8px;color:var(--ink-500);margin-top:6px;}
   .minor:hover{color:#000;}
@@ -251,14 +257,76 @@
         <div class="zlabel" style="margin-top:8px">Der Knopf legt eine Markierung in die Bildmitte.
         Im Werkzeug <b>Markieren</b> zieht man weitere im Bild auf. Angefasst wird eine Markierung in
         jedem Werkzeug: an der Rahmenkante schieben, an den vier Ecken die Groesse aendern, das Label
-        zieht separat. Durch die Innenflaeche hindurch schiebt man weiter den Screenshot.</div>
+        zieht separat. Durch die Innenflaeche hindurch schiebt man weiter den Screenshot.
+        <b>Strg</b> oder <b>Umschalt</b> beim Klicken (in der Liste oder im Bild) waehlt mehrere aus,
+        dann laesst sich die Auswahl gemeinsam schieben und ausrichten.</div>
+
+        <div class="hideable" id="markAlign">
+          <div class="field" style="margin-top:14px"><label>Rahmen ausrichten</label>
+            <div class="zlabel" id="markAlignHint">an der Canvas-Kante</div>
+            <div class="alnrow">
+              <button class="aln" data-ra="left"    title="Linke Kanten auf eine Linie">&#8676;</button>
+              <button class="aln" data-ra="hcenter" title="Waagerecht mittig">&#8596;</button>
+              <button class="aln" data-ra="right"   title="Rechte Kanten auf eine Linie">&#8677;</button>
+              <button class="aln" data-ra="top"     title="Oberkanten auf eine Linie">&#10514;</button>
+              <button class="aln" data-ra="vmiddle" title="Senkrecht mittig">&#8597;</button>
+              <button class="aln" data-ra="bottom"  title="Unterkanten auf eine Linie">&#10515;</button>
+            </div>
+            <div class="alnrow">
+              <button class="aln" data-rv="h" title="Gleiche Abstaende waagerecht (ab 3 Markierungen): die Luecken zwischen den Rahmen werden gleich gross, die aeusseren beiden bleiben stehen">&#8660;| gleiche Abstaende</button>
+              <button class="aln" data-rv="v" title="Gleiche Abstaende senkrecht (ab 3 Markierungen)">&#8661;| gleiche Abstaende</button>
+            </div>
+            <div class="alnrow">
+              <button class="aln" data-rg="w" title="Alle ausgewaehlten Rahmen bekommen die Breite des zuerst ausgewaehlten">gleiche Breite</button>
+              <button class="aln" data-rg="h" title="Alle ausgewaehlten Rahmen bekommen die Hoehe des zuerst ausgewaehlten">gleiche Hoehe</button>
+            </div>
+          </div>
+
+          <div class="field"><label>Label am eigenen Rahmen</label>
+            <div class="zlabel">waagerecht: aussen links, linksbuendig, mittig, rechtsbuendig, aussen rechts</div>
+            <div class="alnrow">
+              <button class="aln" data-lr="xout-left"  title="Label links neben den Rahmen">&#9668;</button>
+              <button class="aln" data-lr="xleft"      title="Linke Kante buendig mit der Rahmenkante">&#8676;</button>
+              <button class="aln" data-lr="xcenter"    title="Waagerecht mittig zum Rahmen">&#8596;</button>
+              <button class="aln" data-lr="xright"     title="Rechte Kante buendig mit der Rahmenkante">&#8677;</button>
+              <button class="aln" data-lr="xout-right" title="Label rechts neben den Rahmen">&#9658;</button>
+            </div>
+            <div class="zlabel" style="margin-top:8px">senkrecht: darueber, Oberkante, mittig, Unterkante, darunter</div>
+            <div class="alnrow">
+              <button class="aln" data-lr="yabove"  title="Label ueber den Rahmen">&#9650;</button>
+              <button class="aln" data-lr="ytop"    title="Oberkante buendig mit der Rahmenoberkante">&#10514;</button>
+              <button class="aln" data-lr="ymiddle" title="Senkrecht mittig zum Rahmen">&#8597;</button>
+              <button class="aln" data-lr="ybottom" title="Unterkante buendig mit der Rahmenunterkante">&#10515;</button>
+              <button class="aln" data-lr="ybelow"  title="Label unter den Rahmen">&#9660;</button>
+            </div>
+            <input type="range" id="markGap" min="0" max="60" value="8" style="margin-top:10px">
+            <div class="zlabel" id="markGapLabel">Abstand aussen</div>
+          </div>
+
+          <div class="field"><label>Label zueinander</label>
+            <div class="zlabel" id="markLabelAlignHint">ab zwei ausgewaehlten Markierungen</div>
+            <div class="alnrow">
+              <button class="aln" data-la="left"    title="Linke Labelkanten auf eine Linie">&#8676;</button>
+              <button class="aln" data-la="hcenter" title="Label waagerecht mittig zueinander">&#8596;</button>
+              <button class="aln" data-la="right"   title="Rechte Labelkanten auf eine Linie">&#8677;</button>
+              <button class="aln" data-la="top"     title="Label-Oberkanten auf eine Linie">&#10514;</button>
+              <button class="aln" data-la="vmiddle" title="Label senkrecht mittig zueinander">&#8597;</button>
+              <button class="aln" data-la="bottom"  title="Label-Unterkanten auf eine Linie">&#10515;</button>
+            </div>
+            <div class="alnrow">
+              <button class="aln" data-lv="h" title="Gleiche Abstaende zwischen den Labeln, waagerecht (ab 3)">&#8660;| gleiche Abstaende</button>
+              <button class="aln" data-lv="v" title="Gleiche Abstaende zwischen den Labeln, senkrecht (ab 3)">&#8661;| gleiche Abstaende</button>
+            </div>
+          </div>
+        </div>
 
         <div class="hideable" id="markEdit">
           <div class="field" style="margin-top:14px"><label>Label</label>
             <input type="text" id="markText" placeholder="leer = nur Rahmen">
+            <div class="zlabel" id="markMulti"></div>
           </div>
 
-          <div class="field"><label>Linie und Flaeche</label>
+          <div class="field"><label>Rahmen und Linie</label>
             <div class="row"><input type="color" id="markColor" value="#ff5900"><input type="text" class="hex" id="markHex" value="#ff5900"></div>
             <div class="swatches" id="markSwatches">
               <div class="swatch sel" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus, Vorgabe"></div>
@@ -272,12 +340,34 @@
             </div>
           </div>
 
+          <div class="field"><label>Labelflaeche</label>
+            <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="markFillOn" checked> Flaeche hinter dem Label zeichnen</label>
+            <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="markFillAuto" checked> Farbe wie Rahmen und Linie</label>
+            <div class="hideable" id="markFillRow">
+              <div class="row"><input type="color" id="markFill" value="#ff5900"><input type="text" class="hex" id="markFillHex" value="#ff5900"></div>
+              <div class="swatches" id="markFillSwatches">
+                <div class="swatch sel" data-c="#ff5900" style="background:#ff5900" title="MuseumPlus"></div>
+                <div class="swatch" data-c="#f5b400" style="background:#f5b400" title="MonumentPlus"></div>
+                <div class="swatch" data-c="#d133c3" style="background:#d133c3" title="ArtPlus"></div>
+                <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Foundation"></div>
+                <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Manage"></div>
+                <div class="swatch" data-c="#3ec325" style="background:#3ec325" title="Eco"></div>
+                <div class="swatch" data-c="#000000" style="background:#000000" title="Schwarz"></div>
+                <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="Weiss"></div>
+              </div>
+            </div>
+          </div>
+
           <div class="field"><label>Textfarbe im Label</label>
             <div class="row"><input type="color" id="markTextColor" value="#000000"><input type="text" class="hex" id="markTextHex" value="#000000"></div>
             <div class="swatches" id="markTextSwatches">
               <div class="swatch sel" data-c="#000000" style="background:#000000" title="Schwarz, auf Akzent die CD-Vorgabe"></div>
               <div class="swatch" data-c="#ffffff" style="background:#ffffff" title="Weiss"></div>
+              <div class="swatch" data-c="#ff5900" style="background:#ff5900" title="Orange, nur ohne Flaeche auf hellem Grund"></div>
+              <div class="swatch" data-c="#6432c9" style="background:#6432c9" title="Violett, nur ohne Flaeche auf hellem Grund"></div>
+              <div class="swatch" data-c="#2a91ff" style="background:#2a91ff" title="Blau, nur ohne Flaeche auf hellem Grund"></div>
             </div>
+            <div class="zlabel">Gelb und Gruen sind nie Text (CD), sie fehlen hier mit Absicht.</div>
             <div class="zlabel" id="markKontrast">Kontrast</div>
           </div>
 
@@ -302,6 +392,22 @@
             <div class="zlabel">erscheint nur, wenn das Label ausserhalb des Rahmens liegt</div>
           </div>
         </div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>Projekt (Zwischenstand)</summary>
+      <div class="accbody">
+        <div class="btnrow">
+          <button class="selbtn" id="saveProject">Projekt speichern</button>
+          <button class="selbtn" id="openProject">Projekt laden</button>
+        </div>
+        <input type="file" id="projectFile" accept=".json,.zdm.json,application/json" style="display:none">
+        <div class="zlabel" id="projectNote" style="margin-top:8px">Sichert Geraete mit Ansicht, Rahmen,
+        Lage und Zoom, die Screenshots samt Radierstrichen, alle Markierungen, alle Overlays sowie
+        Canvasformat, Hintergrund und Exporteinstellungen in eine <b>.zdm.json</b>-Datei. Spaeter laden
+        und exakt weiterarbeiten. Die Projektdatei laesst sich auch ins Fenster ziehen. Bilder stecken
+        mit drin, die Datei wird dadurch gross.</div>
       </div>
     </details>
 
@@ -374,7 +480,11 @@
     each plain or with baked shadow). The Browser device carries no PNG at all: it is generated in code
     and exports the screenshot itself with the browser bar, a minimal corner radius, an optional soft shadow and a very slight tilt.
     Markierungen draws zetcom website callouts on top of everything: a rectangle around the element, a label outside it,
-    and a straight line between them when they do not touch, one pixel by default and adjustable. The screenshot is projected into the tilted screen automatically.
+    and a straight line between them when they do not touch, one pixel by default and adjustable.
+    Hold Ctrl or Shift while clicking to select several callouts, then align their rectangles, snap each label to its own
+    rectangle, or align the labels to one another; the label fill is coloured separately from the rectangle and can be
+    switched off entirely. Projekt saves the whole working state, screenshots included, as a .zdm.json you can reload later.
+    The screenshot is projected into the tilted screen automatically.
     Preview and export run through the same canvas at 2×, so the download matches the preview exactly.
     Transparent exports the chosen canvas size with alpha. Several devices export together on one canvas.</p>
   </div>
@@ -960,7 +1070,15 @@ window.addEventListener("paste", e => {
   if(it){ e.preventDefault(); loadScreenshot(it.getAsFile()); }
 });
 window.addEventListener("dragover", e => e.preventDefault());
-window.addEventListener("drop", e => { e.preventDefault(); loadScreenshot(e.dataTransfer.files[0]); });
+/* Bild oder Projektdatei? Beides darf ins Fenster gezogen werden. Die Weiche steht hier,
+   damit eine versehentlich gezogene .json nicht als kaputtes Bild stillschweigend
+   verschluckt wird. projektLaden ist zu diesem Zeitpunkt schon definiert, der Handler
+   laeuft erst beim Ziehen.                                                            */
+window.addEventListener("drop", e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0]; if(!f) return;
+  if(istProjektDatei(f)) projektLaden(f); else loadScreenshot(f);
+});
 
 /* ---------------- pointer ---------------- */
 function evtPoint(e){
@@ -992,7 +1110,7 @@ view.addEventListener("pointerdown", e => {
   if(e.button !== 0) return;
   const p = evtPoint(e);
   // eine bestehende Markierung liegt ueber allem und wird in jedem Werkzeug angefasst
-  const mh = markHit(p);
+  const mh = markHit(p, e);
   if(mh){
     snap("markDrag"); drag = mh;
     view.setPointerCapture(e.pointerId); e.preventDefault();
@@ -1278,7 +1396,8 @@ $("#ovScale").addEventListener("input", e => {
 const MARK_FONT = '"DM Sans Var", "DM Sans", system-ui, sans-serif';
 const MARK_ORANGE = "#ff5900";     // MuseumPlus, Vorgabe der Spec
 const MARKS = [];
-let markSel = -1;
+let markSel = -1;                    // fuehrende Markierung, sie steht im Editor
+const markSelSet = new Set();        // alle ausgewaehlten, fuer Schieben und Ausrichten
 
 function mkMark(over){
   const [W,H] = stageSize();
@@ -1286,13 +1405,18 @@ function mkMark(over){
     x: Math.round(W*0.32), y: Math.round(H*0.36),
     w: Math.round(W*0.26), h: Math.round(H*0.15),
     linie: MARK_ORANGE, breite: 3, radius: 4,
-    label: String(MARKS.length + 1), flaeche: MARK_ORANGE, textFarbe: "#000000",
+    label: String(MARKS.length + 1), textFarbe: "#000000",
+    /* Die Labelflaeche haengt nicht mehr an der Linienfarbe. flaecheAuto haelt beide
+       zusammen, solange niemand sie trennt: das ist der alte Stand und bleibt die Vorgabe.
+       flaecheAn aus heisst Text ohne Flaeche, fuer Label direkt auf hellem Screenshot.  */
+    flaeche: MARK_ORANGE, flaecheAuto: true, flaecheAn: true,
     staerke: 600, groesse: 16, verbindung: true, verbBreite: 1,
+    abstand: 8,                      // Luecke fuer "aussen"/"darueber"/"darunter"
     lx: null, ly: null
   };
   Object.assign(m, over || {});
-  if(m.lx === null){ const b = markLabelBox(m); m.lx = m.x; m.ly = m.y - b.h - m.groesse*0.6; }
-  if(m.ly < 4) m.ly = m.y + m.h + m.groesse*0.6;
+  if(m.lx === null){ const b = markLabelBox(m); m.lx = m.x; m.ly = m.y - b.h - m.abstand; }
+  if(m.ly < 4) m.ly = m.y + m.h + m.abstand;
   return m;
 }
 /* Labelmass in 1x-Pixeln. Gemessen wird in Geraetepixeln und zurueckgerechnet, sonst
@@ -1343,7 +1467,9 @@ function drawMarks(){
          danach darueber gefuellt. Am Rahmen nicht: dort stand bei dicker Linie ein Stummel
          im Rechteck. Deshalb wird auf alles AUSSERHALB der Rahmen-Innenkante beschnitten,
          die Linie darf die Rahmenlinie decken, die Innenflaeche nie.                      */
-      const ea = kappenVersatz(ux, uy, a.achse, w);
+      /* Ohne Labelflaeche deckt spaeter nichts mehr zu, dann darf das Labelende der Linie
+         nicht ueber die Kante hinausstehen, sonst laeuft sie in die Schrift.            */
+      const ea = m.flaecheAn === false ? 0 : kappenVersatz(ux, uy, a.achse, w);
       const eb = kappenVersatz(ux, uy, b.achse, w) + m.breite;
       const inn = m.breite/2;
       vctx.save();
@@ -1371,9 +1497,11 @@ function drawMarks(){
     // Label
     if(m.label){
       vctx.save();
-      vctx.fillStyle = m.flaeche;
-      vctx.beginPath(); vctx.roundRect(L.x*RES, L.y*RES, L.w*RES, L.h*RES, m.radius*RES);
-      vctx.fill();
+      if(m.flaecheAn !== false){
+        vctx.fillStyle = markFlaeche(m);
+        vctx.beginPath(); vctx.roundRect(L.x*RES, L.y*RES, L.w*RES, L.h*RES, m.radius*RES);
+        vctx.fill();
+      }
       vctx.fillStyle = m.textFarbe;
       vctx.font = m.staerke + " " + (m.groesse*RES) + "px " + MARK_FONT;
       vctx.textAlign = "left"; vctx.textBaseline = "middle";
@@ -1388,8 +1516,17 @@ function drawMarkHandles(){
   // Sichtbar sobald etwas ausgewaehlt ist, in JEDEM Werkzeug. Vorher hingen sie am
   // Markiermodus: die Groesse liess sich aendern, man sah nur nicht, wo man greifen muss.
   if(markSel < 0 || markSel >= MARKS.length) return;
-  const m = MARKS[markSel], R = markRect(m), L = markLabelBox(m);
   sctx.save();
+  /* Mitausgewaehlte blass, die fuehrende kraeftig: sonst sieht man bei einer Mehrfachauswahl
+     nicht, welche Markierung der Editor gerade bearbeitet.                                */
+  for(const i of markAuswahl()){
+    if(i === markSel) continue;
+    const m = MARKS[i], R = markRect(m), L = markLabelBox(m);
+    sctx.strokeStyle = "rgba(42,108,255,.45)"; sctx.lineWidth = 1*RES; sctx.setLineDash([4*RES, 4*RES]);
+    sctx.strokeRect(R.x*RES - 2, R.y*RES - 2, R.w*RES + 4, R.h*RES + 4);
+    if(m.label) sctx.strokeRect(L.x*RES - 2, L.y*RES - 2, L.w*RES + 4, L.h*RES + 4);
+  }
+  const m = MARKS[markSel], R = markRect(m), L = markLabelBox(m);
   sctx.strokeStyle = "#2a6cff"; sctx.lineWidth = 1*RES; sctx.setLineDash([6*RES, 4*RES]);
   sctx.strokeRect(R.x*RES - 2, R.y*RES - 2, R.w*RES + 4, R.h*RES + 4);
   if(m.label) sctx.strokeRect(L.x*RES - 2, L.y*RES - 2, L.w*RES + 4, L.h*RES + 4);
@@ -1403,6 +1540,32 @@ function drawMarkHandles(){
   sctx.restore();
 }
 
+/* ---- Auswahl ----
+   markSel ist die fuehrende Markierung (sie steht im Editor), markSelSet die ganze Auswahl.
+   Strg/Cmd nimmt einzeln dazu oder weg, Umschalt zieht den Bereich von der fuehrenden bis
+   zur angeklickten. Ohne Taste ersetzt der Klick die Auswahl. Gleich in der Liste und im
+   Bild, damit man nicht zwei Bedienarten lernen muss.                                    */
+function markAuswahl(){
+  return [...markSelSet].filter(i => i >= 0 && i < MARKS.length).sort((a,b) => a-b);
+}
+function markWaehlen(i, e){
+  if(i < 0 || i >= MARKS.length) return;
+  if(e && (e.ctrlKey || e.metaKey)){
+    if(markSelSet.has(i) && markSelSet.size > 1){
+      markSelSet.delete(i);
+      if(markSel === i) markSel = markAuswahl()[0];
+    } else { markSelSet.add(i); markSel = i; }
+  } else if(e && e.shiftKey && markSel >= 0){
+    const a = Math.min(markSel, i), b = Math.max(markSel, i);
+    for(let k = a; k <= b; k++) markSelSet.add(k);
+    markSel = i;
+  } else {
+    markSelSet.clear(); markSelSet.add(i); markSel = i;
+  }
+  syncMark(); renderMarkList(); render();
+}
+function markNurWaehlen(i){ markSelSet.clear(); if(i >= 0){ markSelSet.add(i); } markSel = i; }
+
 /* ---- Zeigerarbeit ----
    Eine bestehende Markierung ist in JEDEM Werkzeug anfassbar, sonst waere Markieren ein
    Dauerzustand, in dem sich nichts anderes mehr bewegen laesst. Gegriffen wird an der
@@ -1414,9 +1577,9 @@ function aufKante(q, R, tol){
   const innen  = q.x > R.x + tol && q.x < R.x + R.w - tol && q.y > R.y + tol && q.y < R.y + R.h - tol;
   return !aussen && !innen;
 }
-function markHit(p){
+function markHit(p, e){
   const q = {x:p.x/RES, y:p.y/RES};
-  // Anfasser der Auswahl haben Vorrang
+  // Anfasser der fuehrenden Auswahl haben Vorrang
   if(markSel >= 0 && markSel < MARKS.length){
     const m = MARKS[markSel], g = markGriffe(m);
     for(let k = 0; k < 4; k++){
@@ -1427,15 +1590,22 @@ function markHit(p){
   for(let i = MARKS.length - 1; i >= 0; i--){
     const m = MARKS[i];
     if(m.label && inRect(q, markLabelBox(m))){
-      markSel = i; syncMark(); renderMarkList(); render();
+      markWaehlen(i, e);
       return {t:"markLabel", m, lx0:m.lx, ly0:m.ly, q0:q};
     }
   }
   for(let i = MARKS.length - 1; i >= 0; i--){
     const m = MARKS[i];
     if(aufKante(q, markRect(m), MARK_FASSEN)){
-      markSel = i; syncMark(); renderMarkList(); render();
-      return {t:"markMove", m, x0:m.x, y0:m.y, lx0:m.lx, ly0:m.ly, q0:q};
+      /* Eine Markierung aus der Auswahl heraus anfassen behaelt die Auswahl, damit sich
+         mehrere zusammen schieben lassen. Eine andere anfassen waehlt sie neu aus.     */
+      if(!markSelSet.has(i) || (e && (e.ctrlKey || e.metaKey || e.shiftKey))) markWaehlen(i, e);
+      else { markSel = i; syncMark(); renderMarkList(); render(); }
+      const alle = markAuswahl().map(k => {
+        const mm = MARKS[k];
+        return {m:mm, x0:mm.x, y0:mm.y, lx0:mm.lx, ly0:mm.ly};
+      });
+      return {t:"markMove", m, alle, q0:q};
     }
   }
   return null;
@@ -1444,7 +1614,7 @@ function markHit(p){
 function markNeu(p){
   const q = {x:p.x/RES, y:p.y/RES};
   const m = mkMark({x:q.x, y:q.y, w:1, h:1, lx:q.x, ly:q.y});
-  MARKS.push(m); markSel = MARKS.length - 1;
+  MARKS.push(m); markNurWaehlen(MARKS.length - 1);
   syncMark(); renderMarkList();
   return {t:"markNew", m, q0:q};
 }
@@ -1454,12 +1624,14 @@ function markDrag(p, d){
     m.x = Math.min(d.q0.x, q.x); m.y = Math.min(d.q0.y, q.y);
     m.w = Math.abs(q.x - d.q0.x); m.h = Math.abs(q.y - d.q0.y);
     const b = markLabelBox(m);
-    m.lx = m.x; m.ly = m.y - b.h - m.groesse*0.6;
-    if(m.ly < 4) m.ly = m.y + m.h + m.groesse*0.6;
+    m.lx = m.x; m.ly = m.y - b.h - m.abstand;
+    if(m.ly < 4) m.ly = m.y + m.h + m.abstand;
   } else if(d.t === "markMove"){
     const dx = q.x - d.q0.x, dy = q.y - d.q0.y;
-    m.x = d.x0 + dx; m.y = d.y0 + dy;
-    m.lx = d.lx0 + dx; m.ly = d.ly0 + dy;   // Label wandert mit
+    for(const e of (d.alle || [{m, x0:d.x0, y0:d.y0, lx0:d.lx0, ly0:d.ly0}])){
+      e.m.x = e.x0 + dx; e.m.y = e.y0 + dy;
+      e.m.lx = e.lx0 + dx; e.m.ly = e.ly0 + dy;   // Label wandert mit
+    }
   } else if(d.t === "markLabel"){
     m.lx = d.lx0 + (q.x - d.q0.x); m.ly = d.ly0 + (q.y - d.q0.y);
   } else if(d.t === "markResize"){
@@ -1476,7 +1648,7 @@ function markUp(d){
   if(d.t !== "markNew") return;
   // ein Klick ohne Zug ist keine Markierung
   if(d.m.w < 6 || d.m.h < 6){
-    MARKS.pop(); markSel = MARKS.length - 1;
+    MARKS.pop(); markNurWaehlen(MARKS.length - 1);
     syncMark(); renderMarkList(); render();
   }
   /* Kein Rueckschalten auf Move. Der erste Versuch tat das und nahm damit das Zeichnen
@@ -1498,6 +1670,118 @@ function kontrast(a, b){
   const l1 = relLum(a), l2 = relLum(b);
   return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
 }
+const markFlaeche = m => (m.flaecheAuto === false ? m.flaeche : m.linie);
+
+/* ---- Ausrichten ----
+   Drei Ebenen, absichtlich getrennt, weil sie drei verschiedene Fragen beantworten:
+   die Rahmen zueinander (oder zur Canvas, wenn nur einer ausgewaehlt ist), das Label an
+   seinem eigenen Rahmen, und die Label mehrerer Markierungen zueinander. Gemessen wird
+   immer die gezeichnete Box in 1x-Pixeln: beim Rahmen die Rechteckgeometrie, beim Label
+   die gemessene Textbox samt Innenabstand. Verschoben wird nur, was der jeweilige Knopf
+   meint, die andere Achse bleibt stehen; erst dadurch lassen sich die Knoepfe
+   kombinieren (linksbuendig UND Oberkante).                                             */
+function boxenAusrichten(B, mode, W, H, setzen){
+  let minX, maxX, cX, minY, maxY, cY;
+  if(B.length === 1){ minX = 0; maxX = W; cX = W/2; minY = 0; maxY = H; cY = H/2; }
+  else {
+    minX = Math.min(...B.map(o => o.b.x));  maxX = Math.max(...B.map(o => o.b.x + o.b.w));
+    minY = Math.min(...B.map(o => o.b.y));  maxY = Math.max(...B.map(o => o.b.y + o.b.h));
+    cX = (minX + maxX)/2; cY = (minY + maxY)/2;
+  }
+  for(const o of B){
+    const b = o.b;
+    if(mode === "left")         setzen(o, minX, null);
+    else if(mode === "hcenter") setzen(o, cX - b.w/2, null);
+    else if(mode === "right")   setzen(o, maxX - b.w, null);
+    else if(mode === "top")     setzen(o, null, minY);
+    else if(mode === "vmiddle") setzen(o, null, cY - b.h/2);
+    else if(mode === "bottom")  setzen(o, null, maxY - b.h);
+  }
+}
+/* Gleiche Abstaende heisst: gleich grosse Luecken zwischen den Kanten, nicht gleiche
+   Mittenabstaende. Bei verschieden breiten Rahmen ist das der Unterschied zwischen
+   "sieht ausgerichtet aus" und "ist es". Die aeusseren beiden bleiben stehen.          */
+function boxenVerteilen(B, axis, setzen){
+  const p = axis === "h" ? "x" : "y", d = axis === "h" ? "w" : "h";
+  B.sort((a, c) => a.b[p] - c.b[p]);
+  const erste = B[0].b, letzte = B[B.length-1].b;
+  const spanne = (letzte[p] + letzte[d]) - erste[p];
+  const summe = B.reduce((s, o) => s + o.b[d], 0);
+  const luecke = (spanne - summe) / (B.length - 1);
+  let lauf = erste[p];
+  for(const o of B){
+    if(axis === "h") setzen(o, lauf, null); else setzen(o, null, lauf);
+    lauf += o.b[d] + luecke;
+  }
+}
+function rahmenSetzen(o, nx, ny){
+  const m = o.m;
+  if(nx !== null){ m.lx += nx - m.x; m.x = nx; }   // das Label wandert mit dem Rahmen
+  if(ny !== null){ m.ly += ny - m.y; m.y = ny; }
+}
+const labelSetzen = (o, nx, ny) => { if(nx !== null) o.m.lx = nx; if(ny !== null) o.m.ly = ny; };
+const rahmenBoxen = () => markAuswahl().map(i => ({m:MARKS[i], b:markRect(MARKS[i])}));
+const labelBoxen  = () => markAuswahl().map(i => ({m:MARKS[i], b:markLabelBox(MARKS[i])}))
+                                        .filter(o => o.m.label);
+
+function markNachAusrichten(){ syncMark(); renderMarkList(); render(); }
+function rahmenAusrichten(mode){
+  const B = rahmenBoxen(); if(!B.length) return;
+  snap("alignR" + mode);
+  const [W,H] = stageSize();
+  boxenAusrichten(B, mode, W, H, rahmenSetzen);
+  markNachAusrichten();
+}
+function rahmenVerteilen(axis){
+  const B = rahmenBoxen(); if(B.length < 3) return;
+  snap("distR" + axis);
+  boxenVerteilen(B, axis, rahmenSetzen);
+  markNachAusrichten();
+}
+/* Gleiche Groesse nimmt das Mass der fuehrenden Markierung, nicht das groesste: so ist
+   vorhersehbar, welches Mass gewinnt, und man waehlt die Vorlage bewusst zuerst aus.  */
+function rahmenAngleichen(was){
+  const B = rahmenBoxen(); if(B.length < 2 || markSel < 0) return;
+  snap("sizeR" + was);
+  const v = MARKS[markSel];
+  for(const o of B){
+    if(o.m === v) continue;
+    if(was === "w") o.m.w = v.w; else o.m.h = v.h;
+  }
+  markNachAusrichten();
+}
+function labelAmRahmen(mode){
+  const ids = markAuswahl(); if(!ids.length) return;
+  snap("labelAn" + mode);
+  for(const i of ids){
+    const m = MARKS[i]; if(!m.label) continue;
+    const R = markRect(m), L = markLabelBox(m), g = m.abstand;
+    if(mode === "xout-left")       m.lx = R.x - g - L.w;
+    else if(mode === "xleft")      m.lx = R.x;
+    else if(mode === "xcenter")    m.lx = R.x + R.w/2 - L.w/2;
+    else if(mode === "xright")     m.lx = R.x + R.w - L.w;
+    else if(mode === "xout-right") m.lx = R.x + R.w + g;
+    else if(mode === "yabove")     m.ly = R.y - g - L.h;
+    else if(mode === "ytop")       m.ly = R.y;
+    else if(mode === "ymiddle")    m.ly = R.y + R.h/2 - L.h/2;
+    else if(mode === "ybottom")    m.ly = R.y + R.h - L.h;
+    else if(mode === "ybelow")     m.ly = R.y + R.h + g;
+  }
+  markNachAusrichten();
+}
+function labelAusrichten(mode){
+  const B = labelBoxen(); if(!B.length) return;
+  snap("alignL" + mode);
+  const [W,H] = stageSize();
+  boxenAusrichten(B, mode, W, H, labelSetzen);
+  markNachAusrichten();
+}
+function labelVerteilen(axis){
+  const B = labelBoxen(); if(B.length < 3) return;
+  snap("distL" + axis);
+  boxenVerteilen(B, axis, labelSetzen);
+  markNachAusrichten();
+}
 
 /* ---- Seitenleiste ---- */
 const STAERKEN = [[100,"Thin"],[200,"ExtraLight"],[300,"Light"],[400,"Regular"],[500,"Medium"],
@@ -1507,9 +1791,10 @@ function renderMarkList(){
   box.innerHTML = "";
   MARKS.forEach((m, i) => {
     const row = document.createElement("div");
-    row.className = "devitem" + (i === markSel ? " sel" : "");
-    row.onclick = e => { if(e.target.classList.contains("x")) return;
-                         markSel = i; syncMark(); renderMarkList(); render(); };
+    row.className = "devitem" + (markSelSet.has(i) ? " sel" : "");
+    if(markSelSet.has(i) && i !== markSel) row.style.boxShadow = "inset 0 0 0 1px var(--ink-300)";
+    row.title = "Klick waehlt einzeln · Strg-Klick nimmt dazu · Umschalt-Klick waehlt den Bereich";
+    row.onclick = e => { if(e.target.classList.contains("x")) return; markWaehlen(i, e); };
     const dot = document.createElement("span");
     dot.className = "dot"; dot.style.background = m.linie;
     const nm = document.createElement("span");
@@ -1519,21 +1804,57 @@ function renderMarkList(){
     const x = document.createElement("button");
     x.className = "x"; x.textContent = "×"; x.title = "Markierung entfernen";
     x.onclick = () => { snap("delMark"); MARKS.splice(i,1);
+                        /* Nach dem Loeschen rutschen die Indizes, die Auswahl muss mit:
+                           sonst zeigt sie auf die falsche oder auf gar keine Markierung. */
+                        const rest = markAuswahl().filter(k => k !== i)
+                                                  .map(k => k > i ? k - 1 : k);
+                        markSelSet.clear(); rest.forEach(k => markSelSet.add(k));
+                        markSel = markSelSet.has(markSel) ? markSel
+                                : (markSel > i ? markSel - 1 : Math.min(markSel, MARKS.length-1));
                         if(markSel >= MARKS.length) markSel = MARKS.length-1;
+                        if(markSel >= 0 && !markSelSet.size) markSelSet.add(markSel);
                         syncMark(); renderMarkList(); render(); };
     row.append(dot, nm, mini, x);
     box.appendChild(row);
   });
+  const n = markAuswahl().length;
   $("#markCount").textContent = MARKS.length
-    ? MARKS.length + (MARKS.length === 1 ? " Markierung" : " Markierungen") : "";
-  $("#markEdit").classList.toggle("show", markSel >= 0 && markSel < MARKS.length);
+    ? MARKS.length + (MARKS.length === 1 ? " Markierung" : " Markierungen")
+      + (n > 1 ? ", " + n + " gewaehlt" : "") : "";
+  const offen = markSel >= 0 && markSel < MARKS.length;
+  $("#markEdit").classList.toggle("show", offen);
+  $("#markAlign").classList.toggle("show", offen);
 }
 function syncMark(){
   const m = MARKS[markSel];
   $("#markEdit").classList.toggle("show", !!m);
+  $("#markAlign").classList.toggle("show", !!m);
   if(!m) return;
+  const n = markAuswahl().length;
+  /* Die Knopfreihen sagen selbst, was sie gerade tun: bei einer Auswahl richtet sich der
+     Rahmen an der Canvas aus, ab zwei aneinander. Ohne diesen Satz klickt man einmal und
+     wundert sich, warum die Markierung an den Bildrand springt.                        */
+  $("#markAlignHint").textContent = n < 2
+    ? "eine Markierung: an der Canvas-Kante"
+    : n + " Markierungen: aneinander (gleiche Abstaende ab 3)";
+  $("#markLabelAlignHint").textContent = n < 2
+    ? "eine Markierung: Label an der Canvas-Kante"
+    : "Label der " + n + " Markierungen zueinander";
+  $("#markMulti").textContent = n > 1
+    ? n + " ausgewaehlt: der Text gilt nur fuer diese eine, Farben, Groessen und Ausrichten "
+      + "fuer alle ausgewaehlten."
+    : "";
+  document.querySelectorAll("[data-rv],[data-lv]").forEach(b => b.disabled = n < 3);
+  document.querySelectorAll("[data-rg]").forEach(b => b.disabled = n < 2);
   $("#markText").value = m.label;
   $("#markColor").value = m.linie; $("#markHex").value = m.linie;
+  $("#markFillOn").checked = m.flaecheAn !== false;
+  $("#markFillAuto").checked = m.flaecheAuto !== false;
+  $("#markFillRow").classList.toggle("show", m.flaecheAn !== false && m.flaecheAuto === false);
+  $("#markFill").value = markFlaeche(m); $("#markFillHex").value = markFlaeche(m);
+  $("#markGap").value = m.abstand;
+  $("#markGapLabel").textContent = "Abstand aussen: " + m.abstand + " px bei 1× — gilt fuer "
+    + "aussen links/rechts und darueber/darunter";
   $("#markTextColor").value = m.textFarbe; $("#markTextHex").value = m.textFarbe;
   $("#markWeight").value = String(m.staerke);
   $("#markSize").value = m.groesse;
@@ -1548,22 +1869,42 @@ function syncMark(){
   $("#markConnWidth").value = m.verbBreite;
   $("#markConnWidthLabel").textContent = "Linienbreite: " + m.verbBreite + " px bei 1×, "
     + (m.verbBreite*RES) + " px im Export";
+  syncMarkKontrast();
+}
+/* Getrennt von syncMark, weil die Farbfelder es beim Tippen aufrufen: es fasst die
+   Eingabefelder nicht an. Wuerde es das tun, schriebe es dem Nutzer "#f5b" mitten im
+   Tippen auf "#f5b400" um und der Cursor spraenge.                                    */
+function syncMarkKontrast(){
+  const m = MARKS[markSel]; if(!m) return;
   document.querySelectorAll("#markSwatches .swatch").forEach(s =>
     s.classList.toggle("sel", s.dataset.c.toLowerCase() === m.linie.toLowerCase()));
+  document.querySelectorAll("#markFillSwatches .swatch").forEach(s =>
+    s.classList.toggle("sel", s.dataset.c.toLowerCase() === markFlaeche(m).toLowerCase()));
   document.querySelectorAll("#markTextSwatches .swatch").forEach(s =>
     s.classList.toggle("sel", s.dataset.c.toLowerCase() === m.textFarbe.toLowerCase()));
-  const k = kontrast(m.flaeche, m.textFarbe), px = m.groesse*RES;
-  const ok = k >= 4.5 || (k >= 3 && (px >= 24 && m.staerke >= 700 || px >= 30));
-  $("#markKontrast").textContent = "Kontrast " + k.toFixed(2).replace(".", ",")
-    + " zu 1, " + (ok ? "in Ordnung" : "zu wenig, 4,5 ist die Grenze");
-  $("#markKontrast").classList.toggle("warn", !ok);
+  const px = m.groesse*RES;
+  if(m.flaecheAn === false){
+    /* Ohne Flaeche steht das Label auf dem Screenshot, und was dort liegt, weiss das
+       Werkzeug nicht. Also keine Zahl erfinden, sondern sagen, dass gemessen werden muss. */
+    $("#markKontrast").textContent = "Ohne Flaeche nicht messbar: der Grund ist der Screenshot. "
+      + "Selbst pruefen, 4,5 zu 1 ist die Grenze.";
+    $("#markKontrast").classList.remove("warn");
+  } else {
+    const k = kontrast(markFlaeche(m), m.textFarbe);
+    const ok = k >= 4.5 || (k >= 3 && (px >= 24 && m.staerke >= 700 || px >= 30));
+    $("#markKontrast").textContent = "Kontrast " + k.toFixed(2).replace(".", ",")
+      + " zu 1, " + (ok ? "in Ordnung" : "zu wenig, 4,5 ist die Grenze");
+    $("#markKontrast").classList.toggle("warn", !ok);
+  }
 }
 function addMark(){
   const v = MARKS[MARKS.length-1];
   const m = mkMark(v ? {x: v.x + 24, y: v.y + 24, linie: v.linie, flaeche: v.flaeche,
+                        flaecheAuto: v.flaecheAuto, flaecheAn: v.flaecheAn,
                         textFarbe: v.textFarbe, staerke: v.staerke, groesse: v.groesse,
-                        breite: v.breite, radius: v.radius, verbBreite: v.verbBreite} : null);
-  MARKS.push(m); markSel = MARKS.length - 1;
+                        breite: v.breite, radius: v.radius, verbBreite: v.verbBreite,
+                        abstand: v.abstand} : null);
+  MARKS.push(m); markNurWaehlen(MARKS.length - 1);
   syncMark(); renderMarkList(); updateBtns(); render();
 }
 
@@ -1595,7 +1936,7 @@ function snap(key){
     act,
     marks: MARKS.map(m => Object.assign({}, m)),
     ovs: OVERLAYS.map(o => ({ref:o, x:o.x, y:o.y, scale:o.scale})),
-    markSel, ovSel
+    markSel, ovSel, markSelSet: markAuswahl()
   });
   if(HIST.length > HIST_MAX) HIST.shift();
   updateUndoBtn();
@@ -1611,6 +1952,9 @@ function undo(){
   OVERLAYS.length = 0;
   for(const e of h.ovs){ e.ref.x = e.x; e.ref.y = e.y; e.ref.scale = e.scale; OVERLAYS.push(e.ref); }
   markSel = Math.min(h.markSel, MARKS.length - 1);
+  markSelSet.clear();
+  for(const k of (h.markSelSet || [])) if(k < MARKS.length) markSelSet.add(k);
+  if(markSel >= 0 && !markSelSet.size) markSelSet.add(markSel);
   ovSel = Math.min(h.ovSel, OVERLAYS.length - 1);
   histKey = ""; histZeit = 0;
   // Bedienelemente nachziehen, sonst zeigen sie den verworfenen Stand
@@ -1698,10 +2042,10 @@ function speichern(blob, name){
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
-async function speichernMitDialog(blob, name){
+async function speichernMitDialog(blob, name, typen){
   const opt = {
     suggestedName: name,
-    types: [{description: state.exportFormat.toUpperCase(),
+    types: typen || [{description: state.exportFormat.toUpperCase(),
              accept: {[MIME[state.exportFormat]]: ENDUNG[state.exportFormat]}}]
   };
   if(letzterGriff) opt.startIn = letzterGriff;
@@ -1727,28 +2071,231 @@ $("#export").addEventListener("click", () => {
   }, MIME[state.exportFormat], q);
 });
 
+/* ---------------- Projekt speichern und laden ----------------
+   Ein Zwischenstand als .zdm.json, gebaut wie beim Image Cropper: die Bilder stecken als
+   Data-URL mit drin, damit die Datei allein genuegt und niemand die Originale nachreichen
+   muss. Gesichert wird die Arbeitsfassung des Screenshots (i.edit), nicht das Original:
+   sie traegt die Radierstriche. Der Preis steht in der Notiz, die Datei wird gross, und
+   der Radierer faengt nach dem Laden bei diesem Stand an statt beim unberuehrten Bild. */
+const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 1;
+const PROJEKT_TYPEN = [{description:"zetcom Device-Mockup-Projekt",
+                        accept:{"application/json":[".json"]}}];
+function bildAusURL(url){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = () => rej(new Error("Bilddaten im Projekt sind beschaedigt"));
+    im.src = url;
+  });
+}
+function bildAlsPNG(im){
+  const c = document.createElement("canvas");
+  c.width = im.naturalWidth; c.height = im.naturalHeight;
+  c.getContext("2d").drawImage(im, 0, 0);
+  return c.toDataURL("image/png");
+}
+function projektStand(){
+  return {
+    app: PROJEKT_APP, version: PROJEKT_VERSION, savedAt: new Date().toISOString(),
+    state: {bgMode:state.bgMode, bgColor:state.bgColor, ratio:state.ratio, freeW:state.freeW,
+            freeH:state.freeH, tool:state.tool, brush:state.brush, exportName:state.exportName,
+            exportFormat:state.exportFormat, exportQuality:state.exportQuality},
+    aktiv: Math.max(0, insts.indexOf(act)),
+    geraete: insts.map(i => {
+      const g = {};
+      for(const k of INST_SKALARE) g[k] = i[k];
+      g.w = i.w; g.h = i.h;
+      g.shot = i.edit ? i.edit.toDataURL("image/png") : null;
+      return g;
+    }),
+    marks: MARKS.map(m => Object.assign({}, m)),
+    overlays: OVERLAYS.map(o => ({name:o.name, x:o.x, y:o.y, scale:o.scale, src:bildAlsPNG(o.img)})),
+    markSel, markSelSet: markAuswahl(), ovSel
+  };
+}
+function projektName(){
+  const roh = (state.exportName || "").trim()
+    .replace(/[\\/:*?"<>|]/g, "").replace(/\.(png|webp|jpe?g|json)$/i, "")
+    .replace(/\.zdm$/i, "");
+  return (roh || "zetcom-mockup-projekt") + ".zdm.json";
+}
+async function projektSpeichern(){
+  let json;
+  try{ json = JSON.stringify(projektStand()); }
+  catch(err){ $("#projectNote").textContent = "Projekt konnte nicht gebaut werden: " + err.message; return; }
+  const blob = new Blob([json], {type:"application/json"});
+  const name = projektName();
+  if(KANN_ZIELORT && $("#askPath").checked) await speichernMitDialog(blob, name, PROJEKT_TYPEN);
+  else speichern(blob, name);
+  $("#projectNote").innerHTML = "Gespeichert als <b>" + name + "</b>, " + fmtBytes(blob.size)
+    + " (Screenshots und Overlays sind eingebettet). Zum Weiterarbeiten wieder laden.";
+}
+const istProjektDatei = f => !!f && (/\.json$/i.test(f.name) || f.type === "application/json");
+
+async function projektAnwenden(P){
+  const s = P.state || {};
+  state.bgMode = s.bgMode === "color" ? "color" : "transparent";
+  state.bgColor = validHex(s.bgColor || "") ? s.bgColor : "#f7f7f7";
+  state.ratio = s.ratio || "1200,800";
+  state.freeW = clamp(+s.freeW || 1200, 200, 4000);
+  state.freeH = clamp(+s.freeH || 800, 200, 4000);
+  state.tool = s.tool || "move";
+  state.brush = clamp(+s.brush || 40, 4, 400);
+  state.exportName = s.exportName || "";
+  state.exportFormat = MIME[s.exportFormat] ? s.exportFormat : "png";
+  state.exportQuality = s.exportQuality != null ? s.exportQuality : 0.9;
+
+  // ---- Geraete: erst alle Bilder holen, dann tauschen, damit ein Fehler nichts zerreisst ----
+  const neu = [];
+  for(const g of (P.geraete || [])){
+    const i = mkInst();
+    for(const k of INST_SKALARE) if(g[k] !== undefined) i[k] = g[k];
+    if(!DEVICES[i.device]) i.device = "desktop";
+    if(!DEVICES[i.device][i.view]) i.view = "front";
+    if(!DEVICES[i.device][i.view][i.frame]) i.frame = "shadow";
+    if(g.shot){
+      const im = await bildAusURL(g.shot);
+      i.img = im; i.w = im.naturalWidth; i.h = im.naturalHeight;
+      i.edit = document.createElement("canvas");
+      i.edit.width = i.w; i.edit.height = i.h;
+      i.edit.getContext("2d").drawImage(im, 0, 0);
+    }
+    neu.push(i);
+  }
+  if(!neu.length) neu.push(mkInst());
+  insts.length = 0; for(const i of neu) insts.push(i);
+  act = insts[clamp(+P.aktiv || 0, 0, insts.length - 1)];
+
+  // ---- Markierungen: Vorgaben zuerst, damit aeltere Dateien die neuen Felder bekommen ----
+  MARKS.length = 0;
+  for(const m of (P.marks || [])){
+    MARKS.push(Object.assign(mkMark({x:0, y:0, w:10, h:10, lx:0, ly:100}), m));
+  }
+  markSel = Math.min(P.markSel != null ? P.markSel : MARKS.length - 1, MARKS.length - 1);
+  markSelSet.clear();
+  for(const k of (P.markSelSet || (markSel >= 0 ? [markSel] : []))) if(k < MARKS.length) markSelSet.add(k);
+
+  // ---- Overlays ----
+  const ovNeu = [];
+  for(const o of (P.overlays || [])){
+    if(!o.src) continue;
+    ovNeu.push({img: await bildAusURL(o.src), name:o.name || "overlay",
+                x:+o.x || 0, y:+o.y || 0, scale:+o.scale || 1});
+  }
+  OVERLAYS.length = 0; for(const o of ovNeu) OVERLAYS.push(o);
+  ovSel = Math.min(P.ovSel != null ? P.ovSel : OVERLAYS.length - 1, OVERLAYS.length - 1);
+
+  // ---- Bedienelemente auf den geladenen Stand ziehen ----
+  if([...$("#size").options].some(o => o.value === state.ratio)) $("#size").value = state.ratio;
+  else { state.ratio = "free"; $("#size").value = "free"; }
+  $("#freeRow").classList.toggle("show", state.ratio === "free");
+  $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
+  $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
+  document.querySelectorAll("#canvasSwatches .swatch").forEach(x =>
+    x.classList.toggle("sel", x.dataset.c.toLowerCase() === state.bgColor.toLowerCase()));
+  $("#exportName").value = state.exportName;
+  $("#quality").value = Math.round(state.exportQuality * 100);
+  $("#qualityLabel").textContent = "Quality: " + Math.round(state.exportQuality * 100) + "%";
+  $("#qualityRow").classList.toggle("show", state.exportFormat !== "png");
+  $("#brush").value = state.brush;
+  $("#brushLabel").textContent = "Brush: " + state.brush + " px";
+  view.classList.toggle("markmode", state.tool === "mark");
+  // Ein geladener Stand ist der neue Anfang, sonst holt Strg+Z das alte Bild zurueck.
+  HIST.length = 0; updateUndoBtn();
+  syncControls(); syncMark(); renderMarkList(); renderOvList(); updateBtns();
+  render(); updateSizePreview();
+}
+async function projektLaden(f){
+  let P;
+  try{ P = JSON.parse(await f.text()); }
+  catch(err){ $("#projectNote").textContent = "Die Datei ist kein lesbares JSON."; return; }
+  if(!P || P.app !== PROJEKT_APP){
+    $("#projectNote").textContent = "Das ist keine Projektdatei des Device Mockup Tools (.zdm.json).";
+    return;
+  }
+  const neuer = P.version > PROJEKT_VERSION
+    ? " Achtung: die Datei stammt aus einer neueren Fassung des Werkzeugs, sie wurde trotzdem geladen." : "";
+  try{
+    await projektAnwenden(P);
+    $("#projectNote").innerHTML = "Projekt geladen"
+      + (P.savedAt ? " (gespeichert " + new Date(P.savedAt).toLocaleString("de-CH") + ")" : "")
+      + "." + neuer;
+  } catch(err){ $("#projectNote").textContent = "Projekt konnte nicht geladen werden: " + err.message; }
+}
+$("#saveProject").addEventListener("click", () => projektSpeichern());
+$("#openProject").addEventListener("click", () => $("#projectFile").click());
+$("#projectFile").addEventListener("change", e => {
+  if(e.target.files[0]) projektLaden(e.target.files[0]);
+  e.target.value = "";
+});
+
 /* ---------------- Markierungen: Bedienelemente ---------------- */
 $("#markWeight").innerHTML = STAERKEN
   .map(([w, nm]) => `<option value="${w}">${w} ${nm}</option>`).join("");
 $("#addMark").addEventListener("click", () => { snap("addMark"); addMark(); });
-function markSet(fn, key){
+/* Aussehen gilt fuer die ganze Auswahl, Text nur fuer die fuehrende Markierung. Sonst
+   traegt nach einem Tippen jede ausgewaehlte denselben Text, und genau das will niemand.
+   Umgekehrt ist "alle Label auf 20 px" der Normalfall und waere einzeln muehsam.       */
+const markZiele = () => { const a = markAuswahl().map(i => MARKS[i]); return a.length ? a : []; };
+function markSet(fn, key, nurFuehrend){
   const m = MARKS[markSel]; if(!m) return;
   snap(key || "markSet");
-  fn(m); syncMark(); renderMarkList(); render();
+  if(nurFuehrend) fn(m); else for(const z of markZiele()) fn(z);
+  syncMark(); renderMarkList(); render();
 }
-$("#markText").addEventListener("input", e => markSet(m => m.label = e.target.value, "markText"));
+$("#markText").addEventListener("input", e => markSet(m => m.label = e.target.value, "markText", true));
 $("#markWeight").addEventListener("change", e => markSet(m => m.staerke = +e.target.value, "markWeight"));
 $("#markSize").addEventListener("input", e => markSet(m => m.groesse = +e.target.value, "markSize"));
 $("#markWidth").addEventListener("input", e => markSet(m => m.breite = +e.target.value, "markWidth"));
 $("#markRadius").addEventListener("input", e => markSet(m => m.radius = +e.target.value, "markRadius"));
 $("#markConn").addEventListener("change", e => markSet(m => m.verbindung = e.target.checked, "markConn"));
 $("#markConnWidth").addEventListener("input", e => markSet(m => m.verbBreite = +e.target.value, "markConnW"));
-bindColor("#markColor", "#markHex", v => { const m = MARKS[markSel]; if(m){ m.linie = v; m.flaeche = v; } });
-bindColor("#markTextColor", "#markTextHex", v => { const m = MARKS[markSel]; if(m) m.textFarbe = v; });
-bindSwatches("#markSwatches", "#markColor", "#markHex",
-  v => { const m = MARKS[markSel]; if(m){ m.linie = v; m.flaeche = v; } });
-bindSwatches("#markTextSwatches", "#markTextColor", "#markTextHex",
-  v => { const m = MARKS[markSel]; if(m) m.textFarbe = v; });
+$("#markGap").addEventListener("input", e => markSet(m => m.abstand = +e.target.value, "markGap"));
+$("#markFillOn").addEventListener("change", e => markSet(m => m.flaecheAn = e.target.checked, "markFillOn"));
+$("#markFillAuto").addEventListener("change", e => markSet(m => {
+  m.flaecheAuto = e.target.checked;
+  if(m.flaecheAuto) m.flaeche = m.linie;   // wieder angekoppelt heisst: Linienfarbe gewinnt
+}, "markFillAuto"));
+/* Die Linienfarbe zieht die Flaeche nur mit, solange die Kopplung steht. Ist sie geloest,
+   bleibt die Flaeche, wo sie ist: genau dafuer wurde sie geloest.                       */
+function setLinie(v){
+  const m = MARKS[markSel]; if(!m) return;
+  for(const z of markZiele()){
+    z.linie = v;
+    if(z.flaecheAuto !== false) z.flaeche = v;
+  }
+  if(m.flaecheAuto !== false){ $("#markFill").value = v; $("#markFillHex").value = v; }
+  syncMarkKontrast(); renderMarkList();
+}
+function setFlaeche(v){
+  const m = MARKS[markSel]; if(!m) return;
+  // Wer die Flaeche von Hand faerbt, meint sie und nicht die Linie: Kopplung faellt.
+  for(const z of markZiele()){ z.flaeche = v; z.flaecheAuto = false; }
+  $("#markFillAuto").checked = false;
+  $("#markFillRow").classList.toggle("show", m.flaecheAn !== false);
+  syncMarkKontrast();
+}
+const setTextFarbe = v => { if(MARKS[markSel]){ for(const z of markZiele()) z.textFarbe = v;
+                                                syncMarkKontrast(); } };
+bindColor("#markColor", "#markHex", setLinie);
+bindColor("#markFill", "#markFillHex", setFlaeche);
+bindColor("#markTextColor", "#markTextHex", setTextFarbe);
+bindSwatches("#markSwatches", "#markColor", "#markHex", setLinie);
+bindSwatches("#markFillSwatches", "#markFill", "#markFillHex", setFlaeche);
+bindSwatches("#markTextSwatches", "#markTextColor", "#markTextHex", setTextFarbe);
+
+/* Ausrichten: eine Reihe Knoepfe, ein Verhalten. Die Zuordnung steht im HTML als
+   data-Attribut, damit hier keine zweite Liste gepflegt werden muss.                   */
+document.querySelectorAll("#markAlign .aln").forEach(b => b.addEventListener("click", () => {
+  const d = b.dataset;
+  if(d.ra) rahmenAusrichten(d.ra);
+  else if(d.rv) rahmenVerteilen(d.rv);
+  else if(d.rg) rahmenAngleichen(d.rg);
+  else if(d.lr) labelAmRahmen(d.lr);
+  else if(d.la) labelAusrichten(d.la);
+  else if(d.lv) labelVerteilen(d.lv);
+}));
 
 /* ---------------- Empfohlene Groessen ----------------
    Maße aus den Vault-Standards: Website aus Image Standards (Panel, Ratio, Template),
