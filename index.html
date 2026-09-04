@@ -8,7 +8,9 @@
      Code gezeichnet plus Markierungen. 2026-08-28 Ausrichten, Projektdatei, Fenstergroesse
      am Screenshot, Exportskala, Zuschnitt, und die Oberflaeche auf die CD gezogen.
      2026-08-29 Aufteilung gedreht: Einstellungen mit Reitern links, Buehne rechts,
-     Werkzeuge waagerecht in der Kopfleiste. -->
+     Werkzeuge waagerecht in der Kopfleiste.
+     2026-09-04 Zwei Modi: Einfach (vier Schritte, sonst nichts) und Erweitert (alles
+     wie bisher). Der Schalter steht links in der Kopfleiste. -->
 <style data-zetcom-source="tokens.css">
 /* zetcom-canonical:start tokens.css */
 /* ============================================================
@@ -3214,6 +3216,42 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   .free .z-field { flex: 1; min-width: 0; }
   .paar { display: flex; gap: var(--space-component-xxs); }
   .paar > * { flex: 1; min-width: 0; }
+
+  /* ---- Zwei Modi, seit 04.09.2026 ----
+     Robins Vorgabe: das Werkzeug geht an die ganze Firma, und wer mit Gestaltung nie zu
+     tun hatte, soll ein Mockup bauen koennen, ohne eine einzige Einstellung zu verstehen.
+     Einfach ist deshalb keine zweite Anwendung, sondern derselbe Kern mit vier Schritten
+     davor: Bild, Rahmen, Zweck, Datei. Alles Uebrige entscheidet das Werkzeug still.
+     Erweitert ist unveraendert das, was vorher da war. Nichts wird ausgebaut, nur
+     verborgen: wer umschaltet, findet seine Einstellung an derselben Stelle wieder. */
+  body.einfach #panel > .z-tabs { display: none; }
+  body.einfach #panel > section[data-bereich="einfach"].aktiv { display: block; }
+  body:not(.einfach) #panel > section[data-bereich="einfach"] { display: none !important; }
+  body.einfach #werkzeugleiste,
+  body.einfach #projektKnopf,
+  body.einfach #speicherstand,
+  body.einfach #speichertrenner { display: none; }
+
+  .z-modus { margin-left: var(--space-component-xs); }
+
+  /* Die Kachel zeigt den Rahmen selbst, nicht ein Sinnbild davon: der Iconsatz kennt
+     kein Geraet, und freihaendig dazuzeichnen ist verboten. Gezeichnet wird derselbe
+     Rahmen, der gleich auf der Flaeche steht, damit die Wahl keine Uebersetzung braucht. */
+  .e-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .e-kachel {
+    display: flex; flex-direction: column; align-items: stretch; gap: 4px;
+    padding: 6px; cursor: pointer; text-align: left;
+    background: var(--surface-sunken);
+    border: var(--border-width) solid transparent;
+    font-family: var(--font-sans); font-size: var(--ui-body); color: var(--text-strong);
+  }
+  .e-kachel:hover { border-color: var(--color-black-30); }
+  .e-kachel[aria-pressed="true"] {
+    background: var(--color-white); border-color: var(--ui-ink);
+    font-weight: var(--weight-semibold);
+  }
+  .e-kachel canvas { display: block; width: 100%; height: 54px; }
+  .e-kachel .wort { line-height: 1.2; }
 </style>
 </head>
 <body>
@@ -3222,7 +3260,14 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   <header class="z-appbar">
     <img class="z-logo z-logo--pfeil" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTA0IiBoZWlnaHQ9IjUwNCIgdmlld0JveD0iMCAwIDUwNCA1MDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQo8cmVjdCB4PSIyMDEuNjAyIiB5PSIxMDAuOCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyMDEuNjAyIDEwMC44KSIgZmlsbD0iI0QxMzNDMyI+PC9yZWN0Pg0KPHJlY3QgeD0iMzAyLjQwMiIgeT0iMTAwLjgiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMzAyLjQwMiAxMDAuOCkiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjQwMy4xOTkiIHk9IjEwMC44IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDQwMy4xOTkgMTAwLjgpIiBmaWxsPSIjRkY1OTAwIj48L3JlY3Q+DQo8cmVjdCB4PSIzMDIuNDAyIiB5PSIyMDEuNiIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAzMDIuNDAyIDIwMS42KSIgZmlsbD0iIzY0MzJDOSI+PC9yZWN0Pg0KPHJlY3QgeD0iNDAzLjE5OSIgeT0iMjAxLjYiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgNDAzLjE5OSAyMDEuNikiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjIwMS42MDIiIHk9IjMwMi40IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDIwMS42MDIgMzAyLjQpIiBmaWxsPSIjRjVCNDAwIj48L3JlY3Q+DQo8cmVjdCB4PSI0MDMuMTk5IiB5PSIzMDIuNCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCA0MDMuMTk5IDMwMi40KSIgZmlsbD0iIzJBOTFGRiI+PC9yZWN0Pg0KPC9zdmc+" alt="zetcom">
 
-    <nav class="z-werkzeuge" aria-label="Tools">
+    <div class="z-schalter z-modus" role="group" aria-label="How much of the tool you see">
+      <button class="modusbtn" data-modus="einfach"   aria-pressed="true"
+        title="Four steps and nothing else. The tool decides the rest">Simple</button>
+      <button class="modusbtn" data-modus="erweitert" aria-pressed="false"
+        title="Every setting the tool has">Advanced</button>
+    </div>
+
+    <nav class="z-werkzeuge" id="werkzeugleiste" aria-label="Tools">
       <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)">Select</button>
       <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)">Erase</button>
       <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)">Callout</button>
@@ -3240,7 +3285,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
       <button class="z-btn z-btn--text z-btn--glyph" id="redoBtn" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M4 5 V11 H20"/><path d="M15 6 L20 11 L15 16"/></svg>
       </button>
-      <span class="trenner" aria-hidden="true"></span>
+      <span class="trenner" id="speichertrenner" aria-hidden="true"></span>
       <span class="z-meta" id="speicherstand">Nothing saved yet</span>
       <button class="z-btn z-btn--text" data-bereich="projekt" id="projektKnopf">Project</button>
       <button class="z-btn z-btn--text" data-bereich="hilfe" id="hilfeKnopf">Help</button>
@@ -3261,6 +3306,81 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         </nav>
 
         <!-- ============ DEVICE ============ -->
+        <!-- ============ SIMPLE ============ -->
+        <section data-bereich="einfach">
+          <h2>Make a mockup</h2>
+          <p class="z-meta">Four steps, from top to bottom. Whatever is not asked for here, the tool decides for you.</p>
+
+          <div class="z-note" id="eExtra" hidden></div>
+
+          <div class="z-gruppe">
+            <span class="z-gruppe-titel">Step 1, your screenshot</span>
+            <button class="z-btn z-btn--outline" id="eBildWaehlen" style="width:100%">Choose an image</button>
+            <span class="z-hinweis" id="eBildStand"></span>
+          </div>
+
+          <div class="z-gruppe">
+            <span class="z-gruppe-titel">Step 2, what it sits in</span>
+            <div class="e-kacheln" role="group" aria-label="What the screenshot sits in">
+              <button class="e-kachel" data-egeraet="desktop" aria-pressed="true">
+                <canvas width="240" height="112" aria-hidden="true"></canvas>
+                <span class="wort">Monitor</span>
+              </button>
+              <button class="e-kachel" data-egeraet="laptop" aria-pressed="false">
+                <canvas width="240" height="112" aria-hidden="true"></canvas>
+                <span class="wort">Laptop</span>
+              </button>
+              <button class="e-kachel" data-egeraet="phone" aria-pressed="false">
+                <canvas width="240" height="112" aria-hidden="true"></canvas>
+                <span class="wort">Phone</span>
+              </button>
+              <button class="e-kachel" data-egeraet="browser" aria-pressed="false">
+                <canvas width="240" height="112" aria-hidden="true"></canvas>
+                <span class="wort">Browser window</span>
+              </button>
+              <button class="e-kachel" data-egeraet="window" aria-pressed="false">
+                <canvas width="240" height="112" aria-hidden="true"></canvas>
+                <span class="wort">Plain frame</span>
+              </button>
+            </div>
+            <span class="z-hinweis" id="eGeraetHinweis"></span>
+          </div>
+
+          <div class="z-gruppe">
+            <span class="z-gruppe-titel">Step 3, what you need it for</span>
+            <div class="z-objekte" id="eZwecke"></div>
+            <span class="z-hinweis" id="eAusgabe"></span>
+          </div>
+
+          <div class="z-gruppe">
+            <span class="z-gruppe-titel">Step 4, take it</span>
+            <button class="z-btn" id="eLaden" style="width:100%">Download the image</button>
+            <span class="z-hinweis" id="eLadenHinweis"></span>
+          </div>
+
+          <details class="z-mehr">
+            <summary>Two more things you can change</summary>
+            <div class="z-gruppe">
+              <span class="z-gruppe-titel">How big it sits in the picture</span>
+              <div class="z-schalter" role="group" aria-label="How big">
+                <button class="egroessebtn" data-size="75"  aria-pressed="false">Small</button>
+                <button class="egroessebtn" data-size="80"  aria-pressed="true">Medium</button>
+                <button class="egroessebtn" data-size="100" aria-pressed="false">Large</button>
+              </div>
+              <span class="z-hinweis">You can also drag the device on the canvas, and drag the screenshot inside the screen.</span>
+            </div>
+            <div class="z-gruppe">
+              <span class="z-gruppe-titel">Around the device</span>
+              <div class="z-schalter" role="group" aria-label="Around the device">
+                <button class="ebgbtn" data-ebg="transparent" aria-pressed="true">Nothing</button>
+                <button class="ebgbtn" data-ebg="white"       aria-pressed="false">White</button>
+                <button class="ebgbtn" data-ebg="grey"        aria-pressed="false">Light grey</button>
+              </div>
+              <span class="z-hinweis" id="eBgHinweis"></span>
+            </div>
+          </details>
+        </section>
+
         <section data-bereich="geraet" class="aktiv">
           <h2>Device</h2>
 
@@ -3700,6 +3820,14 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
           <p class="z-meta">Four steps to an image. For everything else, walk through the four tabs on the left.</p>
 
           <div class="z-gruppe">
+            <span class="z-gruppe-titel">Simple and Advanced</span>
+            <span class="z-hinweis">Top left you switch between the two. <strong>Simple</strong> asks four
+              questions and decides the rest: one device, no callouts, and the file that fits the purpose
+              you picked. <strong>Advanced</strong> shows every setting the tool has. Nothing is lost when
+              you switch, the canvas stays as it is, and the choice is remembered for the next time.</span>
+          </div>
+
+          <div class="z-gruppe">
             <span class="z-gruppe-titel">How it works</span>
             <ol class="z-list" style="padding-left:1.1em;margin:0">
               <li>Drop a screenshot onto the canvas.</li>
@@ -3739,7 +3867,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
       <div id="ablage">
         <div>
           <p><strong>Drop a screenshot here.</strong></p>
-          <p class="z-meta">Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.</p>
+          <p class="z-meta" id="ablageHinweis">Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.</p>
         </div>
       </div>
       <div class="zoomfeld" role="group" aria-label="View zoom">
@@ -4597,6 +4725,9 @@ function loadScreenshot(f, i){
     i.edit.getContext("2d").drawImage(im, 0, 0);
     i.undo.length = 0;
     i.fitMode = "fill";
+    /* Im einfachen Modus nimmt ein Rahmen ohne eigenes Bildschirmmass die Form des
+       Screenshots an. Sonst beschneidet er still, und genau das versteht dort niemand. */
+    if(modus === "einfach" && KANN_ANPASSEN(i.device)) i.frameSize = "shot";
     beruehrt();
     if(i === act) syncControls();   // der Hinweis zur Fensteranpassung nennt das neue Mass
     render();
@@ -6266,10 +6397,16 @@ if(!KANN_ZIELORT){
    Kopfleiste. Sie sind auch keine Orte, an denen man arbeitet, sondern etwas, das
    man einmal aufmacht.
    Der Ort steht in der Adresse, damit ein weitergegebener Link dort landet.        */
-const BEREICHE = ["geraet", "markierung", "overlay", "ausgabe", "projekt", "hilfe"];
-let bereich = "geraet";
+const BEREICHE = ["einfach", "geraet", "markierung", "overlay", "ausgabe", "projekt", "hilfe"];
+/* Projekt und Hilfe sind Knoepfe, keine Orte: von dort will man zurueck an die Arbeit.
+   Deshalb merkt sich die Oberflaeche den letzten Arbeitsort, und ein zweiter Klick auf
+   denselben Knopf geht dorthin zurueck. Ohne das gaebe es im einfachen Modus keinen Weg
+   zurueck, dort steht keine Reiterzeile. */
+const ARBEITSORTE = ["einfach", "geraet", "markierung", "overlay", "ausgabe"];
+let bereich = "geraet", letzterArbeitsort = "geraet";
 function zeigeBereich(name, ausAdresse){
   if(!BEREICHE.includes(name)) name = "geraet";
+  if(ARBEITSORTE.includes(name)) letzterArbeitsort = name;
   bereich = name;
   document.querySelectorAll("#panel section").forEach(s =>
     s.classList.toggle("aktiv", s.dataset.bereich === name));
@@ -6284,7 +6421,10 @@ function zeigeBereich(name, ausAdresse){
 }
 document.querySelectorAll("[data-bereich]").forEach(b => {
   if(!b.dataset.bereich || b.tagName === "SECTION") return;
-  b.addEventListener("click", e => { e.preventDefault(); zeigeBereich(b.dataset.bereich); });
+  b.addEventListener("click", e => {
+    e.preventDefault();
+    zeigeBereich(b.dataset.bereich === bereich ? letzterArbeitsort : b.dataset.bereich);
+  });
 });
 window.addEventListener("hashchange", () => zeigeBereich(location.hash.slice(1), true));
 
@@ -6465,10 +6605,17 @@ function syncOberflaeche(){
     : "No image in this device yet. Drop one on the canvas, paste it, or pick a file.";
   const leer = insts.every(i => !i.img) && !OVERLAYS.length && !MARKS.length;
   $("#ablage").classList.toggle("zeigen", leer);
+  /* Der Hinweis auf der leeren Flaeche nennt den Weg, den es im jeweiligen Modus gibt.
+     Im einfachen Modus steht kein Reiter "Device" da, auf den er zeigen koennte. */
+  const ah = $("#ablageHinweis");
+  if(ah) ah.textContent = modus === "einfach"
+    ? "Or paste it with Ctrl and V, or press Choose an image on the left. Then work down the four steps."
+    : "Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.";
   const inh = $("#buehne");
   if(inh) inh.classList.toggle("greift", !!inhaltModus);
   syncFokus();
   syncDevAlign();
+  syncEinfach();
 }
 function syncFokus(){
   const f = $("#fokusAn"); if(!f) return;
@@ -6626,6 +6773,7 @@ for(const [key, dev] of Object.entries(DEVICES)){
         slot.bb = frameBBox(im);
         if(braucht_sil) slot.sil = frameSil(im);
         if(--pending === 0){
+          zeichneMiniaturen();
           syncControls(); render(); einpassen();
           if(document.fonts?.ready) document.fonts.ready.then(render);
         }
@@ -6635,11 +6783,233 @@ for(const [key, dev] of Object.entries(DEVICES)){
     }
   }
 }
+
+/* ================= Einfach und Erweitert, seit 04.09.2026 =================
+   Robins Vorgabe: das Werkzeug geht an jeden im Haus, auch an den, der mit Gestaltung
+   nie zu tun hatte. Zwei Wege in dieselbe Anwendung, kein zweites Programm:
+
+   EINFACH stellt vier Fragen und entscheidet den Rest. Bild, Rahmen, Zweck, Datei, in
+   dieser Reihenfolge untereinander, und jeder Schritt sagt in einem Satz, was er tut.
+   Was hier nicht steht, ist nicht abgeschaltet, sondern gesetzt: ein Geraet, keine
+   Markierungen, Werkzeug Auswahl, Skala zweifach, und das Ausgabemass kommt aus dem
+   Zweck statt aus einer Liste mit sechzehn Eintraegen.
+   ERWEITERT ist unveraendert die Oberflaeche vom 29.08.2026.
+
+   Drei Entscheidungen, die nicht offensichtlich sind:
+   1. Der Zweck ersetzt das Mass, nicht umgekehrt. "PowerPoint slide" sagt jedem etwas,
+      "1920 x 1080 PNG" nur dem, der es ohnehin weiss. Unter dem Knopf steht trotzdem
+      beides, damit niemand hinterher raten muss, was er heruntergeladen hat.
+   2. Die Kachel zeigt den Rahmen, den sie waehlt. Ein gezeichnetes Sinnbild waere hier
+      verboten und auch schlechter: der Rahmen selbst ist die genaueste Vorschau.
+   3. Der Modus steht im Browser, nicht in der Adresse. Er ist eine Eigenschaft des
+      Menschen davor, kein Ort im Werkzeug: ein weitergegebener Link soll die Stelle
+      treffen, nicht den Anfaenger zum Fortgeschrittenen machen.                       */
+const MODUS_SCHLUESSEL = "zetcom-mockup-modus";
+let modus = "einfach";
+
+/* Der Zweck, in der Sprache dessen, der ihn hat. Mass und Format sind dieselben Werte,
+   die in GROESSEN stehen; geaendert wird dort, hier steht nur die Auswahl daraus.     */
+const ZWECKE = [
+  {k:"slide",    wort:"PowerPoint slide",   mass:"1920,1080", fmt:"png",  neben:"1920 x 1080"},
+  {k:"linkedin", wort:"LinkedIn post",      mass:"1200,1200", fmt:"png",  neben:"1200 x 1200"},
+  {k:"website",  wort:"Website",            mass:"2126,1417", fmt:"webp", neben:"2126 x 1417"},
+  {k:"word",     wort:"Word or email",      mass:"1200,800",  fmt:"png",  neben:"1200 x 800"},
+  {k:"knapp",    wort:"Just the mockup",    mass:"content",   fmt:"png",  neben:"cut to size"}
+];
+const zweckJetzt = () =>
+  (ZWECKE.find(z => z.mass === state.ratio && z.fmt === state.exportFormat) || {}).k || "";
+
+const E_GERAET = {
+  desktop: "A screen on a stand. The usual choice for a website.",
+  laptop:  "A notebook with the lid open.",
+  phone:   "A phone, upright. Take a narrow screenshot for this one.",
+  browser: "No device around it: your screenshot with a browser bar on top and a soft shadow.",
+  window:  "A plain frame around a part of a screen, without any device."
+};
+const E_HINTERGRUND = {
+  transparent: "The corners stay empty, so the picture works on any colour. In Word it looks white.",
+  white:       "White behind the device. The safe choice for a printed page.",
+  grey:        "The light grey of the website sections behind the device."
+};
+
+/* Die Kacheln zeichnen denselben Rahmen, der gleich auf der Flaeche steht: erst die
+   Bildschirmflaeche als graues Viereck, damit auch der duenne Rahmen zu sehen ist,
+   darueber das Rahmenbild. Kein Wert wird geraten, bb und quad kommen aus derselben
+   Vermessung, aus der das Werkzeug rendert.                                          */
+function zeichneMiniatur(c, key){
+  const V = DEVICES[key]; if(!V || !V.front) return;
+  /* Die Schattenfassung, nicht die schlichte: Browser und schlichter Rahmen sind nur
+     eine Haarlinie, ohne Schatten sieht man auf der Kachel fast nichts. */
+  const slot = V.front.shadow || V.front.plain, bb = slot && slot.bb;
+  if(!bb || !slot.img) return;
+  const x = c.getContext("2d");
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.clearRect(0, 0, c.width, c.height);
+  const rand = 8;
+  const s = Math.min((c.width - rand*2)/bb.w, (c.height - rand*2)/bb.h);
+  x.setTransform(s, 0, 0, s,
+                 (c.width  - bb.w*s)/2 - bb.x*s,
+                 (c.height - bb.h*s)/2 - bb.y*s);
+  const q = V.front.quad;
+  x.beginPath();
+  q.forEach((p, k) => k ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]));
+  x.closePath();
+  x.fillStyle = TOKEN("--color-black-20");
+  x.fill();
+  if(slot.back) x.drawImage(slot.back, 0, 0);
+  x.drawImage(slot.img, 0, 0);
+}
+function zeichneMiniaturen(){
+  document.querySelectorAll(".e-kachel").forEach(b => {
+    const c = b.querySelector("canvas");
+    if(c) zeichneMiniatur(c, b.dataset.egeraet);
+  });
+}
+
+/* Die Zweckliste ist dieselbe Objektzeile wie ueberall im Panel: eine Zeile, ein Ziel,
+   rechts die Zahl, die man hinterher wiedererkennt.                                   */
+(function baueZwecke(){
+  const w = $("#eZwecke"); if(!w) return;
+  for(const z of ZWECKE){
+    const b = document.createElement("button");
+    b.className = "z-objekt ezweckbtn";
+    b.dataset.zweck = z.k;
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = '<span class="punkt" aria-hidden="true"></span>'
+                + '<span class="name"></span><span class="neben"></span>';
+    b.querySelector(".name").textContent = z.wort;
+    b.querySelector(".neben").textContent = z.neben;
+    b.addEventListener("click", () => setZweck(z.k));
+    w.appendChild(b);
+  }
+})();
+
+/* Der Zweck setzt Mass und Format ueber dieselben Bedienteile, die der erweiterte Modus
+   hat. Kein zweiter Pfad in den Zustand: sonst laufen die beiden Modi auseinander, und
+   die Ausgabeliste zeigt etwas anderes an als das, was heruntergeladen wird.          */
+function setZweck(k){
+  const z = ZWECKE.find(x => x.k === k); if(!z) return;
+  const liste = $("#size");
+  liste.value = z.mass;
+  liste.dispatchEvent(new Event("change"));
+  const f = document.querySelector('.fmtbtn[data-fmt="' + z.fmt + '"]');
+  if(f && state.exportFormat !== z.fmt) f.click();
+  /* Mit dem Zweck aendert sich die Flaeche, oft um das Doppelte. Ohne Einpassen steht
+     danach ein angeschnittenes Bild da, und wer den Zoom unten rechts nicht kennt,
+     haelt das fuer den Ausschnitt, den er bekommt. */
+  einpassen();
+  syncEinfach();
+}
+
+document.querySelectorAll(".e-kachel").forEach(b =>
+  b.addEventListener("click", () => {
+    const ziel = document.querySelector('.devicebtn[data-device="' + b.dataset.egeraet + '"]');
+    if(ziel) ziel.click();
+    /* Ein Rahmen ohne eigenes Bildschirmmass nimmt im einfachen Modus die Form des
+       Screenshots an, dann wird nichts still beschnitten. */
+    if(KANN_ANPASSEN(act.device) && act.img){
+      const fs = document.querySelector('.framesizebtn[data-framesize="shot"]');
+      if(fs) fs.click();
+    }
+    syncEinfach();
+  }));
+document.querySelectorAll(".egroessebtn").forEach(b =>
+  b.addEventListener("click", () => { setDevPreset(b.dataset.size); syncEinfach(); }));
+document.querySelectorAll(".ebgbtn").forEach(b =>
+  b.addEventListener("click", () => {
+    const w = b.dataset.ebg;
+    state.bgMode = w === "transparent" ? "transparent" : "color";
+    if(w !== "transparent"){
+      state.bgColor = TOKEN(w === "white" ? "--color-white" : "--color-grey-ultra-100");
+      $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
+    }
+    $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
+    render();
+  }));
+$("#eBildWaehlen").addEventListener("click", () => $("#file").click());
+$("#eLaden").addEventListener("click", () => { if(!$("#eLaden").disabled) $("#export").click(); });
+
+const eHintergrund = () => state.bgMode === "transparent" ? "transparent"
+  : state.bgColor.toLowerCase() === TOKEN("--color-white").toLowerCase() ? "white" : "grey";
+
+function syncEinfach(){
+  if(!$("#eBildStand")) return;
+  const hat = insts.some(i => i.img);
+  $("#eBildWaehlen").textContent = act.img ? "Choose a different image" : "Choose an image";
+  $("#eBildStand").textContent = act.img
+    ? "Loaded, " + act.w + " by " + act.h + " pixels."
+    : "Nothing yet. You can also drop a file on the dark area, or paste one with Ctrl and V.";
+  markiere(".e-kachel",     b => b.dataset.egeraet === act.device);
+  markiere(".ezweckbtn",    b => b.dataset.zweck === zweckJetzt());
+  markiere(".egroessebtn",  b => b.dataset.size === act.sizeMode);
+  markiere(".ebgbtn",       b => b.dataset.ebg === eHintergrund());
+  $("#eGeraetHinweis").textContent = E_GERAET[act.device] || "";
+  $("#eBgHinweis").textContent = E_HINTERGRUND[eHintergrund()] || "";
+  const R = exportRahmen();
+  /* Warum die Datei doppelt so gross ist wie die Zeile daneben: die Skala steht auf
+     zweifach, damit das Bild auf einem guten Bildschirm scharf bleibt. Ohne den Satz
+     liest sich das wie ein Fehler. */
+  const doppelt = state.exportScale === 2
+    ? ", twice the size in the line above so it stays sharp" : "";
+  $("#eAusgabe").textContent = zweckJetzt()
+    ? "You get a " + FMT_NAME[state.exportFormat] + " file, " + R.w + " by " + R.h
+      + " pixels" + doppelt + "."
+    : "Nothing picked, so it stays at " + FMT_NAME[state.exportFormat] + ", " + R.w + " by "
+      + R.h + " pixels" + doppelt + ". Pick a line above and the tool sets it for you.";
+  /* Ohne Bild waere die Datei ein leerer Rahmen. Der Knopf sagt, warum er nicht geht:
+     ein grauer Knopf ohne Grund daneben ist eine Sackgasse.                           */
+  $("#eLaden").disabled = !hat;
+  $("#eLadenHinweis").textContent = hat
+    ? "The browser asks where to put it."
+    : "Choose a screenshot first, then this works.";
+  if(modus === "einfach"){
+    $("#export").disabled = !hat;
+    $("#export").title = hat ? "" : "Choose a screenshot first";
+  } else {
+    $("#export").disabled = false;
+    $("#export").title = "";
+  }
+  /* Was aus dem erweiterten Modus auf der Flaeche steht, wird benannt statt verschwiegen:
+     sonst sieht jemand drei Geraete und findet im Panel nur eins.                       */
+  const dazu = [];
+  if(insts.length > 1) dazu.push(insts.length + " devices");
+  if(MARKS.length) dazu.push(MARKS.length === 1 ? "one callout" : MARKS.length + " callouts");
+  if(OVERLAYS.length) dazu.push(OVERLAYS.length === 1 ? "one extra image"
+                                                      : OVERLAYS.length + " extra images");
+  const n = $("#eExtra");
+  n.hidden = !dazu.length;
+  if(dazu.length) n.textContent = "Also on the canvas, from the advanced mode: "
+    + dazu.join(", ") + ". Switch to Advanced to change them.";
+}
+
+function setModus(m){
+  modus = m === "erweitert" ? "erweitert" : "einfach";
+  document.body.classList.toggle("einfach", modus === "einfach");
+  markiere(".modusbtn", b => b.dataset.modus === modus);
+  try { localStorage.setItem(MODUS_SCHLUESSEL, modus); } catch(e){ /* privates Fenster */ }
+  if(modus === "einfach"){
+    setTool("move");
+    zeichneMiniaturen();
+    zeigeBereich("einfach");
+  } else if(bereich === "einfach"){
+    zeigeBereich("geraet");
+  }
+  syncEinfach();
+}
+document.querySelectorAll(".modusbtn").forEach(b =>
+  b.addEventListener("click", () => setModus(b.dataset.modus)));
+
 /* Startzustand der Oberflaeche: der Ort kommt aus der Adresse, damit ein weitergegebener
-   Link dort landet, wo er hinzeigt. Danach einmal einpassen, sonst steht die Flaeche in
-   der Ecke der Buehne.                                                              */
-zeigeBereich(location.hash.slice(1) || "geraet", true);
+   Link dort landet, wo er hinzeigt. Nennt die Adresse einen Ort, den es nur im erweiterten
+   Modus gibt, gilt der Ort und nicht der gemerkte Modus: der Link zeigt sonst auf etwas,
+   das nicht da ist. Danach einmal einpassen, sonst steht die Flaeche in der Ecke.     */
+const startOrt = location.hash.slice(1);
+let startModus = "einfach";
+try { startModus = localStorage.getItem(MODUS_SCHLUESSEL) || "einfach"; } catch(e){}
+if(startOrt && startOrt !== "einfach" && BEREICHE.includes(startOrt)) startModus = "erweitert";
+zeigeBereich(startOrt || (startModus === "einfach" ? "einfach" : "geraet"), true);
 setTool("move");
+setModus(startModus);
 syncSpeicherstand(); updateUndoBtn(); updateRedoBtn();
 einpassen();
 </script>
