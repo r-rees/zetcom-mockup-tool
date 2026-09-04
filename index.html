@@ -3136,6 +3136,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   .z-buehne[data-werkzeug="hand"], .z-buehne.greift { cursor: grab; }
   .z-buehne[data-werkzeug="hand"].zieht, .z-buehne.zieht { cursor: grabbing; }
   .z-buehne[data-werkzeug="mark"]  { cursor: crosshair; }
+  .z-buehne[data-werkzeug="crop"]  { cursor: crosshair; }
   .z-buehne[data-werkzeug="erase"] { cursor: cell; }
 
   /* Erste Hilfe auf leerer Buehne, genau dort, wo das Bild hinsoll. */
@@ -3247,6 +3248,12 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   body.einfach .z-gruppe + .z-gruppe { margin-top: var(--space-component-xs); }
   body.einfach .z-gruppe > .z-gruppe-titel { margin-bottom: 4px; }
   body.einfach .z-gruppe .z-hinweis { margin-top: 4px; }
+  /* Ein leerer Hinweis kostet sonst seinen Abstand, und die Zeile fehlt unten. */
+  body.einfach .z-hinweis:empty { display: none; }
+  /* Die Notiz ueber Objekte aus dem erweiterten Modus ist meistens nicht da. Ohne diese
+     Zeile behielte sie trotzdem ihren Abstand: .z-note setzt display, und das schlaegt
+     das hidden-Attribut. */
+  .z-note[hidden] { display: none; }
 
   /* Eine Zeile im einfachen Modus: links das Wort, rechts das Bedienteil. Ein eigener
      Titel ueber jedem Schalter wuerde die Leiste doppelt so hoch machen. */
@@ -3256,6 +3263,11 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   }
   .e-zeile.hideable { display: none; }
   .e-zeile.hideable.show { display: grid; }
+  /* Ein Haken traegt seine Beschriftung selbst, er braucht die Spalte links nicht und
+     bricht darin um. Deshalb eine eigene Zeilenart ueber die ganze Breite. */
+  .e-zeile--haken { display: flex; align-items: center; gap: var(--space-component-xxs); }
+  .e-zeile--haken > .z-haken { flex: none; white-space: nowrap; }
+  .e-zeile--haken > .z-field { flex: 1; min-width: 0; }
   /* Zwei kurze Sachen in einer Zeile: Winkel und Schatten haben zusammen fuenf Knoepfe
      und passen nebeneinander. Zwei einzelne Zeilen daraus zu machen kostet 28 Punkte
      Hoehe, und die fehlen unten beim vierten Schritt. */
@@ -3286,8 +3298,50 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
     background: var(--color-white); border-color: var(--ui-ink);
     font-weight: var(--weight-semibold);
   }
-  .e-kachel canvas { display: block; width: 100%; height: 30px; }
+  .e-kachel canvas { display: block; width: 100%; height: 34px; }
   .e-kachel .wort { line-height: 1.2; }
+  /* Die sechste Zelle des Kachelrasters bleibt sonst leer. Der Schatten gehoert zum
+     Geraet, also steht sein Haken dort und nicht als eigene Zeile weiter unten.
+     Keine Kachelflaeche: er waehlt kein Geraet und darf auch nicht so aussehen. */
+  .e-kachel-option { display: flex; align-items: center; padding: 5px; }
+
+  /* Wo das Bild im Bildschirm sitzt: neun Felder statt zweier Knopfreihen. Das Bild der
+     Anordnung ist die Anordnung selbst, das liest sich schneller als sechs Woerter, und
+     daneben steht die Lage trotzdem als Wort, sonst traegt allein die Flaeche den
+     Zustand. */
+  .e-pad { display: grid; grid-template-columns: repeat(3, 18px); gap: 2px; }
+  .e-pad button {
+    width: 18px; height: 18px; padding: 0; cursor: pointer;
+    background: var(--surface-sunken);
+    /* Jedes Feld traegt seine Kante: ohne sie steht dort nur ein einziges dunkles
+       Quadrat auf Weiss, und die Anordnung, die den Sinn ausmacht, ist unsichtbar. */
+    border: var(--border-width) solid var(--border-subtle);
+  }
+  .e-pad button:hover { border-color: var(--ui-ink); }
+  .e-pad button[aria-pressed="true"] { background: var(--ui-ink); border-color: var(--ui-ink); }
+  .e-lage { font-size: var(--ui-small); color: var(--text-strong); }
+
+  /* Die Pipette nimmt die Farbe dort, wo hingezeigt wird, das Feld daneben laesst jede
+     andere zu. Zwei Wege auf denselben Wert, deshalb stehen sie nebeneinander und nicht
+     als Umschalter mit zwei festen Antworten.
+     Es gibt kein Pipettensymbol: der zetcom-Iconsatz kennt keins, und freihaendig eines
+     zu zeichnen ist verboten. Angezeigt wird der Zustand deshalb wie bei jedem Werkzeug
+     hier, mit dem Wort auf dem Knopf, dem gedrueckten Zustand und dem Fadenkreuz als
+     Zeiger auf der Flaeche. */
+  body.pipette .z-buehne,
+  body.pipette .z-buehne[data-werkzeug="move"] { cursor: crosshair; }
+  .e-farbe input[type="color"] {
+    flex: none; width: 34px; height: 26px; padding: 0; cursor: pointer;
+    border: var(--border-width) solid var(--border-subtle); background: none;
+  }
+
+  /* Die Legende gehoert nicht zu den Einstellungen, sie sagt, was die Hand auf der
+     Flaeche tut. Deshalb steht sie unter allem, in der ruhigsten Schrift, die es hier
+     gibt, und traegt keinen Schritt-Titel. */
+  .e-legende { margin-top: var(--space-component-xs); border-top: var(--border-width) solid var(--border-subtle); padding-top: var(--space-component-xxs); }
+  .e-legende dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px var(--space-component-xxs); margin: 0; }
+  .e-legende dt { font-size: var(--ui-small); color: var(--text-strong); }
+  .e-legende dd { font-size: var(--ui-small); color: var(--text-muted); margin: 0; }
 </style>
 </head>
 <body>
@@ -3349,6 +3403,21 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Step 1, your screenshot</span>
             <button class="z-btn z-btn--outline" id="eBildWaehlen" style="width:100%">Choose an image</button>
+            <div class="e-zeile">
+              <span class="e-was">Change it</span>
+              <div class="z-schalter" role="group" aria-label="Change the screenshot">
+                <button class="ewerkzeug" data-tool="crop" aria-pressed="false"
+                  title="Press this, then drag a box in the picture. Everything outside the box is cut away">Crop</button>
+                <button class="ewerkzeug" data-tool="erase" aria-pressed="false"
+                  title="Press this, then paint over what should disappear. The colour behind the image shows through">Erase</button>
+              </div>
+            </div>
+            <div class="e-zeile hideable" id="ePinselZeile">
+              <span class="e-was">Brush</span>
+              <input type="range" class="z-regler" id="ePinsel" min="4" max="200" value="40"
+                aria-label="How wide the eraser is">
+            </div>
+            <span class="z-hinweis" id="eWerkzeugHinweis"></span>
             <span class="z-hinweis" id="eBildStand"></span>
           </div>
 
@@ -3375,13 +3444,18 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
                 <canvas width="240" height="112" aria-hidden="true"></canvas>
                 <span class="wort">Plain frame</span>
               </button>
+              <div class="e-kachel-option">
+                <label class="z-haken" title="A soft shadow under the device, so it lifts off the page">
+                  <input type="checkbox" id="eSchatten" checked> Shadow
+                </label>
+              </div>
             </div>
             <span class="z-hinweis" id="eGeraetHinweis"></span>
           </div>
 
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Step 3, how the device looks</span>
-            <div class="e-zeile e-zeile--zwei">
+            <div class="e-zeile">
               <span class="e-was">Angle</span>
               <div class="z-schalter" role="group" aria-label="Angle">
                 <button class="eviewbtn" data-view="left"  aria-pressed="false"
@@ -3391,27 +3465,14 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
                 <button class="eviewbtn" data-view="right" aria-pressed="false"
                   title="Turned a little to the right">Right</button>
               </div>
-              <span class="luecke" aria-hidden="true"></span>
-              <span class="e-was">Shadow</span>
-              <div class="z-schalter" role="group" aria-label="Shadow">
-                <button class="eframebtn" data-frame="shadow" aria-pressed="true"
-                  title="A soft shadow under the device, so it lifts off the page">On</button>
-                <button class="eframebtn" data-frame="plain"  aria-pressed="false"
-                  title="No shadow. Better on a coloured or busy background">Off</button>
-              </div>
             </div>
-            <div class="e-zeile">
-              <span class="e-was">Browser bar</span>
-              <span class="e-inline">
-                <div class="z-schalter" role="group" aria-label="Browser bar">
-                  <button class="echromebtn" data-chrome="an"  aria-pressed="false"
-                    title="Draws an address line with three dots at the top of the screen">On</button>
-                  <button class="echromebtn" data-chrome="aus" aria-pressed="true"
-                    title="Nothing above the screenshot">Off</button>
-                </div>
-                <input type="text" class="z-field hideable" id="eUrl"
-                  aria-label="Address in the browser bar" placeholder="collectionshub.com">
-              </span>
+            <div class="e-zeile e-zeile--haken">
+              <label class="z-haken" for="eChrome"
+                title="Draws an address line with three dots at the top of the screen">
+                <input type="checkbox" id="eChrome"> Browser bar
+              </label>
+              <input type="text" class="z-field hideable" id="eUrl"
+                aria-label="Address in the browser bar" placeholder="zetcom.com">
             </div>
             <div class="e-zeile hideable" id="eFormZeile">
               <span class="e-was">Frame shape</span>
@@ -3437,48 +3498,40 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
 
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Step 4, the image in the screen</span>
-            <div class="e-zeile">
-              <span class="e-was">How it sits</span>
-              <div class="z-schalter" role="group" aria-label="How the image sits">
-                <button class="efitbtn" data-fit="fill" aria-pressed="true"
-                  title="The image covers the whole screen. What does not fit is cut off">Fill the screen</button>
-                <button class="efitbtn" data-fit="fit"  aria-pressed="false"
-                  title="The whole image is visible. What is left over shows the colour behind it">Show all of it</button>
-              </div>
+            <div class="e-zeile e-zeile--haken">
+              <label class="z-haken" for="eGanz"
+                title="Off, the image covers the whole screen and what does not fit is cut off. On, all of it is visible and the rest takes the colour below">
+                <input type="checkbox" id="eGanz"> Show the whole image
+              </label>
             </div>
             <div class="e-zeile">
-              <span class="e-was">Across</span>
-              <div class="z-schalter" role="group" aria-label="Across">
-                <button class="ealignh" data-h="0"   aria-pressed="false">Left</button>
-                <button class="ealignh" data-h="0.5" aria-pressed="true">Centre</button>
-                <button class="ealignh" data-h="1"   aria-pressed="false">Right</button>
-              </div>
-            </div>
-            <div class="e-zeile">
-              <span class="e-was">Down</span>
-              <div class="z-schalter" role="group" aria-label="Down">
-                <button class="ealignv" data-v="0"   aria-pressed="false">Top</button>
-                <button class="ealignv" data-v="0.5" aria-pressed="true">Middle</button>
-                <button class="ealignv" data-v="1"   aria-pressed="false">Bottom</button>
-              </div>
+              <span class="e-was">Where</span>
+              <span class="e-inline">
+                <div class="e-pad" role="group" aria-label="Where the image sits"></div>
+                <span class="e-lage" id="eLage"></span>
+              </span>
             </div>
             <div class="e-zeile">
               <span class="e-was">Behind it</span>
-              <span class="e-farbe">
-                <div class="z-schalter" role="group" aria-label="Behind the image">
-                  <button class="ebgbtn" data-ebg="bild"  aria-pressed="false"
-                    title="Takes the colour from the edge of your screenshot, so you cannot see where it ends">From the image</button>
-                  <button class="ebgbtn" data-ebg="weiss" aria-pressed="true">White</button>
-                </div>
-                <span class="e-chip" id="eBgChip" aria-hidden="true"></span>
+              <span class="e-farbe e-inline">
+                <button class="z-btn z-btn--outline" id="eBgPipette" aria-pressed="false"
+                  title="Press this, then click anywhere in the picture. That colour goes behind your image">Pick from the picture</button>
+                <input type="color" id="eBgColor" aria-label="Colour behind the image">
               </span>
             </div>
-            <span class="z-hinweis" id="eBildHinweis"></span>
           </div>
 
           <div class="z-gruppe">
             <button class="z-btn" id="eLaden" style="width:100%">Download the mockup</button>
             <span class="z-hinweis" id="eLadenHinweis"></span>
+          </div>
+
+          <div class="e-legende">
+            <dl>
+              <dt>Drag in the screen</dt><dd>moves your image</dd>
+              <dt>Scroll wheel</dt><dd>zooms the view, not the file</dd>
+              <dt>Hold the space bar</dt><dd>moves the view</dd>
+            </dl>
           </div>
         </section>
 
@@ -3618,7 +3671,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
             <div class="z-gruppe">
               <span class="z-gruppe-titel">Browser bar</span>
               <label class="z-haken"><input type="checkbox" id="chromeToggle"> Draw a browser bar in the screen</label>
-              <input type="text" class="z-field" id="url" value="collectionshub.com" style="margin-top:6px" aria-label="Address in the browser bar">
+              <input type="text" class="z-field" id="url" value="zetcom.com" style="margin-top:6px" aria-label="Address in the browser bar">
               <div class="z-farbzeile" style="margin-top:6px">
                 <input type="color" id="acColor" aria-label="Colour of the browser bar">
                 <input type="text" class="z-field" id="acHex" aria-label="Colour value">
@@ -3924,7 +3977,8 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
             <span class="z-gruppe-titel">Simple and Advanced</span>
             <span class="z-hinweis">Top left you switch between the two. <strong>Simple</strong> walks
               down four steps and decides the rest: one device, no callouts, and always the same file, a
-              transparent PNG cut to the mockup itself, which drops onto any slide or page.
+              transparent PNG cut to the mockup itself, which drops onto any slide or page. It can
+              crop and rub out parts of your screenshot as well.
               <strong>Advanced</strong> shows every setting the tool has, including the output sizes.
               Nothing is lost when you switch, and the choice is remembered for the next time.</span>
           </div>
@@ -3949,6 +4003,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
               <dt>0</dt><dd>Fit the whole output area</dd>
               <dt>1</dt><dd>View at 100 per cent</dd>
               <dt>V, H, M, E</dt><dd>Select, Pan, Callout, Erase</dd>
+              <dt>Escape</dt><dd>Stops the colour picker and the crop</dd>
               <dt>Delete</dt><dd>Remove the selected callout or overlay</dd>
               <dt>Ctrl and V</dt><dd>Paste a screenshot from the clipboard</dd>
               <dt>Double click on a screen</dt><dd>Move and zoom the image inside its frame</dd>
@@ -4315,7 +4370,7 @@ function mkInst(over){
        damit die haeufigste Bildschirmaufnahme.                                        */
     frameSize:"standard", frameW:1600, frameH:900,
     devScale:0.8, devX:0, devY:0, sizeMode:"80",
-    url:"collectionshub.com", screenBg: TOKEN("--color-white"), chromeAccent: TOKEN("--color-black-20"), chromeOn:false,
+    url:"zetcom.com", screenBg: TOKEN("--color-white"), chromeAccent: TOKEN("--color-black-20"), chromeOn:false,
     fitMode:"fill", ix:0, iy:0, is:1,       // screenshot pan/zoom in content px
     /* Wo das Bild im Bildschirm sitzt, 0 bis 1 je Achse. Gemerkt und nicht nur gesetzt,
        weil jede Aenderung am Rahmen neu einpasst und die Wahl sonst jedes Mal verfaellt. */
@@ -4370,7 +4425,11 @@ function layout(i){
   const cw = clamp(Math.round(Math.max(dist(Q[0],Q[1]), dist(Q[3],Q[2]))), 64, 4096);
   const chh = clamp(Math.round(Math.max(dist(Q[0],Q[3]), dist(Q[1],Q[2]))), 64, 4096);
   const Hinv = computeH(Q, [[0,0],[cw,0],[cw,chh],[0,chh]]);   // canvas px -> content px
-  return {W, H, S, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv, bb};
+  /* Der Weg zurueck, content px -> canvas px. Gebraucht wird er nur zum Zeichnen des
+     Zuschnittrahmens: der liegt im Bild und muss auf der Flaeche stehen, und bei einem
+     gedrehten Geraet ist er dort kein Rechteck mehr, sondern ein Viereck. */
+  const Hvor = computeH([[0,0],[cw,0],[cw,chh],[0,chh]], Q);
+  return {W, H, S, fw, fh, gs, ox, oy, Q, bbox, cw, chh, Hinv, Hvor, bb};
 }
 function chromeH(L, i){ return i.chromeOn ? Math.round(L.chh * 0.062) : 0; }
 function effRect(L, i){ const ch = chromeH(L, i); return {x:0, y:ch, w:L.cw, h:L.chh - ch}; }
@@ -4578,6 +4637,20 @@ function render(){
 /* selection outline lives on its own overlay canvas so it never lands in the export */
 function drawSelection(){
   sctx.clearRect(0, 0, sel.width, sel.height);
+  /* Der Zuschnittrahmen liegt im Bild und wird von dort auf die Flaeche gerechnet: bei
+     einem gedrehten Geraet ist er deshalb ein Viereck und kein Rechteck, und er sitzt
+     genau auf den Punkten, die gleich stehen bleiben. */
+  if(drag && drag.t === "crop" && drag.i.L){
+    const i = drag.i, L = i.L, r = bildRechteck(drag.a, drag.b);
+    const ecken = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]]
+      .map(([ix, iy]) => applyH(L.Hvor, i.ix + ix*i.is, i.iy + iy*i.is));
+    sctx.save();
+    sctx.setLineDash([10, 7]); sctx.lineWidth = 2; sctx.strokeStyle = AUSWAHL;
+    sctx.beginPath();
+    ecken.forEach((p, k) => k ? sctx.lineTo(p.x, p.y) : sctx.moveTo(p.x, p.y));
+    sctx.closePath(); sctx.stroke();
+    sctx.restore();
+  }
   /* Beim Zuschnitt auf den Inhalt bleibt die Arbeitsflaeche stehen und nur der Export
      wird beschnitten. Ohne sichtbare Linie waere das ein unsichtbarer Zustand.       */
   if(state.ratio === "content"){
@@ -4834,11 +4907,7 @@ function loadScreenshot(f, i){
        Screenshots an. Sonst beschneidet er still, und genau das versteht dort niemand.
        Dazu die Farbe hinter dem Bild aus seinem eigenen Rand: liegt "Show all of it" an,
        verschwindet der Balken damit, statt weiss aufzufallen. */
-    if(modus === "einfach"){
-      if(KANN_ANPASSEN(i.device)) i.frameSize = "shot";
-      const f = aussenfarbe(i);
-      if(f) i.screenBg = f;
-    }
+    if(modus === "einfach" && KANN_ANPASSEN(i.device)) i.frameSize = "shot";
     beruehrt();
     if(i === act) syncControls();   // der Hinweis zur Fensteranpassung nennt das neue Mass
     render();
@@ -4860,6 +4929,28 @@ window.addEventListener("drop", e => {
   const f = e.dataTransfer.files[0]; if(!f) return;
   if(istProjektDatei(f)) projektLaden(f); else loadScreenshot(f);
 });
+
+/* ---- Zuschneiden, seit 04.09.2026 ----
+   Der Radierer nimmt Punkte weg und laesst das Bild so gross, wie es war. Das Zuschneiden
+   aendert das Bild selbst: aus dem Rechteck wird der neue Screenshot, alles ausserhalb ist
+   fort. Gearbeitet wird auf i.edit, nicht auf dem Original, damit Radierstriche erhalten
+   bleiben; i.img bleibt liegen und wird nur noch als Merker gelesen, dass ueberhaupt ein
+   Bild da ist. Weil sich dabei i.w und i.h aendern, stehen beide seit heute im
+   Rueckgaengig-Stapel, und anwenden() zieht die Arbeitsflaeche auf die gesicherte
+   Groesse, statt in eine zu kleine hineinzuzeichnen.                                   */
+const bildRechteck = (a, b) => ({x:Math.min(a.x, b.x), y:Math.min(a.y, b.y),
+                                 w:Math.abs(a.x - b.x), h:Math.abs(a.y - b.y)});
+function bildZuschneiden(i, r){
+  if(!i.edit) return false;
+  const x0 = clamp(Math.round(r.x), 0, i.w - 1), y0 = clamp(Math.round(r.y), 0, i.h - 1);
+  const w  = clamp(Math.round(r.w), 1, i.w - x0), h = clamp(Math.round(r.h), 1, i.h - y0);
+  if(w < 16 || h < 16) return false;   // ein Zug von wenigen Punkten war ein Klick
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  c.getContext("2d").drawImage(i.edit, x0, y0, w, h, 0, 0, w, h);
+  i.edit = c; i.w = w; i.h = h;
+  return true;
+}
 
 /* ---------------- pointer ---------------- */
 function evtPoint(e){
@@ -4889,6 +4980,9 @@ function pickDevice(p){
 let drag = null;
 view.addEventListener("pointerdown", e => {
   if(e.button !== 0) return;
+  /* Die Pipette liegt vor allem anderen: solange sie an ist, nimmt ein Klick eine Farbe
+     auf und schiebt nichts. */
+  if(pipetteAn){ e.preventDefault(); pipetteGriff(evtPoint(e)); return; }
   // Die Ansicht schieben hat Vorrang: Leertaste oder Werkzeug Ansicht
   if(leertaste || state.tool === "hand") return;
   const p = evtPoint(e);
@@ -4918,7 +5012,11 @@ view.addEventListener("pointerdown", e => {
   if(!hit){ drag = null; return; }
   if(hit.inst !== act) setActive(hit.inst);
   const i = hit.inst;
-  if(hit.type === "screen" && state.tool === "erase" && i.img){
+  if(hit.type === "screen" && state.tool === "crop" && i.img){
+    const p0 = toImagePx(hit.cp, i);
+    drag = {t:"crop", i, a:p0, b:p0};
+    render();
+  } else if(hit.type === "screen" && state.tool === "erase" && i.img){
     snap("erase");                      // sichert diesmal auch die Bildpunkte
     const ip = toImagePx(hit.cp, i);
     eraseStroke(ip, ip, i);
@@ -4935,8 +5033,9 @@ view.addEventListener("pointerdown", e => {
   } else if(modus === "einfach"){
     /* Das Geraet steht im einfachen Modus fest in der Mitte. Es zu schieben braucht dort
        niemand, der Export schneidet ohnehin auf das Mockup zu, und ein halb aus der
-       Flaeche gezogenes Geraet waere genau die Falle, die dieser Modus vermeiden soll. */
-    drag = null;
+       Flaeche gezogenes Geraet waere genau die Falle, die dieser Modus vermeiden soll.
+       Ein leeres Geraet nimmt den Klick trotzdem an: er oeffnet die Dateiauswahl. */
+    drag = i.img ? null : {t:"dev", i, p0:p, dx:i.devX, dy:i.devY, moved:false, fest:true};
   } else {
     snap("devDrag");
     drag = {t:"dev", i, p0:p, dx:i.devX, dy:i.devY, moved:false};
@@ -4958,6 +5057,9 @@ view.addEventListener("pointermove", e => {
     drag.o.y = drag.y0 + (p.y - drag.p0.y)/RES;
     drag.moved = true;
     render();
+  } else if(drag.t === "crop"){
+    drag.b = toImagePx(toContentL(p, drag.i.L), drag.i);
+    render();
   } else if(drag.t === "pan"){
     const cp = toContentL(p, drag.i.L);
     if(Math.abs(cp.x - drag.cp0.x) + Math.abs(cp.y - drag.cp0.y) > 1) drag.moved = true;
@@ -4965,7 +5067,7 @@ view.addEventListener("pointermove", e => {
     drag.i.iy = drag.iy + (cp.y - drag.cp0.y);
     drag.i.fitMode = "custom";
     render();
-  } else {
+  } else if(!drag.fest){
     if(Math.abs(p.x - drag.p0.x) + Math.abs(p.y - drag.p0.y) > 2) drag.moved = true;
     drag.i.devX = drag.dx + (p.x - drag.p0.x)/RES;
     drag.i.devY = drag.dy + (p.y - drag.p0.y)/RES;
@@ -4974,6 +5076,23 @@ view.addEventListener("pointermove", e => {
 });
 view.addEventListener("pointerup", () => {
   if(drag && drag.t && drag.t.indexOf("mark") === 0) markUp(drag);
+  else if(drag && drag.t === "crop"){
+    const i = drag.i, r = bildRechteck(drag.a, drag.b);
+    drag = null;                      // erst aus dem Zug heraus, dann sichern
+    snap("crop");                     // sichert diesmal auch die Bildpunkte
+    if(bildZuschneiden(i, r)){
+      /* Der Zuschnitt ist das neue Bild, also sitzt es wieder so im Bildschirm, wie es
+         eingestellt ist. Ohne das haenge es an der alten Ecke und man sucht es. */
+      applyFit(i.fitMode === "fit" ? "fit" : "fill", i);
+      bildAusrichten(i, i.alignH, i.alignV);
+      setTool("move");                // ein Schnitt, dann wieder zeigen und schieben
+    } else {
+      HIST.pop();                     // nichts geschnitten, also auch kein Schritt
+      updateUndoBtn();
+    }
+    syncControls(); render();
+    return;
+  }
   else if(drag && drag.t === "dev" && !drag.moved && !drag.i.img) $("#file").click();
   drag = null;
 });
@@ -5881,7 +6000,9 @@ const HIST = [];
 const HIST_MAX = 40;
 let histKey = "", histZeit = 0;
 const INST_SKALARE = ["device","view","frame","frameSize","frameW","frameH","devScale","devX","devY","sizeMode","url",
-  "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW","alignH","alignV"];
+  "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW","alignH","alignV",
+  /* seit dem Zuschneiden: die Bildgroesse aendert sich, also muss sie zurueckkommen */
+  "w","h"];
 
 const FUTURE = [];   // der Stapel nach vorn, seit 28.08.2026
 
@@ -5919,8 +6040,15 @@ function anwenden(h){
   for(const e of h.insts){
     Object.assign(e.ref, e.sk);
     if(e.pixel && e.ref.edit){
-      const x = e.ref.edit.getContext("2d");
-      x.clearRect(0, 0, e.ref.edit.width, e.ref.edit.height);
+      /* Die Arbeitsflaeche wird auf das gesicherte Mass gezogen, bevor gezeichnet wird.
+         Nach einem Zuschnitt ist sie kleiner als der Stand davor, und ohne das kaeme
+         nur die linke obere Ecke zurueck. */
+      const c = e.ref.edit;
+      if(c.width !== e.pixel.width || c.height !== e.pixel.height){
+        c.width = e.pixel.width; c.height = e.pixel.height;
+      }
+      const x = c.getContext("2d");
+      x.clearRect(0, 0, c.width, c.height);
       x.drawImage(e.pixel, 0, 0);
     }
     insts.push(e.ref);
@@ -5947,7 +6075,7 @@ function snap(key){
   const jetzt = Date.now();
   if(key && key === histKey && jetzt - histZeit < 900){ histZeit = jetzt; return; }
   histKey = key || ""; histZeit = jetzt;
-  HIST.push(zustand(key === "erase"));
+  HIST.push(zustand(key === "erase" || key === "crop"));
   if(HIST.length > HIST_MAX) HIST.shift();
   /* Eine neue Aenderung schneidet den Weg nach vorn ab. Alles andere waere eine
      Verzweigung, und die kann sich niemand merken.                                  */
@@ -6676,7 +6804,11 @@ function updateRedoBtn(){
 function redo(){
   const h = FUTURE.pop();
   if(!h) return;
-  HIST.push(zustand());
+  /* Mit Bildpunkten, wie im Weg zurueck. Ohne sie kaeme nach Wiederholen und wieder
+     Rueckgaengig zwar die Bildgroesse zurueck, aber die Arbeitsflaeche behielte ihre
+     letzte: seit dem Zuschneiden sind das zwei verschiedene Zahlen, und das Bild waere
+     abgeschnitten. Beim Radierer fiel es nie auf, dort bleibt die Groesse gleich. */
+  HIST.push(zustand(true));
   anwenden(h);
   histKey = ""; histZeit = 0;
   updateUndoBtn(); updateRedoBtn();
@@ -6789,7 +6921,13 @@ window.addEventListener("keydown", e => {
   }
   if(e.ctrlKey || e.metaKey || e.altKey || imFeld(e)) return;
   const k = e.key.toLowerCase();
-  if(k === "escape"){ inhaltAus(); return; }
+  if(k === "escape"){
+    if(pipetteAn) pipette(false);
+    // Im einfachen Modus fuehrt Escape immer zurueck aufs Zeigen, dort gibt es keine
+    // Werkzeugleiste, an der man sieht, was gerade an ist.
+    if(modus === "einfach" && state.tool !== "move") setTool("move");
+    inhaltAus(); return;
+  }
   if(k === "0"){ e.preventDefault(); einpassen(); return; }
   if(k === "1"){ e.preventDefault(); const [bw,bh] = buehnenMass(); zoomAnPunkt(1, bw/2, bh/2); return; }
   if(k === "v"){ setTool("move"); return; }
@@ -6940,8 +7078,8 @@ const E_GERAET = {
   desktop: "A screen on a stand. The usual choice for a website.",
   laptop:  "A notebook with the lid open.",
   phone:   "A phone, upright. Take a narrow screenshot for this one.",
-  browser: "No device around it: your screenshot with a soft shadow and barely rounded corners.",
-  window:  "A plain frame around a part of a screen, without any device."
+  browser: "Your screenshot alone, with a soft shadow.",
+  window:  "A plain frame, without any device."
 };
 
 /* Die Kacheln zeichnen denselben Rahmen, der gleich auf der Flaeche steht: erst die
@@ -6954,6 +7092,12 @@ function zeichneMiniatur(c, key){
      eine Haarlinie, ohne Schatten sieht man auf der Kachel fast nichts. */
   const slot = V.front.shadow || V.front.plain, bb = slot && slot.bb;
   if(!bb || !slot.img) return;
+  /* Die Zeichenflaeche wird aus ihrer dargestellten Groesse gesetzt, nicht aus zwei
+     Zahlen im Markup. Standen beide fest, streckte der Browser das Ergebnis auf die
+     Kachelform, und jedes Geraet stand verzerrt da. Doppelt fuer feine Bildschirme. */
+  const bw = Math.round(c.clientWidth * 2), bh = Math.round(c.clientHeight * 2);
+  if(!bw || !bh) return;                       // im erweiterten Modus ist die Kachel weg
+  if(c.width !== bw || c.height !== bh){ c.width = bw; c.height = bh; }
   const x = c.getContext("2d");
   x.setTransform(1, 0, 0, 1, 0, 0);
   x.clearRect(0, 0, c.width, c.height);
@@ -6977,36 +7121,48 @@ function zeichneMiniaturen(){
     if(c) zeichneMiniatur(c, b.dataset.egeraet);
   });
 }
+/* Die Kachel ist beim ersten Zeichnen sechs Punkte schmaler, solange die Leiste noch
+   einen Rollbalken hat. Gezeichnet wird dann auf eine Flaeche, die kurz darauf breiter
+   ist, und der Browser streckt das Ergebnis. Ein Beobachter auf der ersten Kachel
+   zeichnet nach, sobald sich die Breite setzt. Das Setzen der Zeichenflaeche aendert
+   die Darstellungsgroesse nicht, also dreht sich hier nichts im Kreis. */
+if(window.ResizeObserver){
+  const erste = document.querySelector(".e-kachel canvas");
+  if(erste) new ResizeObserver(() => zeichneMiniaturen()).observe(erste);
+}
 
-/* ---- Die Farbe hinter dem Bild aus dem Bild ----
-   Gelesen wird der aeussere Rand des Screenshots, ein Punkt breit auf allen vier Seiten,
-   und daraus die haeufigste Farbe. Auf 16er-Stufen gerundet, sonst zaehlt jeder
-   Rauschpunkt als eigene Farbe und die Mehrheit findet sich nie. Der Sinn: steht
-   "Show all of it" an, laufen die Balken links und rechts in derselben Farbe weiter wie
-   der Rand des Bildes, und man sieht nicht mehr, wo das Bild aufhoert.                 */
-function aussenfarbe(i){
-  if(!i.edit) return null;
-  const c = i.edit, W = c.width, H = c.height;
-  if(!(W > 1) || !(H > 1)) return null;
-  const x = c.getContext("2d", {willReadFrequently:true});
-  const zaehler = new Map();
-  const streifen = (sx, sy, sw, sh) => {
-    let d;
-    try { d = x.getImageData(sx, sy, sw, sh).data; } catch(e){ return; }
-    for(let k = 0; k < d.length; k += 4){
-      if(d[k+3] < 128) continue;   // durchsichtige Raender zaehlen nicht mit
-      const stufe = ((d[k] & 240) << 16) | ((d[k+1] & 240) << 8) | (d[k+2] & 240);
-      zaehler.set(stufe, (zaehler.get(stufe) || 0) + 1);
-    }
-  };
-  streifen(0, 0, W, 1); streifen(0, H-1, W, 1);
-  streifen(0, 0, 1, H); streifen(W-1, 0, 1, H);
-  let beste = null, hoechste = 0;
-  for(const [wert, anzahl] of zaehler) if(anzahl > hoechste){ hoechste = anzahl; beste = wert; }
-  if(beste === null) return null;
-  // Mitte der Stufe statt ihres Anfangs, sonst faellt jede Farbe um bis zu 15 zu dunkel aus
-  const zwei = v => Math.min(255, v + 8).toString(16).padStart(2, "0");
-  return "#" + zwei((beste >> 16) & 255) + zwei((beste >> 8) & 255) + zwei(beste & 255);
+/* ---- Die Farbe hinter dem Bild ----
+   Sie wird gezeigt, nicht geraten. Bis zum 04.09.2026 las das Werkzeug den aeusseren Rand
+   des Screenshots und nahm die haeufigste Farbe; das ging daneben, weil die Werte dafuer
+   auf 16er-Stufen gerundet wurden und aus reinem Weiss so ein sichtbar helles Grau
+   wurde. Statt die Rundung zu reparieren ist die Automatik weg: wer die Farbe des Bildes
+   will, zeigt auf die Stelle, die er meint, und bekommt genau diesen Punkt. Gelesen wird
+   die dargestellte Flaeche, also das, was man sieht.                                    */
+let pipetteAn = false;
+function pipette(an){
+  pipetteAn = an;
+  document.body.classList.toggle("pipette", an);
+  const b = $("#eBgPipette");
+  b.setAttribute("aria-pressed", an ? "true" : "false");
+  b.classList.toggle("sel", an);
+  b.textContent = an ? "Click in the picture" : "Pick from the picture";
+}
+/* Der Griff sitzt vor allem anderen im pointerdown der Flaeche, siehe dort. */
+function pipetteGriff(p){
+  let d;
+  try { d = vctx.getImageData(Math.round(p.x), Math.round(p.y), 1, 1).data; }
+  catch(e){ pipette(false); return; }
+  if(d[3] < 128){
+    // Durchsichtig heisst: daneben getippt. Die Pipette bleibt an, der Knopf sagt es weiter.
+    $("#eBgPipette").textContent = "Nothing there, click the picture";
+    return;
+  }
+  snap("screenBg");
+  const zwei = v => v.toString(16).padStart(2, "0");
+  act.screenBg = "#" + zwei(d[0]) + zwei(d[1]) + zwei(d[2]);
+  $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
+  pipette(false);
+  render();
 }
 
 /* ---- Wo das Bild im Bildschirm sitzt ----
@@ -7067,20 +7223,18 @@ document.querySelectorAll(".eviewbtn").forEach(b =>
     if(ziel) ziel.click();
     einfachNeuEinpassen(); render();
   }));
-document.querySelectorAll(".eframebtn").forEach(b =>
-  b.addEventListener("click", () => {
-    const ziel = document.querySelector('.framebtn[data-frame="' + b.dataset.frame + '"]');
-    if(ziel) ziel.click();
-  }));
-document.querySelectorAll(".echromebtn").forEach(b =>
-  b.addEventListener("click", () => {
-    snap("chrome");
-    act.chromeOn = b.dataset.chrome === "an";
-    $("#chromeToggle").checked = act.chromeOn;
-    /* Die Leiste nimmt oben ein Stueck vom Bildschirm weg, das Bild sitzt danach anders. */
-    einfachNeuEinpassen();
-    syncControls(); render();
-  }));
+$("#eSchatten").addEventListener("change", e => {
+  const ziel = document.querySelector('.framebtn[data-frame="' + (e.target.checked ? "shadow" : "plain") + '"]');
+  if(ziel) ziel.click();
+});
+$("#eChrome").addEventListener("change", e => {
+  snap("chrome");
+  act.chromeOn = e.target.checked;
+  $("#chromeToggle").checked = act.chromeOn;
+  /* Die Leiste nimmt oben ein Stueck vom Bildschirm weg, das Bild sitzt danach anders. */
+  einfachNeuEinpassen();
+  syncControls(); render();
+});
 $("#eUrl").addEventListener("input", e => {
   act.url = e.target.value; $("#url").value = act.url; render();
 });
@@ -7096,25 +7250,52 @@ const eMass = (feld, welches) => $(feld).addEventListener("input", e => {
   einfachNeuEinpassen(); render();
 });
 eMass("#eFrameW", "frameW"); eMass("#eFrameH", "frameH");
-document.querySelectorAll(".efitbtn").forEach(b =>
+$("#eGanz").addEventListener("change", e => {
+  snap("fit");
+  applyFit(e.target.checked ? "fit" : "fill", act);
+  bildAusrichten(act, act.alignH, act.alignV);
+  render();
+});
+/* Neun Felder, drei mal drei. Der Anteil steht im Markup, damit die Reihenfolge auf dem
+   Bildschirm und die Zahl dahinter dieselbe Quelle haben. */
+const E_LAGEN = [[0,0,"Top left"],   [0.5,0,"Top"],    [1,0,"Top right"],
+                 [0,0.5,"Left"],     [0.5,0.5,"Centre"], [1,0.5,"Right"],
+                 [0,1,"Bottom left"],[0.5,1,"Bottom"], [1,1,"Bottom right"]];
+(function bauePad(){
+  const w = document.querySelector(".e-pad"); if(!w) return;
+  for(const [h, v, wort] of E_LAGEN){
+    const b = document.createElement("button");
+    b.className = "epad";
+    b.dataset.h = h; b.dataset.v = v;
+    b.setAttribute("aria-label", wort);
+    b.setAttribute("aria-pressed", "false");
+    b.title = wort;
+    b.addEventListener("click", () => { snap("align"); bildAusrichten(act, h, v); render(); });
+    w.appendChild(b);
+  }
+})();
+$("#eBgPipette").addEventListener("click", () => pipette(!pipetteAn));
+$("#eBgColor").addEventListener("input", e => {
+  act.screenBg = e.target.value;
+  $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
+  render();
+});
+/* Zuschneiden und Radieren sind Werkzeuge, keine Einstellungen: ein Druck schaltet sie
+   an, ein zweiter wieder aus, und das Zuschneiden schaltet sich nach dem Schnitt selbst
+   ab, weil ein zweiter Schnitt fast nie gemeint ist. Der Zustand steht im gedrueckten
+   Knopf, im Zeiger auf der Flaeche und in dem Satz darunter, der sagt, was jetzt zu tun
+   ist. Die Werkzeugleiste des erweiterten Modus bleibt dieselbe Quelle: gesetzt wird
+   ueber setTool, nicht ueber eine zweite Zustandsvariable.                            */
+document.querySelectorAll(".ewerkzeug").forEach(b =>
   b.addEventListener("click", () => {
-    snap("fit");
-    applyFit(b.dataset.fit, act);
-    bildAusrichten(act, act.alignH, act.alignV);
-    render();
+    if(pipetteAn) pipette(false);
+    setTool(state.tool === b.dataset.tool ? "move" : b.dataset.tool);
   }));
-document.querySelectorAll(".ealignh").forEach(b =>
-  b.addEventListener("click", () => { snap("align"); bildAusrichten(act, +b.dataset.h, act.alignV); render(); }));
-document.querySelectorAll(".ealignv").forEach(b =>
-  b.addEventListener("click", () => { snap("align"); bildAusrichten(act, act.alignH, +b.dataset.v); render(); }));
-document.querySelectorAll(".ebgbtn").forEach(b =>
-  b.addEventListener("click", () => {
-    snap("screenBg");
-    const f = b.dataset.ebg === "bild" ? aussenfarbe(act) : TOKEN("--color-white");
-    act.screenBg = f || TOKEN("--color-white");
-    $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
-    render();
-  }));
+$("#ePinsel").addEventListener("input", e => {
+  state.brush = +e.target.value;
+  $("#brush").value = state.brush;
+  $("#brushLabel").textContent = "Brush " + state.brush + " px";
+});
 $("#eBildWaehlen").addEventListener("click", () => $("#file").click());
 $("#eLaden").addEventListener("click", () => { if(!$("#eLaden").disabled) $("#export").click(); });
 
@@ -7127,27 +7308,33 @@ function syncEinfach(){
     : "Nothing yet. You can also drop a file on the dark area, or paste one with Ctrl and V.";
   markiere(".e-kachel",   b => b.dataset.egeraet === act.device);
   markiere(".eviewbtn",   b => b.dataset.view === act.view);
-  markiere(".eframebtn",  b => b.dataset.frame === act.frame);
-  markiere(".echromebtn", b => (b.dataset.chrome === "an") === act.chromeOn);
   markiere(".eformbtn",   b => b.dataset.framesize === act.frameSize);
-  markiere(".efitbtn",    b => b.dataset.fit === act.fitMode);
-  markiere(".ealignh",    b => +b.dataset.h === act.alignH && act.fitMode !== "custom");
-  markiere(".ealignv",    b => +b.dataset.v === act.alignV && act.fitMode !== "custom");
-  markiere(".ebgbtn",     b => (b.dataset.ebg === "weiss")
-    === (act.screenBg.toLowerCase() === TOKEN("--color-white").toLowerCase()));
+  /* Ein gezogenes Bild sitzt zwischen den neun Feldern, dann ist keines gedrueckt und
+     die Lage heisst "moved by hand". Ein Feld zu markieren, das nicht mehr stimmt,
+     waere die haeufigere Art zu luegen. */
+  const gesetzt = act.fitMode !== "custom";
+  markiere(".epad", b => gesetzt && +b.dataset.h === act.alignH && +b.dataset.v === act.alignV);
+  const lage = E_LAGEN.find(([h, v]) => h === act.alignH && v === act.alignV);
+  $("#eLage").textContent = gesetzt && lage ? lage[2] : "Moved by hand";
+  $("#eSchatten").checked = act.frame === "shadow";
+  $("#eChrome").checked = act.chromeOn;
+  $("#eGanz").checked = act.fitMode === "fit";
+  markiere(".ewerkzeug", b => b.dataset.tool === state.tool);
+  $("#ePinselZeile").classList.toggle("show", state.tool === "erase");
+  $("#ePinsel").value = state.brush;
+  $("#eWerkzeugHinweis").textContent =
+      state.tool === "crop"  ? "Drag a box around the part you want to keep."
+    : state.tool === "erase" ? "Paint over what should disappear. Press Erase again when you are done."
+    : "";
   $("#eGeraetHinweis").textContent = E_GERAET[act.device] || "";
   $("#eUrl").classList.toggle("show", act.chromeOn);
   $("#eFormZeile").classList.toggle("show", KANN_ANPASSEN(act.device));
   $("#eMassZeile").classList.toggle("show", KANN_ANPASSEN(act.device) && act.frameSize === "custom");
   $("#eUrl").value = act.url;
   $("#eFrameW").value = act.frameW; $("#eFrameH").value = act.frameH;
-  $("#eBgChip").style.background = act.screenBg;
+  $("#eBgColor").value = act.screenBg;
   $("#eLookHinweis").textContent = KANN_ANPASSEN(act.device)
-    ? "This frame can take the shape of your image."
-    : "The browser bar draws an address line into the screen.";
-  $("#eBildHinweis").textContent = act.fitMode === "fit"
-    ? "The bars left over take the colour set above."
-    : "You can also drag the image inside the screen.";
+    ? "This frame takes the shape of your image." : "";
   /* Ohne Bild waere die Datei ein leerer Rahmen. Der Knopf sagt, warum er nicht geht:
      ein grauer Knopf ohne Grund daneben ist eine Sackgasse.                           */
   const R = exportRahmen();
@@ -7185,8 +7372,11 @@ function setModus(m){
     einfachAusgabe();
     zeichneMiniaturen();
     zeigeBereich("einfach");
-  } else if(bereich === "einfach"){
-    zeigeBereich("geraet");
+  } else {
+    /* Zuschneiden kennt die Werkzeugleiste des erweiterten Modus nicht, dort saehe man
+       ein Werkzeug, das nirgends gedrueckt ist. */
+    if(state.tool === "crop") setTool("move");
+    if(bereich === "einfach") zeigeBereich("geraet");
   }
   syncEinfach();
   /* Die Leiste ist in den beiden Modi verschieden breit, die Buehne also auch. */
