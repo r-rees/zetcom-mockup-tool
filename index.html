@@ -3234,13 +3234,49 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
 
   .z-modus { margin-left: var(--space-component-xs); }
 
+  /* Die Seitenleiste ist im einfachen Modus breiter, und das ist gerechnet, nicht
+     gefuehlt: alle Schritte sollen ohne Rollen untereinander stehen, und dafuer muessen
+     Beschriftung und Bedienteil nebeneinander passen. 96 Punkte Beschriftung plus drei
+     Schalter brauchen 380. Der erweiterte Modus bleibt bei den 300 aus dem Token. */
+  body.einfach .z-werkbank { grid-template-columns: 400px minmax(0, 1fr); }
+  /* Enger als im erweiterten Modus, und das ist der Zweck: alle vier Schritte sollen
+     zusammen auf einen Bildschirm passen, sonst sucht man den vierten unter der Kante.
+     Gemessen bei 900 Punkten Fensterhoehe, dem kleinsten Fall, der hier vorkommt. */
+  body.einfach #panel { padding-bottom: var(--space-component-xs); }
+  body.einfach .z-gruppe { margin-top: var(--space-component-xs); }
+  body.einfach .z-gruppe + .z-gruppe { margin-top: var(--space-component-xs); }
+  body.einfach .z-gruppe > .z-gruppe-titel { margin-bottom: 4px; }
+  body.einfach .z-gruppe .z-hinweis { margin-top: 4px; }
+
+  /* Eine Zeile im einfachen Modus: links das Wort, rechts das Bedienteil. Ein eigener
+     Titel ueber jedem Schalter wuerde die Leiste doppelt so hoch machen. */
+  .e-zeile {
+    display: grid; grid-template-columns: 84px minmax(0, 1fr);
+    align-items: center; gap: var(--space-component-xxs); min-height: 28px;
+  }
+  .e-zeile.hideable { display: none; }
+  .e-zeile.hideable.show { display: grid; }
+  /* Zwei kurze Sachen in einer Zeile: Winkel und Schatten haben zusammen fuenf Knoepfe
+     und passen nebeneinander. Zwei einzelne Zeilen daraus zu machen kostet 28 Punkte
+     Hoehe, und die fehlen unten beim vierten Schritt. */
+  .e-zeile--zwei { display: flex; align-items: center; gap: var(--space-component-xxs); }
+  .e-zeile--zwei .luecke { flex: 1; min-width: 8px; }
+  .e-inline { display: flex; align-items: center; gap: var(--space-component-xxs); }
+  .e-inline .z-field { flex: 1; min-width: 0; }
+  .e-inline .z-field.hideable.show { display: block; }
+  .e-was { font-size: var(--ui-small); color: var(--text-muted); }
+  .e-masse { display: flex; align-items: center; gap: 6px; }
+  .e-masse .z-field { flex: 1; min-width: 0; }
+  .e-farbe { display: flex; align-items: center; gap: var(--space-component-xxs); }
+  .e-chip { flex: none; width: 22px; height: 22px; border: var(--border-width) solid var(--border-subtle); }
+
   /* Die Kachel zeigt den Rahmen selbst, nicht ein Sinnbild davon: der Iconsatz kennt
      kein Geraet, und freihaendig dazuzeichnen ist verboten. Gezeichnet wird derselbe
      Rahmen, der gleich auf der Flaeche steht, damit die Wahl keine Uebersetzung braucht. */
-  .e-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .e-kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
   .e-kachel {
-    display: flex; flex-direction: column; align-items: stretch; gap: 4px;
-    padding: 6px; cursor: pointer; text-align: left;
+    display: flex; flex-direction: column; align-items: stretch; gap: 3px;
+    padding: 5px; cursor: pointer; text-align: left;
     background: var(--surface-sunken);
     border: var(--border-width) solid transparent;
     font-family: var(--font-sans); font-size: var(--ui-body); color: var(--text-strong);
@@ -3250,7 +3286,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
     background: var(--color-white); border-color: var(--ui-ink);
     font-weight: var(--weight-semibold);
   }
-  .e-kachel canvas { display: block; width: 100%; height: 54px; }
+  .e-kachel canvas { display: block; width: 100%; height: 30px; }
   .e-kachel .wort { line-height: 1.2; }
 </style>
 </head>
@@ -3308,9 +3344,6 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         <!-- ============ DEVICE ============ -->
         <!-- ============ SIMPLE ============ -->
         <section data-bereich="einfach">
-          <h2>Make a mockup</h2>
-          <p class="z-meta">Four steps, from top to bottom. Whatever is not asked for here, the tool decides for you.</p>
-
           <div class="z-note" id="eExtra" hidden></div>
 
           <div class="z-gruppe">
@@ -3336,7 +3369,7 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
               </button>
               <button class="e-kachel" data-egeraet="browser" aria-pressed="false">
                 <canvas width="240" height="112" aria-hidden="true"></canvas>
-                <span class="wort">Browser window</span>
+                <span class="wort">Browser</span>
               </button>
               <button class="e-kachel" data-egeraet="window" aria-pressed="false">
                 <canvas width="240" height="112" aria-hidden="true"></canvas>
@@ -3347,38 +3380,106 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
           </div>
 
           <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 3, what you need it for</span>
-            <div class="z-objekte" id="eZwecke"></div>
-            <span class="z-hinweis" id="eAusgabe"></span>
+            <span class="z-gruppe-titel">Step 3, how the device looks</span>
+            <div class="e-zeile e-zeile--zwei">
+              <span class="e-was">Angle</span>
+              <div class="z-schalter" role="group" aria-label="Angle">
+                <button class="eviewbtn" data-view="left"  aria-pressed="false"
+                  title="Turned a little to the left">Left</button>
+                <button class="eviewbtn" data-view="front" aria-pressed="true"
+                  title="Seen straight from the front">Straight</button>
+                <button class="eviewbtn" data-view="right" aria-pressed="false"
+                  title="Turned a little to the right">Right</button>
+              </div>
+              <span class="luecke" aria-hidden="true"></span>
+              <span class="e-was">Shadow</span>
+              <div class="z-schalter" role="group" aria-label="Shadow">
+                <button class="eframebtn" data-frame="shadow" aria-pressed="true"
+                  title="A soft shadow under the device, so it lifts off the page">On</button>
+                <button class="eframebtn" data-frame="plain"  aria-pressed="false"
+                  title="No shadow. Better on a coloured or busy background">Off</button>
+              </div>
+            </div>
+            <div class="e-zeile">
+              <span class="e-was">Browser bar</span>
+              <span class="e-inline">
+                <div class="z-schalter" role="group" aria-label="Browser bar">
+                  <button class="echromebtn" data-chrome="an"  aria-pressed="false"
+                    title="Draws an address line with three dots at the top of the screen">On</button>
+                  <button class="echromebtn" data-chrome="aus" aria-pressed="true"
+                    title="Nothing above the screenshot">Off</button>
+                </div>
+                <input type="text" class="z-field hideable" id="eUrl"
+                  aria-label="Address in the browser bar" placeholder="collectionshub.com">
+              </span>
+            </div>
+            <div class="e-zeile hideable" id="eFormZeile">
+              <span class="e-was">Frame shape</span>
+              <div class="z-schalter" role="group" aria-label="Frame shape">
+                <button class="eformbtn" data-framesize="shot" aria-pressed="true"
+                  title="The frame takes the shape of your screenshot, so nothing is cut off">Like the image</button>
+                <button class="eformbtn" data-framesize="standard" aria-pressed="false"
+                  title="The shape the frame was built in, 16 to 9">Standard</button>
+                <button class="eformbtn" data-framesize="custom" aria-pressed="false"
+                  title="Type a width and a height yourself">Custom</button>
+              </div>
+            </div>
+            <div class="e-zeile hideable" id="eMassZeile">
+              <span class="e-was">Width, height</span>
+              <span class="e-masse">
+                <input type="number" class="z-field" id="eFrameW" min="100" max="8000" step="10" aria-label="Frame width">
+                <span class="z-meta">by</span>
+                <input type="number" class="z-field" id="eFrameH" min="100" max="8000" step="10" aria-label="Frame height">
+              </span>
+            </div>
+            <span class="z-hinweis" id="eLookHinweis"></span>
           </div>
 
           <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 4, take it</span>
-            <button class="z-btn" id="eLaden" style="width:100%">Download the image</button>
-            <span class="z-hinweis" id="eLadenHinweis"></span>
+            <span class="z-gruppe-titel">Step 4, the image in the screen</span>
+            <div class="e-zeile">
+              <span class="e-was">How it sits</span>
+              <div class="z-schalter" role="group" aria-label="How the image sits">
+                <button class="efitbtn" data-fit="fill" aria-pressed="true"
+                  title="The image covers the whole screen. What does not fit is cut off">Fill the screen</button>
+                <button class="efitbtn" data-fit="fit"  aria-pressed="false"
+                  title="The whole image is visible. What is left over shows the colour behind it">Show all of it</button>
+              </div>
+            </div>
+            <div class="e-zeile">
+              <span class="e-was">Across</span>
+              <div class="z-schalter" role="group" aria-label="Across">
+                <button class="ealignh" data-h="0"   aria-pressed="false">Left</button>
+                <button class="ealignh" data-h="0.5" aria-pressed="true">Centre</button>
+                <button class="ealignh" data-h="1"   aria-pressed="false">Right</button>
+              </div>
+            </div>
+            <div class="e-zeile">
+              <span class="e-was">Down</span>
+              <div class="z-schalter" role="group" aria-label="Down">
+                <button class="ealignv" data-v="0"   aria-pressed="false">Top</button>
+                <button class="ealignv" data-v="0.5" aria-pressed="true">Middle</button>
+                <button class="ealignv" data-v="1"   aria-pressed="false">Bottom</button>
+              </div>
+            </div>
+            <div class="e-zeile">
+              <span class="e-was">Behind it</span>
+              <span class="e-farbe">
+                <div class="z-schalter" role="group" aria-label="Behind the image">
+                  <button class="ebgbtn" data-ebg="bild"  aria-pressed="false"
+                    title="Takes the colour from the edge of your screenshot, so you cannot see where it ends">From the image</button>
+                  <button class="ebgbtn" data-ebg="weiss" aria-pressed="true">White</button>
+                </div>
+                <span class="e-chip" id="eBgChip" aria-hidden="true"></span>
+              </span>
+            </div>
+            <span class="z-hinweis" id="eBildHinweis"></span>
           </div>
 
-          <details class="z-mehr">
-            <summary>Two more things you can change</summary>
-            <div class="z-gruppe">
-              <span class="z-gruppe-titel">How big it sits in the picture</span>
-              <div class="z-schalter" role="group" aria-label="How big">
-                <button class="egroessebtn" data-size="75"  aria-pressed="false">Small</button>
-                <button class="egroessebtn" data-size="80"  aria-pressed="true">Medium</button>
-                <button class="egroessebtn" data-size="100" aria-pressed="false">Large</button>
-              </div>
-              <span class="z-hinweis">You can also drag the device on the canvas, and drag the screenshot inside the screen.</span>
-            </div>
-            <div class="z-gruppe">
-              <span class="z-gruppe-titel">Around the device</span>
-              <div class="z-schalter" role="group" aria-label="Around the device">
-                <button class="ebgbtn" data-ebg="transparent" aria-pressed="true">Nothing</button>
-                <button class="ebgbtn" data-ebg="white"       aria-pressed="false">White</button>
-                <button class="ebgbtn" data-ebg="grey"        aria-pressed="false">Light grey</button>
-              </div>
-              <span class="z-hinweis" id="eBgHinweis"></span>
-            </div>
-          </details>
+          <div class="z-gruppe">
+            <button class="z-btn" id="eLaden" style="width:100%">Download the mockup</button>
+            <span class="z-hinweis" id="eLadenHinweis"></span>
+          </div>
         </section>
 
         <section data-bereich="geraet" class="aktiv">
@@ -3821,10 +3922,11 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
 
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Simple and Advanced</span>
-            <span class="z-hinweis">Top left you switch between the two. <strong>Simple</strong> asks four
-              questions and decides the rest: one device, no callouts, and the file that fits the purpose
-              you picked. <strong>Advanced</strong> shows every setting the tool has. Nothing is lost when
-              you switch, the canvas stays as it is, and the choice is remembered for the next time.</span>
+            <span class="z-hinweis">Top left you switch between the two. <strong>Simple</strong> walks
+              down four steps and decides the rest: one device, no callouts, and always the same file, a
+              transparent PNG cut to the mockup itself, which drops onto any slide or page.
+              <strong>Advanced</strong> shows every setting the tool has, including the output sizes.
+              Nothing is lost when you switch, and the choice is remembered for the next time.</span>
           </div>
 
           <div class="z-gruppe">
@@ -4215,6 +4317,9 @@ function mkInst(over){
     devScale:0.8, devX:0, devY:0, sizeMode:"80",
     url:"collectionshub.com", screenBg: TOKEN("--color-white"), chromeAccent: TOKEN("--color-black-20"), chromeOn:false,
     fitMode:"fill", ix:0, iy:0, is:1,       // screenshot pan/zoom in content px
+    /* Wo das Bild im Bildschirm sitzt, 0 bis 1 je Achse. Gemerkt und nicht nur gesetzt,
+       weil jede Aenderung am Rahmen neu einpasst und die Wahl sonst jedes Mal verfaellt. */
+    alignH:0.5, alignV:0.5,
     img:null, w:0, h:0, edit:null, undo:[],
     L:null, lastContentW:0
   };
@@ -4726,8 +4831,14 @@ function loadScreenshot(f, i){
     i.undo.length = 0;
     i.fitMode = "fill";
     /* Im einfachen Modus nimmt ein Rahmen ohne eigenes Bildschirmmass die Form des
-       Screenshots an. Sonst beschneidet er still, und genau das versteht dort niemand. */
-    if(modus === "einfach" && KANN_ANPASSEN(i.device)) i.frameSize = "shot";
+       Screenshots an. Sonst beschneidet er still, und genau das versteht dort niemand.
+       Dazu die Farbe hinter dem Bild aus seinem eigenen Rand: liegt "Show all of it" an,
+       verschwindet der Balken damit, statt weiss aufzufallen. */
+    if(modus === "einfach"){
+      if(KANN_ANPASSEN(i.device)) i.frameSize = "shot";
+      const f = aussenfarbe(i);
+      if(f) i.screenBg = f;
+    }
     beruehrt();
     if(i === act) syncControls();   // der Hinweis zur Fensteranpassung nennt das neue Mass
     render();
@@ -4813,12 +4924,19 @@ view.addEventListener("pointerdown", e => {
     eraseStroke(ip, ip, i);
     drag = {t:"erase", i, last:ip, moved:true};
     render();
-  } else if(hit.type === "screen" && i.img && inhaltModus && inhaltModus.inst === i){
+  } else if(hit.type === "screen" && i.img && (modus === "einfach" || (inhaltModus && inhaltModus.inst === i))){
     /* Der Screenshot im Rahmen bewegt sich nur im Bildmodus. Vorher schob ein Zug im
        Bildschirm immer das Bild und ein Zug am Rahmen das Geraet: man musste wissen,
-       wo genau man greift, und verschob staendig das Falsche.                       */
+       wo genau man greift, und verschob staendig das Falsche.
+       Im einfachen Modus geht es ohne Doppelklick: dort ist der Zug im Bildschirm immer
+       das Bild, weil das Geraet ohnehin nicht geschoben wird. */
     snap("pan");
     drag = {t:"pan", i, cp0:hit.cp, ix:i.ix, iy:i.iy, moved:false};
+  } else if(modus === "einfach"){
+    /* Das Geraet steht im einfachen Modus fest in der Mitte. Es zu schieben braucht dort
+       niemand, der Export schneidet ohnehin auf das Mockup zu, und ein halb aus der
+       Flaeche gezogenes Geraet waere genau die Falle, die dieser Modus vermeiden soll. */
+    drag = null;
   } else {
     snap("devDrag");
     drag = {t:"dev", i, p0:p, dx:i.devX, dy:i.devY, moved:false};
@@ -5763,7 +5881,7 @@ const HIST = [];
 const HIST_MAX = 40;
 let histKey = "", histZeit = 0;
 const INST_SKALARE = ["device","view","frame","frameSize","frameW","frameH","devScale","devX","devY","sizeMode","url",
-  "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW"];
+  "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW","alignH","alignV"];
 
 const FUTURE = [];   // der Stapel nach vorn, seit 28.08.2026
 
@@ -6041,7 +6159,7 @@ $("#export").addEventListener("click", () => {
    muss. Gesichert wird die Arbeitsfassung des Screenshots (i.edit), nicht das Original:
    sie traegt die Radierstriche. Der Preis steht in der Notiz, die Datei wird gross, und
    der Radierer faengt nach dem Laden bei diesem Stand an statt beim unberuehrten Bild. */
-const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 5;   // v2: Labelrahmen, Farbe der Verbindungslinie. v3: Fensteranpassung, Exportskala, Zuschnitt auf den Inhalt. v4: Fokus. v5: Rahmenform in drei Formen
+const PROJEKT_APP = "zetcom-device-mockup", PROJEKT_VERSION = 6;   // v2: Labelrahmen, Farbe der Verbindungslinie. v3: Fensteranpassung, Exportskala, Zuschnitt auf den Inhalt. v4: Fokus. v5: Rahmenform in drei Formen. v6: Lage des Bildes im Bildschirm
 const PROJEKT_TYPEN = [{description:"zetcom Device-Mockup-Projekt",
                         accept:{"application/json":[".json"]}}];
 function bildAusURL(url){
@@ -6786,56 +6904,50 @@ for(const [key, dev] of Object.entries(DEVICES)){
 
 /* ================= Einfach und Erweitert, seit 04.09.2026 =================
    Robins Vorgabe: das Werkzeug geht an jeden im Haus, auch an den, der mit Gestaltung
-   nie zu tun hatte. Zwei Wege in dieselbe Anwendung, kein zweites Programm:
+   nie zu tun hatte. Zwei Wege in dieselbe Anwendung, kein zweites Programm.
 
-   EINFACH stellt vier Fragen und entscheidet den Rest. Bild, Rahmen, Zweck, Datei, in
-   dieser Reihenfolge untereinander, und jeder Schritt sagt in einem Satz, was er tut.
-   Was hier nicht steht, ist nicht abgeschaltet, sondern gesetzt: ein Geraet, keine
-   Markierungen, Werkzeug Auswahl, Skala zweifach, und das Ausgabemass kommt aus dem
-   Zweck statt aus einer Liste mit sechzehn Eintraegen.
+   EINFACH ist eine Leiste ohne Rollbalken: vier Schritte untereinander, jeder Schalter
+   mit seinem Wort daneben, kein Aufklapper, keine Auswahlliste. Was hier nicht steht,
+   ist nicht abgeschaltet, sondern gesetzt.
    ERWEITERT ist unveraendert die Oberflaeche vom 29.08.2026.
 
+   DIE AUSGABE IST KEINE FRAGE MEHR (04.09.2026, zweiter Durchgang, Robins Entscheid).
+   Vorher stand hier ein Schritt "wofuer brauchst du es" mit fuenf Zwecken. Er ist weg:
+   der einfache Modus liefert immer dasselbe, ein freigestelltes PNG, zugeschnitten auf
+   das Mockup selbst. Das ist die Datei, die auf jede Folie, in jedes Dokument und auf
+   jede Seite passt, ohne dass jemand ein Ausgabemass verstehen muss. Wer ein bestimmtes
+   Mass braucht, ist im erweiterten Modus richtig, und dort steht die Liste weiterhin.
+
    Drei Entscheidungen, die nicht offensichtlich sind:
-   1. Der Zweck ersetzt das Mass, nicht umgekehrt. "PowerPoint slide" sagt jedem etwas,
-      "1920 x 1080 PNG" nur dem, der es ohnehin weiss. Unter dem Knopf steht trotzdem
-      beides, damit niemand hinterher raten muss, was er heruntergeladen hat.
-   2. Die Kachel zeigt den Rahmen, den sie waehlt. Ein gezeichnetes Sinnbild waere hier
+   1. Die Kachel zeigt den Rahmen, den sie waehlt. Ein gezeichnetes Sinnbild waere hier
       verboten und auch schlechter: der Rahmen selbst ist die genaueste Vorschau.
+   2. Jede Einstellung laeuft ueber dasselbe Bedienteil, das der erweiterte Modus hat.
+      Kein zweiter Pfad in den Zustand, sonst laufen die beiden Modi auseinander.
    3. Der Modus steht im Browser, nicht in der Adresse. Er ist eine Eigenschaft des
       Menschen davor, kein Ort im Werkzeug: ein weitergegebener Link soll die Stelle
       treffen, nicht den Anfaenger zum Fortgeschrittenen machen.                       */
 const MODUS_SCHLUESSEL = "zetcom-mockup-modus";
 let modus = "einfach";
 
-/* Der Zweck, in der Sprache dessen, der ihn hat. Mass und Format sind dieselben Werte,
-   die in GROESSEN stehen; geaendert wird dort, hier steht nur die Auswahl daraus.     */
-const ZWECKE = [
-  {k:"slide",    wort:"PowerPoint slide",   mass:"1920,1080", fmt:"png",  neben:"1920 x 1080"},
-  {k:"linkedin", wort:"LinkedIn post",      mass:"1200,1200", fmt:"png",  neben:"1200 x 1200"},
-  {k:"website",  wort:"Website",            mass:"2126,1417", fmt:"webp", neben:"2126 x 1417"},
-  {k:"word",     wort:"Word or email",      mass:"1200,800",  fmt:"png",  neben:"1200 x 800"},
-  {k:"knapp",    wort:"Just the mockup",    mass:"content",   fmt:"png",  neben:"cut to size"}
-];
-const zweckJetzt = () =>
-  (ZWECKE.find(z => z.mass === state.ratio && z.fmt === state.exportFormat) || {}).k || "";
+/* Die Arbeitsflaeche im einfachen Modus. Sie ist kein Ausgabemass, sie entscheidet nur,
+   wie fein das Mockup gerechnet wird: der Zuschnitt auf den Inhalt schneidet den Rest
+   ohnehin weg. 1200 mal 900 bei 0,95 Geraetegroesse ergibt rund 2280 Punkte Kantenlaenge
+   im Export, genug fuer eine volle Folie, und die Zeichenflaeche bleibt bei 2400 mal
+   1800 Punkten, also so gross wie bisher im Normalfall.                               */
+const E_FLAECHE = [1200, 900], E_GROESSE = 0.95;
 
 const E_GERAET = {
   desktop: "A screen on a stand. The usual choice for a website.",
   laptop:  "A notebook with the lid open.",
   phone:   "A phone, upright. Take a narrow screenshot for this one.",
-  browser: "No device around it: your screenshot with a browser bar on top and a soft shadow.",
+  browser: "No device around it: your screenshot with a soft shadow and barely rounded corners.",
   window:  "A plain frame around a part of a screen, without any device."
-};
-const E_HINTERGRUND = {
-  transparent: "The corners stay empty, so the picture works on any colour. In Word it looks white.",
-  white:       "White behind the device. The safe choice for a printed page.",
-  grey:        "The light grey of the website sections behind the device."
 };
 
 /* Die Kacheln zeichnen denselben Rahmen, der gleich auf der Flaeche steht: erst die
    Bildschirmflaeche als graues Viereck, damit auch der duenne Rahmen zu sehen ist,
-   darueber das Rahmenbild. Kein Wert wird geraten, bb und quad kommen aus derselben
-   Vermessung, aus der das Werkzeug rendert.                                          */
+   darueber Schatten und Rahmenbild. Kein Wert wird geraten, bb und quad kommen aus
+   derselben Vermessung, aus der das Werkzeug rendert.                                 */
 function zeichneMiniatur(c, key){
   const V = DEVICES[key]; if(!V || !V.front) return;
   /* Die Schattenfassung, nicht die schlichte: Browser und schlichter Rahmen sind nur
@@ -6866,101 +6978,182 @@ function zeichneMiniaturen(){
   });
 }
 
-/* Die Zweckliste ist dieselbe Objektzeile wie ueberall im Panel: eine Zeile, ein Ziel,
-   rechts die Zahl, die man hinterher wiedererkennt.                                   */
-(function baueZwecke(){
-  const w = $("#eZwecke"); if(!w) return;
-  for(const z of ZWECKE){
-    const b = document.createElement("button");
-    b.className = "z-objekt ezweckbtn";
-    b.dataset.zweck = z.k;
-    b.setAttribute("aria-pressed", "false");
-    b.innerHTML = '<span class="punkt" aria-hidden="true"></span>'
-                + '<span class="name"></span><span class="neben"></span>';
-    b.querySelector(".name").textContent = z.wort;
-    b.querySelector(".neben").textContent = z.neben;
-    b.addEventListener("click", () => setZweck(z.k));
-    w.appendChild(b);
-  }
-})();
-
-/* Der Zweck setzt Mass und Format ueber dieselben Bedienteile, die der erweiterte Modus
-   hat. Kein zweiter Pfad in den Zustand: sonst laufen die beiden Modi auseinander, und
-   die Ausgabeliste zeigt etwas anderes an als das, was heruntergeladen wird.          */
-function setZweck(k){
-  const z = ZWECKE.find(x => x.k === k); if(!z) return;
-  const liste = $("#size");
-  liste.value = z.mass;
-  liste.dispatchEvent(new Event("change"));
-  const f = document.querySelector('.fmtbtn[data-fmt="' + z.fmt + '"]');
-  if(f && state.exportFormat !== z.fmt) f.click();
-  /* Mit dem Zweck aendert sich die Flaeche, oft um das Doppelte. Ohne Einpassen steht
-     danach ein angeschnittenes Bild da, und wer den Zoom unten rechts nicht kennt,
-     haelt das fuer den Ausschnitt, den er bekommt. */
-  einpassen();
-  syncEinfach();
+/* ---- Die Farbe hinter dem Bild aus dem Bild ----
+   Gelesen wird der aeussere Rand des Screenshots, ein Punkt breit auf allen vier Seiten,
+   und daraus die haeufigste Farbe. Auf 16er-Stufen gerundet, sonst zaehlt jeder
+   Rauschpunkt als eigene Farbe und die Mehrheit findet sich nie. Der Sinn: steht
+   "Show all of it" an, laufen die Balken links und rechts in derselben Farbe weiter wie
+   der Rand des Bildes, und man sieht nicht mehr, wo das Bild aufhoert.                 */
+function aussenfarbe(i){
+  if(!i.edit) return null;
+  const c = i.edit, W = c.width, H = c.height;
+  if(!(W > 1) || !(H > 1)) return null;
+  const x = c.getContext("2d", {willReadFrequently:true});
+  const zaehler = new Map();
+  const streifen = (sx, sy, sw, sh) => {
+    let d;
+    try { d = x.getImageData(sx, sy, sw, sh).data; } catch(e){ return; }
+    for(let k = 0; k < d.length; k += 4){
+      if(d[k+3] < 128) continue;   // durchsichtige Raender zaehlen nicht mit
+      const stufe = ((d[k] & 240) << 16) | ((d[k+1] & 240) << 8) | (d[k+2] & 240);
+      zaehler.set(stufe, (zaehler.get(stufe) || 0) + 1);
+    }
+  };
+  streifen(0, 0, W, 1); streifen(0, H-1, W, 1);
+  streifen(0, 0, 1, H); streifen(W-1, 0, 1, H);
+  let beste = null, hoechste = 0;
+  for(const [wert, anzahl] of zaehler) if(anzahl > hoechste){ hoechste = anzahl; beste = wert; }
+  if(beste === null) return null;
+  // Mitte der Stufe statt ihres Anfangs, sonst faellt jede Farbe um bis zu 15 zu dunkel aus
+  const zwei = v => Math.min(255, v + 8).toString(16).padStart(2, "0");
+  return "#" + zwei((beste >> 16) & 255) + zwei((beste >> 8) & 255) + zwei(beste & 255);
 }
 
+/* ---- Wo das Bild im Bildschirm sitzt ----
+   Ein Anteil je Achse, 0 bis 1. Das rechnet fuer beide Faelle richtig: passt das Bild
+   nicht hinein, waehlt der Anteil den Ausschnitt, passt es hinein, waehlt er die Seite,
+   an der es steht.                                                                    */
+function bildAusrichten(i, hx, vy){
+  i.alignH = hx; i.alignV = vy;
+  if(!i.img) return;
+  const L = i.L || layout(i), e = effRect(L, i);
+  i.ix = e.x + (e.w - i.w*i.is)*hx;
+  i.iy = e.y + (e.h - i.h*i.is)*vy;
+}
+/* Nach jeder Aenderung am Rahmen sitzt das Bild neu. Einpassen und danach die gemerkte
+   Lage wieder herstellen, sonst springt es bei jedem Klick zurueck in die Mitte.      */
+function einfachNeuEinpassen(){
+  applyFit(act.fitMode === "fit" ? "fit" : "fill", act);
+  bildAusrichten(act, act.alignH, act.alignV);
+}
+
+/* ---- Die Ausgabe des einfachen Modus, einmal gesetzt ----
+   Freigestellt, PNG, auf das Mockup zugeschnitten. Gesetzt wird ueber dieselben
+   Bedienteile, die der erweiterte Modus zeigt, damit dort nichts anderes steht als das,
+   was wirklich herauskommt.                                                            */
+function einfachAusgabe(){
+  state.freeW = E_FLAECHE[0]; state.freeH = E_FLAECHE[1];
+  $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
+  state.ratio = "content"; $("#size").value = "content";
+  state.bgMode = "transparent";
+  $("#canvasColorRow").classList.remove("show");
+  state.exportFormat = "png"; state.exportScale = 2;
+  $("#qualityRow").classList.remove("show");
+  /* Groesse und Lage nur, solange ein Geraet da ist. Wer sich im erweiterten Modus eine
+     Anordnung aus mehreren gebaut hat, bekommt sie beim Umschalten nicht umgeraeumt. */
+  if(insts.length === 1){
+    act.devScale = E_GROESSE; act.sizeMode = "custom"; act.devX = 0; act.devY = 0;
+    $("#devSize").value = Math.round(E_GROESSE*100);
+  }
+  syncGroesse();
+}
+
+/* ---- Die Bedienteile ---- */
 document.querySelectorAll(".e-kachel").forEach(b =>
   b.addEventListener("click", () => {
     const ziel = document.querySelector('.devicebtn[data-device="' + b.dataset.egeraet + '"]');
     if(ziel) ziel.click();
-    /* Ein Rahmen ohne eigenes Bildschirmmass nimmt im einfachen Modus die Form des
-       Screenshots an, dann wird nichts still beschnitten. */
-    if(KANN_ANPASSEN(act.device) && act.img){
+    /* Ein Rahmen ohne eigenes Bildschirmmass nimmt die Form des Screenshots an, dann
+       wird nichts still beschnitten. */
+    if(KANN_ANPASSEN(act.device) && act.img && act.frameSize !== "shot"){
       const fs = document.querySelector('.framesizebtn[data-framesize="shot"]');
       if(fs) fs.click();
     }
-    syncEinfach();
+    einfachNeuEinpassen(); render();
   }));
-document.querySelectorAll(".egroessebtn").forEach(b =>
-  b.addEventListener("click", () => { setDevPreset(b.dataset.size); syncEinfach(); }));
+document.querySelectorAll(".eviewbtn").forEach(b =>
+  b.addEventListener("click", () => {
+    const ziel = document.querySelector('.viewbtn[data-view="' + b.dataset.view + '"]');
+    if(ziel) ziel.click();
+    einfachNeuEinpassen(); render();
+  }));
+document.querySelectorAll(".eframebtn").forEach(b =>
+  b.addEventListener("click", () => {
+    const ziel = document.querySelector('.framebtn[data-frame="' + b.dataset.frame + '"]');
+    if(ziel) ziel.click();
+  }));
+document.querySelectorAll(".echromebtn").forEach(b =>
+  b.addEventListener("click", () => {
+    snap("chrome");
+    act.chromeOn = b.dataset.chrome === "an";
+    $("#chromeToggle").checked = act.chromeOn;
+    /* Die Leiste nimmt oben ein Stueck vom Bildschirm weg, das Bild sitzt danach anders. */
+    einfachNeuEinpassen();
+    syncControls(); render();
+  }));
+$("#eUrl").addEventListener("input", e => {
+  act.url = e.target.value; $("#url").value = act.url; render();
+});
+document.querySelectorAll(".eformbtn").forEach(b =>
+  b.addEventListener("click", () => {
+    const ziel = document.querySelector('.framesizebtn[data-framesize="' + b.dataset.framesize + '"]');
+    if(ziel) ziel.click();
+    einfachNeuEinpassen(); render();
+  }));
+const eMass = (feld, welches) => $(feld).addEventListener("input", e => {
+  act[welches] = clamp(+e.target.value || (welches === "frameW" ? 1600 : 900), 100, 8000);
+  $(welches === "frameW" ? "#frameW" : "#frameH").value = act[welches];
+  einfachNeuEinpassen(); render();
+});
+eMass("#eFrameW", "frameW"); eMass("#eFrameH", "frameH");
+document.querySelectorAll(".efitbtn").forEach(b =>
+  b.addEventListener("click", () => {
+    snap("fit");
+    applyFit(b.dataset.fit, act);
+    bildAusrichten(act, act.alignH, act.alignV);
+    render();
+  }));
+document.querySelectorAll(".ealignh").forEach(b =>
+  b.addEventListener("click", () => { snap("align"); bildAusrichten(act, +b.dataset.h, act.alignV); render(); }));
+document.querySelectorAll(".ealignv").forEach(b =>
+  b.addEventListener("click", () => { snap("align"); bildAusrichten(act, act.alignH, +b.dataset.v); render(); }));
 document.querySelectorAll(".ebgbtn").forEach(b =>
   b.addEventListener("click", () => {
-    const w = b.dataset.ebg;
-    state.bgMode = w === "transparent" ? "transparent" : "color";
-    if(w !== "transparent"){
-      state.bgColor = TOKEN(w === "white" ? "--color-white" : "--color-grey-ultra-100");
-      $("#canvasColor").value = state.bgColor; $("#canvasHex").value = state.bgColor;
-    }
-    $("#canvasColorRow").classList.toggle("show", state.bgMode === "color");
+    snap("screenBg");
+    const f = b.dataset.ebg === "bild" ? aussenfarbe(act) : TOKEN("--color-white");
+    act.screenBg = f || TOKEN("--color-white");
+    $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
     render();
   }));
 $("#eBildWaehlen").addEventListener("click", () => $("#file").click());
 $("#eLaden").addEventListener("click", () => { if(!$("#eLaden").disabled) $("#export").click(); });
-
-const eHintergrund = () => state.bgMode === "transparent" ? "transparent"
-  : state.bgColor.toLowerCase() === TOKEN("--color-white").toLowerCase() ? "white" : "grey";
 
 function syncEinfach(){
   if(!$("#eBildStand")) return;
   const hat = insts.some(i => i.img);
   $("#eBildWaehlen").textContent = act.img ? "Choose a different image" : "Choose an image";
   $("#eBildStand").textContent = act.img
-    ? "Loaded, " + act.w + " by " + act.h + " pixels."
+    ? act.w + " by " + act.h + " pixels."
     : "Nothing yet. You can also drop a file on the dark area, or paste one with Ctrl and V.";
-  markiere(".e-kachel",     b => b.dataset.egeraet === act.device);
-  markiere(".ezweckbtn",    b => b.dataset.zweck === zweckJetzt());
-  markiere(".egroessebtn",  b => b.dataset.size === act.sizeMode);
-  markiere(".ebgbtn",       b => b.dataset.ebg === eHintergrund());
+  markiere(".e-kachel",   b => b.dataset.egeraet === act.device);
+  markiere(".eviewbtn",   b => b.dataset.view === act.view);
+  markiere(".eframebtn",  b => b.dataset.frame === act.frame);
+  markiere(".echromebtn", b => (b.dataset.chrome === "an") === act.chromeOn);
+  markiere(".eformbtn",   b => b.dataset.framesize === act.frameSize);
+  markiere(".efitbtn",    b => b.dataset.fit === act.fitMode);
+  markiere(".ealignh",    b => +b.dataset.h === act.alignH && act.fitMode !== "custom");
+  markiere(".ealignv",    b => +b.dataset.v === act.alignV && act.fitMode !== "custom");
+  markiere(".ebgbtn",     b => (b.dataset.ebg === "weiss")
+    === (act.screenBg.toLowerCase() === TOKEN("--color-white").toLowerCase()));
   $("#eGeraetHinweis").textContent = E_GERAET[act.device] || "";
-  $("#eBgHinweis").textContent = E_HINTERGRUND[eHintergrund()] || "";
-  const R = exportRahmen();
-  /* Warum die Datei doppelt so gross ist wie die Zeile daneben: die Skala steht auf
-     zweifach, damit das Bild auf einem guten Bildschirm scharf bleibt. Ohne den Satz
-     liest sich das wie ein Fehler. */
-  const doppelt = state.exportScale === 2
-    ? ", twice the size in the line above so it stays sharp" : "";
-  $("#eAusgabe").textContent = zweckJetzt()
-    ? "You get a " + FMT_NAME[state.exportFormat] + " file, " + R.w + " by " + R.h
-      + " pixels" + doppelt + "."
-    : "Nothing picked, so it stays at " + FMT_NAME[state.exportFormat] + ", " + R.w + " by "
-      + R.h + " pixels" + doppelt + ". Pick a line above and the tool sets it for you.";
+  $("#eUrl").classList.toggle("show", act.chromeOn);
+  $("#eFormZeile").classList.toggle("show", KANN_ANPASSEN(act.device));
+  $("#eMassZeile").classList.toggle("show", KANN_ANPASSEN(act.device) && act.frameSize === "custom");
+  $("#eUrl").value = act.url;
+  $("#eFrameW").value = act.frameW; $("#eFrameH").value = act.frameH;
+  $("#eBgChip").style.background = act.screenBg;
+  $("#eLookHinweis").textContent = KANN_ANPASSEN(act.device)
+    ? "This frame can take the shape of your image."
+    : "The browser bar draws an address line into the screen.";
+  $("#eBildHinweis").textContent = act.fitMode === "fit"
+    ? "The bars left over take the colour set above."
+    : "You can also drag the image inside the screen.";
   /* Ohne Bild waere die Datei ein leerer Rahmen. Der Knopf sagt, warum er nicht geht:
      ein grauer Knopf ohne Grund daneben ist eine Sackgasse.                           */
+  const R = exportRahmen();
   $("#eLaden").disabled = !hat;
   $("#eLadenHinweis").textContent = hat
-    ? "The browser asks where to put it."
+    ? "A see-through PNG, cut to the mockup, " + R.w + " by " + R.h + " pixels."
     : "Choose a screenshot first, then this works.";
   if(modus === "einfach"){
     $("#export").disabled = !hat;
@@ -6989,12 +7182,15 @@ function setModus(m){
   try { localStorage.setItem(MODUS_SCHLUESSEL, modus); } catch(e){ /* privates Fenster */ }
   if(modus === "einfach"){
     setTool("move");
+    einfachAusgabe();
     zeichneMiniaturen();
     zeigeBereich("einfach");
   } else if(bereich === "einfach"){
     zeigeBereich("geraet");
   }
   syncEinfach();
+  /* Die Leiste ist in den beiden Modi verschieden breit, die Buehne also auch. */
+  render(); einpassen();
 }
 document.querySelectorAll(".modusbtn").forEach(b =>
   b.addEventListener("click", () => setModus(b.dataset.modus)));
