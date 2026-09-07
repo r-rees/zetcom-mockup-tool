@@ -1,16 +1,13 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>zetcom Mockups</title>
-<!-- Rahmen: neutralisierte PNG-Exporte, v6 seit 2026-07-16. 2026-08-19 Browser-Fenster im
-     Code gezeichnet plus Markierungen. 2026-08-28 Ausrichten, Projektdatei, Fenstergroesse
-     am Screenshot, Exportskala, Zuschnitt, und die Oberflaeche auf die CD gezogen.
-     2026-08-29 Aufteilung gedreht: Einstellungen mit Reitern links, Buehne rechts,
-     Werkzeuge waagerecht in der Kopfleiste.
-     2026-09-04 Zwei Modi: Einfach (vier Schritte, sonst nichts) und Erweitert (alles
-     wie bisher). Der Schalter steht links in der Kopfleiste. -->
+<title>Mockup Studio · zetcom</title>
+<!-- Mockup Studio v7: standalone UI refresh, 7 September 2026. Renderer and embedded assets from v6. -->
+<!-- Kanonische Tokens VERLINKT statt abgeschrieben (zetcom-html). Die eigenen
+     Werte im zweiten style-Block stehen danach und gewinnen weiter; beim Publish
+     loest build-html.mjs den Verweis auf und bettet die Datei ein. -->
 <style data-zetcom-source="tokens.css">
 /* zetcom-canonical:start tokens.css */
 /* ============================================================
@@ -1416,1684 +1413,6 @@ body {
 
 /* zetcom-canonical:end */
 </style>
-<style data-zetcom-source="zetcom-doc.css">
-/* zetcom-canonical:start zetcom-doc.css */
-/* ============================================================
-   zetcom Dokument-Ebene fuer internes HTML
-   ============================================================
-   Setzt tokens.css voraus und wird IMMER danach geladen:
-
-     <link rel="stylesheet" href="tokens.css">
-     <link rel="stylesheet" href="zetcom-doc.css">
-
-   Zustaendig fuer alles, was gelesen wird: One-Pager, Report,
-   Onboarding-Blatt, Statusseite, Anleitung, Druckbogen. Fuer
-   Bedienoberflaechen (Dashboard, Werkzeug) kommt zetcom-ui.css
-   als dritte Datei dazu.
-
-   REGELN, die hier eingebaut sind und nicht ueberschrieben werden:
-   - kein Wert hart geschrieben, der als Token existiert
-   - DM Sans only, Gewichte 200 / 300 / 400 / 600 / 700
-   - Radius 0, kein Schatten, kein Verlauf
-   - Akzent nur an den erlaubten Stellen (Eyebrow-Quadrat,
-     Hervorhebung, Kennzahl, eine Markierung pro Dokument)
-   - Sentence case, Grossbuchstaben nur im Eyebrow
-
-   Klassennamen tragen das Praefix z-, damit sie nicht mit dem
-   eigenen CSS eines Werkzeugs kollidieren. Fliesstext braucht
-   keine Klassen: h1 bis h4, p, ul, ol, table, code sind direkt
-   gestylt.
-   ============================================================ */
-
-
-/* ---------------- Grundgeruest ---------------- */
-
-html {
-  font-size: 100%;              /* rem bleibt an der Browsergroesse */
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  font-family: var(--font-sans);
-  font-size: var(--doc-body);
-  line-height: var(--doc-body-lh);
-  font-weight: var(--doc-body-w);
-  color: var(--text-body);
-  background: var(--bg-section);
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
-
-/* ---------------- Blatt ----------------
-   Das weisse Blatt auf grauem Grund. Ein Dokument hat genau
-   eins, ein mehrblaettriger One-Pager je Blatt eines. */
-
-.z-sheet {
-  background: var(--bg-page);
-  max-width: var(--doc-width);
-  margin: var(--space-layout-xs) auto;
-  padding: var(--doc-pad-y) var(--doc-pad-x);
-  border-radius: var(--radius-none);
-  box-shadow: var(--shadow-none);
-}
-
-.z-sheet + .z-sheet { margin-top: var(--space-layout-m); }
-
-/* Fliesstext bekommt seine Lesebreite, Tabellen und Karten
-   duerfen die volle Blattbreite nutzen. */
-.z-sheet > p,
-.z-sheet > ul,
-.z-sheet > ol,
-.z-sheet > dl,
-.z-prose { max-width: var(--doc-measure); }
-
-
-/* ---------------- Kopf ---------------- */
-
-/* Kopf eines Lesedokuments, entschieden Robin 05.08.2026
-   (Musterbogen Frontend, Frage 17): Titel links, LOGO rechts,
-   optisch mittig zum linken Block, und eine duenne Linie statt
-   der 2px-Kante. Kein schwarzes Kopfband: das Blatt wird
-   gedruckt, und eine deckende Flaeche ueber die volle Breite
-   frisst Toner ohne etwas zu sagen. */
-.z-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-component-s);
-  padding-bottom: var(--space-component-s);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-  margin-bottom: var(--space-component-m);
-}
-
-.z-head h1 { margin: 0; }
-
-/* Rechte Seite des Kopfs: Logo oben, darunter EINE Zeile
-   (Robin 05.08.2026). Beides rechtsbuendig gestapelt.
-
-   Was in der Zeile steht, haengt vom Dokument ab. Meistens
-   sinnvoll ist ein Stand oder eine Fassung, weil ein internes
-   Blatt herumgereicht wird und niemand sonst erkennt, ob er die
-   aktuelle Version vor sich hat:
-     "Fassung 3, 05.08.2026"   "Stand 05.08.2026"
-     "aktualisiert 05.08.2026"  "Entwurf, fuer Norbert"
-   Sie bleibt EINZEILIG. Wer mehr unterbringen will, hat einen
-   Zusatz, der in den Fuss gehoert. */
-.z-head .z-marke {
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-component-xxs);
-  text-align: right;
-}
-
-.z-head .z-marke .z-meta {
-  margin: 0;
-  white-space: nowrap;
-}
-
-/* Auf Weiss immer die Vollfarbfassung mit dem fuenffarbigen
-   Pfeil (Robin 05.08.2026), nie mono. Breite kommt aus der
-   Mindestbreite, siehe .z-logo. */
-
-/* Ohne .z-marke, also Logo allein rechts. */
-.z-head > .z-logo,
-.z-head > .z-meta { margin-left: auto; }
-
-.z-meta {
-  font-size: var(--doc-micro);
-  line-height: var(--doc-micro-lh);
-  font-weight: var(--doc-micro-w);
-  color: var(--text-muted);
-}
-
-
-/* ---------------- Typografie ---------------- */
-
-.z-display {
-  font-size: var(--doc-display);
-  line-height: var(--doc-display-lh);
-  font-weight: var(--doc-display-w);
-  letter-spacing: var(--tracking-display);
-  color: var(--text-strong);
-  margin: 0 0 var(--space-component-xs);
-}
-
-h1 {
-  font-size: var(--doc-h1);
-  line-height: var(--doc-h1-lh);
-  font-weight: var(--doc-h1-w);
-  letter-spacing: var(--tracking-tight);
-  color: var(--text-strong);
-  margin: 0 0 var(--space-component-xs);
-}
-
-h2 {
-  font-size: var(--doc-h2);
-  line-height: var(--doc-h2-lh);
-  font-weight: var(--doc-h2-w);
-  letter-spacing: var(--tracking-tight);
-  color: var(--text-strong);
-  margin: var(--space-component-l) 0 var(--space-component-s);
-}
-
-h3 {
-  font-size: var(--doc-h3);
-  line-height: var(--doc-h3-lh);
-  font-weight: var(--doc-h3-w);
-  color: var(--text-strong);
-  margin: var(--space-component-m) 0 var(--space-component-xxs);
-}
-
-h4 {
-  font-size: var(--doc-h4);
-  line-height: var(--doc-h4-lh);
-  font-weight: var(--doc-h4-w);
-  color: var(--text-strong);
-  margin: var(--space-component-s) 0 var(--space-component-xxs);
-}
-
-/* Erste Ueberschrift im Blatt oder nach dem Kopf bekommt keinen
-   Abstand nach oben, sonst haengt das Blatt durch. */
-.z-sheet > :first-child,
-.z-head + h2,
-.z-head + h3 { margin-top: 0; }
-
-p { margin: 0 0 var(--space-component-xs); }
-
-/* Vorspann. Genau einer pro Dokument, direkt unter dem Titel.
-   Steht an einer Akzentkante (Robin 05.08.2026, Gliederung B):
-   das ist die einzige Akzentflaeche im Fliessteil und markiert,
-   wo die Zusammenfassung steht. */
-.z-lead {
-  font-size: var(--doc-lead);
-  line-height: var(--doc-lead-lh);
-  font-weight: var(--doc-lead-w);
-  color: var(--text-strong);
-  max-width: var(--doc-measure);
-  border-left: var(--border-width-strong) solid var(--accent);
-  padding-left: var(--space-component-s);
-  margin: 0 0 var(--space-component-l);
-}
-
-/* Ein Vorspann ohne Kante, wenn ein Dokument mehrere
-   Zusammenfassungen hat und keine davon die eine ist. */
-.z-lead--flach { border-left: none; padding-left: 0; }
-
-
-/* ---------------- Abschnitt ----------------
-   Gliederung B, entschieden Robin 05.08.2026: jeder Abschnitt
-   beginnt mit einer Haarlinie ueber die Textbreite und einer
-   Kapitelmarke darueber. Damit sieht man die Gliederung, ohne
-   zu lesen, und kann quer einsteigen.
-
-   Die Zwischenueberschrift traegt KEIN Pixelquadrat (Robin,
-   05.08.2026). Sie unterscheidet sich allein durch Groesse und
-   Gewicht, siehe die Leiter in tokens.css. */
-
-.z-sheet > section {
-  border-top: var(--border-width) solid var(--border-subtle);
-  padding-top: var(--space-component-s);
-  margin-top: var(--space-component-l);
-}
-.z-sheet > section:first-of-type { margin-top: var(--space-component-m); }
-.z-sheet > section > :is(h2, h3, .z-kapitel):first-child { margin-top: 0; }
-
-/* Kapitelmarke. Typografisch derselbe Satz wie der Eyebrow,
-   nur ohne Quadrat und gedaempft. Das ist die zweite und
-   letzte Stelle mit Grossbuchstaben. */
-.z-kapitel {
-  font-size: var(--doc-micro);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0 0 4px;
-}
-
-.z-small {
-  font-size: var(--doc-small);
-  line-height: var(--doc-small-lh);
-  font-weight: var(--doc-small-w);
-}
-
-.z-muted { color: var(--text-muted); }
-
-/* Hervorhebung. b und strong tragen 700, das ist die einzige
-   Betonung im Fliesstext. Kursiv gibt es, wird aber selten
-   gebraucht. */
-b, strong { font-weight: var(--weight-bold); color: var(--text-strong); }
-
-/* Akzent als Textfarbe ist erst ab --accent-text-min-size (24px)
-   erlaubt, im Fliesstext also nie. Diese Klasse ist deshalb
-   ausdruecklich fuer Kennzahlen und Display-Zeilen da und setzt
-   die Mindestgroesse selbst. Gelb und Gruen bleiben trotzdem
-   verboten, das kann CSS nicht durchsetzen, der Pruefer schon. */
-.z-accent {
-  color: var(--accent);
-  font-size: max(var(--accent-text-min-size), 1em);
-}
-
-a {
-  color: var(--text-strong);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: var(--border-width);
-}
-a:hover { color: var(--hover-on-outline); }
-
-
-/* ---------------- Eyebrow ----------------
-   .eyebrow kommt aus tokens.css: Grossbuchstaben, gesperrt,
-   Akzentquadrat davor, Schrift erbt die Umgebungsfarbe. Hier
-   nur die Dokumentgroesse und der Abstand darunter. */
-
-.eyebrow {
-  font-size: var(--doc-eyebrow);
-  font-weight: var(--doc-eyebrow-w);
-  margin: 0 0 var(--space-component-xxs);
-}
-
-
-/* ---------------- Listen ---------------- */
-
-ul, ol { margin: 0 0 var(--space-component-xs); padding-left: var(--space-component-s); }
-li { margin-bottom: var(--space-component-xxs); }
-li:last-child { margin-bottom: 0; }
-
-/* Liste mit Pixelquadrat statt Punkt.
-   Robin 05.08.2026: das Quadrat ist hier kleiner als im Eyebrow
-   (6 statt 8), es rueckt naeher an den Text, und es muss nicht
-   in Akzentfarbe stehen. Naeher heisst: das QUADRAT rueckt ein,
-   der Text bleibt, wo er ist. Sonst franst die linke Kante des
-   Textblocks aus. */
-.z-list {
-  list-style: none;
-  padding-left: 0;
-  --list-square: 6px;
-  --list-color: var(--accent);
-}
-.z-list--schwarz { --list-color: var(--text-strong); }
-
-/* Das Quadrat haengt an der Grundlinie, nicht am Zeilenkasten,
-   aus demselben Grund wie beim Eyebrow (siehe tokens.css): eine
-   fraktionale Position wird von der Rasterung aufgerundet und
-   das Quadrat sitzt sichtbar zu tief. Als inline-block auf der
-   Grundlinie sitzend, dann 2px angehoben, damit es in der Mitte
-   des Versalbands steht statt auf der Linie. */
-.z-list > li {
-  padding-left: var(--space-component-xs);   /* 18px Textkante, auch fuer Umbrueche */
-}
-.z-list > li::before {
-  content: "";
-  display: inline-block;
-  width: var(--list-square);
-  height: var(--list-square);
-  background: var(--list-color);
-  vertical-align: baseline;
-  margin-bottom: 2px;                         /* hebt es ins Versalband */
-  margin-left: calc(-1 * var(--space-component-xs));
-  margin-right: calc(var(--space-component-xs) - var(--list-square));
-}
-
-/* Begriffsliste: Begriff links, Erklaerung rechts. */
-.z-dl {
-  display: grid;
-  grid-template-columns: minmax(9rem, max-content) 1fr;
-  gap: var(--space-component-xxs) var(--space-component-s);
-  margin: 0 0 var(--space-component-s);
-}
-.z-dl dt { font-weight: var(--weight-bold); }
-.z-dl dd { margin: 0; }
-
-
-/* ---------------- Tabelle ---------------- */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--doc-small);
-  line-height: var(--doc-small-lh);
-  margin: 0 0 var(--space-component-s);
-}
-
-th {
-  text-align: left;
-  font-weight: var(--weight-semibold);
-  padding: var(--space-component-xxs) var(--space-component-xxs);
-  border-bottom: var(--border-width-strong) solid var(--border-strong);
-  white-space: nowrap;
-}
-
-td {
-  padding: var(--space-component-xxs);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-  vertical-align: top;
-}
-
-tr:last-child td { border-bottom: none; }
-
-/* Zahlenspalte rechtsbuendig, mit gleichbreiten Ziffern. */
-.z-num { text-align: right; font-variant-numeric: tabular-nums; }
-
-caption {
-  caption-side: bottom;
-  text-align: left;
-  font-size: var(--doc-micro);
-  color: var(--text-muted);
-  padding-top: var(--space-component-xxs);
-}
-
-/* Breite Tabellen scrollen in ihrem eigenen Kasten, das Blatt
-   selbst scrollt nie waagerecht. */
-.z-scroll { overflow-x: auto; margin-bottom: var(--space-component-s); }
-.z-scroll > table { margin-bottom: 0; }
-
-
-/* ---------------- Karten und Raster ---------------- */
-
-.z-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--space-component-s);
-  margin: 0 0 var(--space-component-s);
-}
-.z-grid--2 { grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
-.z-grid--3 { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
-
-.z-card {
-  background: var(--surface-card);
-  border: var(--border-width) solid var(--border-subtle);
-  border-radius: var(--radius-none);
-  padding: var(--space-component-s);
-}
-
-.z-card--sunken { background: var(--surface-sunken); border-color: transparent; }
-
-/* Markiert das, worauf es ankommt. Keine Mengenregel
-   (Robin 05.08.2026): so viele, wie die Sache braucht. */
-.z-card--marked { border-left: var(--border-width-strong) solid var(--accent); }
-
-.z-card > :first-child { margin-top: 0; }
-.z-card > :last-child { margin-bottom: 0; }
-
-
-/* ---------------- Kennzahl ---------------- */
-
-.z-kpi { display: flex; flex-direction: column; gap: var(--space-component-xxs); }
-
-.z-kpi .z-kpi-value {
-  font-size: var(--doc-kpi);
-  line-height: var(--doc-kpi-lh);
-  font-weight: var(--doc-kpi-w);
-  letter-spacing: var(--tracking-display);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-strong);
-}
-
-/* Kennzahl in Akzentfarbe ist zulaessig: --doc-display liegt weit
-   ueber der Mindestgroesse. Gelb und Gruen trotzdem nie. */
-.z-kpi--accent .z-kpi-value { color: var(--accent); }
-
-.z-kpi .z-kpi-label {
-  font-size: var(--doc-small);
-  font-weight: var(--doc-small-w);
-  color: var(--text-muted);
-}
-
-
-/* ---------------- Hinweis ---------------- */
-
-.z-note {
-  background: var(--surface-sunken);
-  border-left: var(--border-width-strong) solid var(--border-strong);
-  padding: var(--space-component-s);
-  margin: 0 0 var(--space-component-s);
-}
-.z-note > :first-child { margin-top: 0; }
-.z-note > :last-child { margin-bottom: 0; }
-
-/* Das, worauf jemand achten soll. */
-.z-note--attention { border-left-color: var(--accent); }
-
-
-/* ---------------- Marke ---------------- */
-
-/* Logo. IMMER ueber die BREITE skalieren, nie ueber die Hoehe.
-   Die Mindestgroesse der CD ist eine Mindestbreite, und wer die
-   Hoehe setzt, rechnet sie nicht mit: bei 22px Hoehe ist die
-   Wortmarke 81px breit, also die Haelfte des Erlaubten. Genau so
-   ist es am 05.08.2026 im Tender-Dummy passiert, und man sieht
-   es sofort, die Pixel des Pfeils sind dann rund 2px gross.
-
-   Seitenverhaeltnis der Wortmarke 3,68 zu 1, also entspricht die
-   Mindestbreite 160px einer Hoehe von 43,5px.
-
-   Die SVG in Assets/logos/ tragen ihre Schutzzone bereits im
-   eigenen Canvas, es muss also nichts addiert werden. */
-.z-logo {
-  display: block;
-  width: var(--logo-min-wordmark);
-  height: auto;
-}
-
-/* Groesser, nie kleiner. */
-.z-logo--lg { width: 220px; }
-
-/* Passt die Wortmarke nicht in ihrer Mindestbreite hin, steht
-   dort der PFEIL SOLO. Das ist die Regel der CD, nicht eine
-   Notloesung: der Pfeil besteht nur aus Big pixels und traegt
-   deshalb kleine Groessen. Nie stattdessen das Lockup
-   schrumpfen. */
-.z-logo--pfeil { width: 28px; }
-
-/* KEINE freie Pixelanordnung im fliessenden Layout.
-   Entschieden Robin 05.08.2026: im Dokument erscheint das Motiv
-   genau zweimal, als Quadrat vor dem Eyebrow und als
-   Aufzaehlungszeichen. Eine gestreute Anordnung oder eine Reihe
-   im Kopf gibt es hier nicht, das waeren zu viele Quadrate.
-   P1, P5 und P6 rechnen ohnehin mit einer festen Canvas, die ein
-   scrollendes Dokument nicht hat. */
-
-
-/* ---------------- Code ---------------- */
-
-code, kbd, samp {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.9em;
-  background: var(--surface-sunken);
-  padding: 0 0.25em;
-}
-
-pre {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: var(--doc-small);
-  line-height: var(--doc-small-lh);
-  background: var(--surface-sunken);
-  padding: var(--space-component-s);
-  overflow-x: auto;
-  margin: 0 0 var(--space-component-s);
-}
-pre code { background: none; padding: 0; }
-
-/* Tastenkuerzel */
-kbd { border: var(--border-width) solid var(--border-subtle); padding: 0 0.35em; }
-
-
-/* ---------------- Trenner, Fuss ---------------- */
-
-hr {
-  border: none;
-  border-top: var(--border-width) solid var(--border-subtle);
-  margin: var(--space-component-l) 0;
-}
-
-.z-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-component-s);
-  margin-top: var(--space-component-l);
-  padding-top: var(--space-component-s);
-  border-top: var(--border-width) solid var(--border-subtle);
-  font-size: var(--doc-micro);
-  line-height: var(--doc-micro-lh);
-  color: var(--text-muted);
-}
-.z-footer .z-logo { margin-left: auto; }
-
-
-/* ---------------- Schmales Fenster ---------------- */
-
-@media (max-width: 48rem) {
-  .z-sheet {
-    margin: 0;
-    padding: var(--space-component-m) var(--space-component-s);
-  }
-  .z-display { font-size: var(--doc-h1); }
-  h1 { font-size: var(--doc-h2); }
-  .z-dl { grid-template-columns: 1fr; gap: 0 0; }
-  .z-dl dd { margin-bottom: var(--space-component-xs); }
-}
-
-
-/* ---------------- Druck ----------------
-   Ein internes Dokument wird gedruckt oder als PDF abgelegt.
-   Papier hat keinen grauen Hintergrund und keine Verlaufe, der
-   Text rechnet in pt. */
-
-@media print {
-  /* Einzige Stelle mit einem geschriebenen Wert: @page ist kein
-     Element, Browser loesen dort kein var() auf. Der Wert steht
-     in tokens.css als --doc-print-margin und muss bei einer
-     Aenderung hier von Hand nachgezogen werden. */
-  @page {
-    margin: 16mm;
-  }
-
-  body {
-    background: var(--bg-page);
-    font-size: var(--doc-print-body);
-    line-height: var(--doc-body-lh);
-  }
-
-  .z-sheet {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .z-sheet + .z-sheet { break-before: page; }
-
-  /* Nichts, was zusammengehoert, faellt ueber die Blattkante. */
-  h1, h2, h3, h4 { break-after: avoid; }
-  .z-card, .z-note, .z-kpi, tr, li { break-inside: avoid; }
-  table { break-inside: auto; }
-  thead { display: table-header-group; }
-
-  .z-small, .z-meta, .z-footer, table, pre { font-size: var(--doc-print-small); }
-
-  /* Bedienelemente haben auf Papier nichts verloren. Der
-     Markenkopf eines Werkzeugs bleibt: er sagt, woraus der
-     Ausdruck stammt. */
-  .z-noprint, .z-toolbar, .z-tabs, .z-btn, button, input, select { display: none !important; }
-  .z-toolbar { position: static; }
-}
-
-/* zetcom-canonical:end */
-</style>
-<style data-zetcom-source="zetcom-ui.css">
-/* zetcom-canonical:start zetcom-ui.css */
-/* ============================================================
-   zetcom Bedien-Ebene fuer interne Werkzeuge
-   ============================================================
-   Setzt tokens.css UND zetcom-doc.css voraus, wird als dritte
-   Datei geladen:
-
-     <link rel="stylesheet" href="tokens.css">
-     <link rel="stylesheet" href="zetcom-doc.css">
-     <link rel="stylesheet" href="zetcom-ui.css">
-
-   Nur fuer Dinge, die man bedient: Dashboard, Werkbank,
-   Pruefausgabe, Statusboard. Ein reines Lesedokument braucht
-   diese Datei nicht.
-
-   Werkzeuge sind dichter als Lesedokumente. Deshalb rechnet
-   alles hier in --ui-*, nicht in --doc-*. Die Website-Werte
-   passen nicht: --button-height ist dort 72px, das ist eine
-   Landingpage-Groesse.
-   ============================================================ */
-
-
-/* ============================================================
-   ZUSTAENDE, verbindlich seit 05.08.2026 (Robin)
-
-   HOVER kehrt Flaeche und Schrift um, der Rahmen bleibt stehen.
-     schwarz gefuellt  ->  weisse Flaeche, schwarze Schrift
-     nur Rahmen        ->  Flaeche in Rahmenfarbe, Schrift in der
-                           Gegenfarbe
-   Das gilt auf hellem wie auf dunklem Grund, es dreht sich
-   jeweils mit. Keine Aufhellung, keine Deckkraft, kein
-   Farbwechsel: die Marke hat zwei Farben fuer so etwas, und die
-   tauschen einfach den Platz.
-
-   FELDER werden beim Hover nicht gefuellt, sondern bekommen
-   einen dickeren Rahmen in der Bedienfarbe (1px -> 2px). Der
-   Innenabstand gibt dabei 1px ab, damit nichts springt.
-
-   FOKUS ist davon getrennt: 2px schwarz mit 2px Abstand
-   (auf dunklem Grund weiss). Farbneutral, damit er unabhaengig
-   vom Produktakzent funktioniert, und sichtbar ueber jedem
-   Hover-Zustand. WCAG 2.4.11.
-   ============================================================ */
-
-:root {
-  --ui-ink:     var(--color-black);    /* Bedienfarbe auf hellem Grund */
-  --ui-paper:   var(--color-white);    /* Gegenfarbe dazu */
-}
-
-/* Auf dunklem Grund dreht sich das Paar. */
-.z-dark {
-  --ui-ink:   var(--color-white);
-  --ui-paper: var(--color-black);
-  background: var(--bg-inverse);
-  color: var(--text-inverse);
-}
-
-:where(.z-btn, .z-field, .z-tab, a, button, input, select, textarea):focus-visible {
-  outline: var(--border-width-strong) solid var(--ui-ink);
-  outline-offset: 2px;
-}
-
-
-/* ---------------- Schaltflaeche ---------------- */
-
-.z-btn {
-  font-family: var(--font-sans);
-  font-size: var(--ui-body);
-  font-weight: var(--weight-semibold);
-  line-height: 1;
-  height: var(--ui-control-height);
-  padding: 0 var(--ui-control-pad-x);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-component-xxs);
-  border: var(--border-width-strong) solid var(--ui-ink);
-  border-radius: var(--radius-none);
-  background: var(--ui-ink);
-  color: var(--ui-paper);
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-standard),
-              color var(--duration-fast) var(--ease-standard);
-}
-
-/* Gefuellt -> beim Hover leer. Der Rahmen bleibt. */
-.z-btn:hover {
-  background: var(--ui-paper);
-  color: var(--ui-ink);
-}
-
-/* DREI RAENGE, und der Unterschied ist funktional, nicht
-   optisch (Robin 05.08.2026):
-
-     .z-btn           CTA, gefuellt. Die Handlung, um die es geht.
-     .z-btn--outline  CTA zweiten Ranges. Nur Rahmen, fuellt sich
-                      beim Hover.
-     .z-btn--text     KEIN CTA. Nebenweg, Abbruch, Umschalter.
-                      Kein Rahmen, holt sich die Flaeche erst
-                      beim Hover.
-
-   EIN CTA TRAEGT IMMER EINEN RAHMEN UND KEHRT IMMER UM. Wer
-   einen Aufruf zum Handeln rahmenlos setzt, nimmt ihm die
-   Klickbarkeit. Rahmenlos ist ausschliesslich der Nebenweg, und
-   davon steht hoechstens einer neben einem CTA. */
-
-.z-btn--outline {
-  background: transparent;
-  color: var(--ui-ink);
-}
-.z-btn--outline:hover {
-  background: var(--ui-ink);
-  color: var(--ui-paper);
-}
-
-.z-btn--text {
-  background: transparent;
-  border-color: transparent;
-  color: var(--ui-ink);
-}
-.z-btn--text:hover {
-  background: var(--ui-ink);
-  border-color: var(--ui-ink);
-  color: var(--ui-paper);
-}
-
-.z-btn:disabled {
-  border-color: var(--hairline-faint);
-  background: transparent;
-  color: var(--hairline-faint);
-  cursor: default;
-}
-.z-btn:disabled:hover { background: transparent; color: var(--hairline-faint); }
-
-/* Icon in der Schaltflaeche laeuft in der Schriftfarbe mit. */
-.z-btn svg { width: var(--icon-size); height: var(--icon-size); flex: none; }
-
-
-/* ---------------- Feld ---------------- */
-
-/* Im Ruhezustand OHNE Rahmen (Robin 05.08.2026). Erkennbar ist
-   das Feld an seiner Flaeche: es liegt tiefer als das Blatt.
-   Beim Hover und beim Tippen kommt der Rahmen dazu, 2px in der
-   Bedienfarbe. Der Innenabstand gibt die zwei Pixel ab, damit
-   der Text nicht springt; die Hoehe haelt border-box. */
-.z-field {
-  font-family: var(--font-sans);
-  font-size: var(--ui-body);
-  font-weight: var(--weight-regular);
-  height: var(--ui-control-height);
-  padding: 0 var(--space-component-xxs);
-  border: 0;
-  border-radius: var(--radius-none);
-  background: var(--surface-sunken);
-  color: var(--text-strong);
-}
-
-.z-field:hover,
-.z-field:focus {
-  border: var(--border-width-strong) solid var(--ui-ink);
-  padding: 0 calc(var(--space-component-xxs) - 2px);
-}
-
-/* Auf dunklem Grund kann die Flaeche nicht heller liegen, dort
-   traegt das Feld eine leichte Aufhellung. */
-.z-dark .z-field,
-.z-appbar .z-field { background: var(--color-black-95); color: var(--text-inverse); }
-
-select.z-field { padding-right: var(--space-component-s); }
-textarea.z-field { height: auto; padding: var(--space-component-xxs); line-height: var(--doc-body-lh); }
-
-
-/* ---------------- Kopfleiste ---------------- */
-
-/* IN DER REGEL NUR FUER WERKZEUGE OHNE SEITENLEISTE (10.08.2026).
-   Hat das Werkzeug eine Leiste, steht die Marke oben in der
-   Leiste und kostet dort keine Hoehe; diese Kopfzeile entfaellt
-   dann meistens, weil sie nichts sagt, was die Leiste nicht schon
-   sagt. Sie bleibt richtig, wenn sie etwas traegt, das die Leiste
-   nicht traegt: Konto, globale Suche, Kontext der ganzen Sitzung.
-   DIE MARKE STEHT DANN TROTZDEM GENAU EINMAL, entweder hier oder
-   in der Leiste. Zwei Logos auf einem Bildschirm sind keine
-   Navigation, sondern ein Versehen, und check-html-cd.mjs meldet
-   sie.
-
-   HELL, nicht schwarz (Robin 05.08.2026, Musterbogen Frontend
-   Frage 18). Ein schwarzer Balken teilt den Bildschirm und
-   entfernt das Werkzeug von der Website, die ebenfalls weiss
-   ist. Die Marke steht trotzdem da: Logo links, davor nichts,
-   und das Akzentquadrat vor dem Werkzeugnamen. */
-.z-appbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-component-s);
-  min-height: var(--ui-appbar-height);
-  padding: 0 var(--doc-pad-x);
-  background: var(--bg-page);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-}
-/* PLATZPROBLEM, und es hat genau eine saubere Loesung.
-   Die Wortmarke braucht 160px Breite, das sind 43,5px Hoehe,
-   plus Schutzzone von einer halben Logohoehe oben und unten.
-   Eine Leiste muesste dafuer 88px hoch sein. In einer 56px-
-   Leiste steht deshalb der PFEIL SOLO, so wie es die CD fuer
-   alles unterhalb der Mindestbreite vorsieht. Das Lockup wird
-   NICHT geschrumpft.
-   Wer die Wortmarke in der Leiste haben will, nimmt
-   .z-appbar--gross und bezahlt mit 32px Hoehe. */
-.z-appbar .z-logo--pfeil { width: 28px; }
-
-.z-appbar--gross { min-height: 88px; }
-
-/* Steht der Pfeil im Kopf, entfaellt das Akzentquadrat vor dem
-   Werkzeugnamen. Der Pfeil bringt seine Quadrate schon mit, zwei
-   Quadratgruppen nebeneinander lesen sich als Versehen. */
-.z-appbar .z-logo--pfeil ~ h1::before { display: none; }
-.z-appbar h1 {
-  font-size: var(--doc-h4);
-  font-weight: var(--weight-semibold);
-  color: var(--text-strong);
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-component-xxs);
-}
-.z-appbar h1::before {
-  content: "";
-  width: var(--eyebrow-square);
-  height: var(--eyebrow-square);
-  background: var(--accent);
-  flex: none;
-  align-self: baseline;
-}
-.z-appbar .z-meta { margin-left: auto; }
-
-
-/* ---------------- Reiter ---------------- */
-
-.z-tabs {
-  display: flex;
-  gap: var(--space-component-s);
-  padding: 0 var(--doc-pad-x);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-  background: var(--bg-page);
-}
-.z-tab {
-  font-family: var(--font-sans);
-  font-size: var(--ui-body);
-  font-weight: var(--weight-semibold);
-  padding: var(--space-component-xxs) 0;
-  background: none;
-  border: none;
-  border-bottom: var(--border-width-strong) solid transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-.z-tab:hover { color: var(--text-strong); }
-.z-tab[aria-selected="true"] {
-  color: var(--text-strong);
-  border-bottom-color: var(--accent);
-}
-
-
-/* ---------------- Navigation an der Seite ---------------- */
-
-/* DIE SEITENLEISTE IST DER NORMALFALL, Reiter sind die Ausnahme.
-   Umgedreht am 10.08.2026 (Robin). Die Fassung vom 07.08. sagte
-   "Reiter, und erst bei zwei Ebenen eine Leiste". Das hat die
-   Reihenfolge falsch herum: ein Werkzeug wird bedient, nicht
-   gelesen, und wer es bedient, springt den ganzen Tag zwischen
-   Zielen hin und her.
-
-   Was die Leiste kann und die Reiterzeile nicht:
-     - sie waechst nach unten. Ein sechster Menuepunkt kostet
-       34px Hoehe, die da sind. Ein sechster Reiter kostet Breite,
-       die neben Suche, Filter und Aktion nicht da ist, und dann
-       bricht die Zeile um oder scrollt seitlich.
-     - sie traegt eine zweite Ebene, ohne dass etwas verschwindet.
-     - sie steht immer, auch beim Scrollen, und beantwortet damit
-       durchgehend "wo bin ich, was gibt es noch".
-     - sie liest sich als Liste, also von oben nach unten in einem
-       Blick. Eine Reiterzeile liest man von links nach rechts und
-       hoert beim aktiven Reiter auf.
-
-   ENTSCHEIDUNGSREGEL, damit das niemand nach Gefuehl macht:
-     Seitenleiste, sobald EINES davon zutrifft
-       - mehr als vier Ziele
-       - eine zweite Ebene
-       - das Werkzeug bleibt laenger offen als ein Blick
-       - die Zielliste waechst noch
-     Reiter nur, wenn ALLES davon zutrifft
-       - hoechstens vier Ziele
-       - eine Ebene
-       - die Liste ist fertig und waechst nicht mehr
-     Im Zweifel Seitenleiste. Eine Leiste mit drei Punkten sieht
-     leer aus und funktioniert; eine Reiterzeile mit neun Punkten
-     sieht voll aus und funktioniert nicht.
-
-   BEIDES ZUSAMMEN NUR IN DIESER RICHTUNG: Leiste fuer den Ort,
-   Reiter fuer Ansichten DESSELBEN Ortes (Liste, Karte, Verlauf).
-   Nie zwei Navigationen fuer dieselbe Ebene, das ist die
-   haeufigste Form von "wo bin ich eigentlich".
-
-   Der aktive Marker ist derselbe wie beim Reiter, nur gekippt:
-   2px Akzent an der Kante, schwarze Schrift. Kein Icon, kein
-   Hintergrund, keine Pille.
-
-   Unterpunkte werden EINGERUECKT, nicht mit einer Zwischen-
-   ueberschrift getrennt. Eine Ueberschrift in Grossbuchstaben
-   waere Eyebrow-Typografie ohne Eyebrow zu sein, und ein
-   Sammelziel ist meistens selbst ein Ziel. */
-
-/* Der Rahmen eines Werkzeugs mit Seitenleiste. Die Leiste steht,
-   der Inhalt scrollt. min-width:0 auf der zweiten Spalte, sonst
-   sprengt eine breite Tabelle das Grid statt zu scrollen; das ist
-   der Standardfehler an dieser Stelle. */
-.z-app {
-  display: grid;
-  grid-template-columns: var(--ui-nav-breite) minmax(0, 1fr);
-  min-height: 100vh;
-}
-.z-app > main { min-width: 0; }
-.z-app > .z-seitenleiste[hidden] { display: none; }
-.z-app:has(> .z-seitenleiste[hidden]) { grid-template-columns: minmax(0, 1fr); }
-
-.z-seitenleiste {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  height: 100vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-component-xxs) 0 var(--space-component-s);
-  border-right: var(--border-width) solid var(--border-subtle);
-}
-/* Marke oben in der Leiste, nicht in einem zweiten Balken
-   darueber. Wer beides baut, hat zwei Kopfzeilen und verliert
-   88px Hoehe an Dekoration. */
-.z-seitenleiste .z-marke {
-  display: flex;
-  align-items: center;
-  gap: var(--space-component-xxs);
-  min-height: var(--ui-appbar-height);
-  padding: 0 var(--space-component-s);
-  margin-bottom: var(--space-component-xxs);
-}
-.z-seitenleiste .z-marke .z-logo--pfeil { width: 28px; }
-.z-seitenleiste .z-marke strong {
-  font-size: var(--doc-h4);
-  font-weight: var(--weight-semibold);
-}
-.z-seitenleiste a {
-  display: block;
-  text-decoration: none;
-  font-size: var(--ui-body);
-  color: var(--text-muted);
-  padding: var(--ui-nav-pad-y) var(--space-component-s);
-  border-left: var(--border-width-strong) solid transparent;
-}
-.z-seitenleiste a:hover { color: var(--text-strong); background: var(--surface-sunken); }
-.z-seitenleiste a[aria-current="page"] {
-  color: var(--text-strong);
-  font-weight: var(--weight-semibold);
-  border-left-color: var(--accent);
-}
-.z-seitenleiste .z-unter {
-  padding-left: calc(var(--space-component-s) + var(--space-component-xs));
-  font-size: var(--ui-small);
-}
-/* Zaehler am Menuepunkt, rechtsbuendig. Er beantwortet "lohnt
-   sich der Klick" vor dem Klick. Gedaempft, damit er den Punkt
-   nicht ueberholt, und nie in einer Signalfarbe: eine Menge ist
-   kein Zustand. */
-.z-seitenleiste a .z-zahl {
-  float: right;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--weight-regular);
-}
-.z-seitenleiste hr {
-  border: 0;
-  border-top: var(--border-width) solid var(--border-subtle);
-  margin: var(--space-component-xxs) var(--space-component-s);
-}
-/* Was unten steht, steht unten: Einstellungen, Hilfe, Abmelden,
-   Datenstand. */
-.z-seitenleiste .z-fuss { margin-top: auto; }
-
-/* Unter --ui-bruch frisst eine 232px-Spalte die halbe Breite.
-   Dort wird aus der Leiste eine Zeile ueber dem Inhalt, mit
-   demselben Marker, nur wieder gekippt. Das ist kein zweites
-   Layout, sondern dasselbe in schmal. */
-@media (max-width: 900px) {
-  /* grid-template-rows steht hier nicht zur Zierde: mit zwei
-     automatischen Zeilen und min-height:100vh verteilt das Grid
-     den uebrigen Platz auf BEIDE Zeilen, und die Navigationszeile
-     bekommt 60px Luft unter sich geschenkt. Am 10.08.2026 im Bild
-     gesehen und nachgemessen. */
-  .z-app {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-  .z-seitenleiste {
-    position: static;
-    height: auto;
-    flex-direction: row;
-    align-items: center;
-    overflow-x: auto;
-    padding: 0 var(--space-component-xxs);
-    border-right: 0;
-    border-bottom: var(--border-width) solid var(--border-subtle);
-  }
-  .z-seitenleiste a {
-    border-left: 0;
-    border-bottom: var(--border-width-strong) solid transparent;
-    white-space: nowrap;
-    padding: var(--space-component-xxs);
-  }
-  .z-seitenleiste a[aria-current="page"] { border-bottom-color: var(--accent); }
-  /* In der Zeile gibt es kein Rechts, an das sich der Zaehler
-     haengen koennte. Ohne diese Zeile klebt er am Wort. */
-  .z-seitenleiste a .z-zahl { float: none; margin-left: 6px; }
-  .z-seitenleiste .z-marke { min-height: 0; padding-left: var(--space-component-xxs); }
-  .z-seitenleiste .z-marke strong,
-  .z-seitenleiste .z-unter,
-  .z-seitenleiste hr { display: none; }
-  .z-seitenleiste .z-fuss { margin-top: 0; }
-}
-
-
-/* ---------------- Umschalter ---------------- */
-
-/* Angelegt 07.08.2026. Ein Umschalter zeigt seine Moeglichkeiten.
-   Ein Auswahlfeld versteckt bei drei Zustaenden zwei davon hinter
-   einem Klick, und eine gefuellte Flaeche waere der Rang eines
-   CTA, den ein Umschalter nicht hat (siehe die drei Raenge oben:
-   der Umschalter ist ausdruecklich .z-btn--text).
-
-   Also die Reiterlogik in der Werkzeugleiste, damit "hier stehst
-   du" im ganzen System derselbe Marker bleibt. */
-.z-schalter { display: flex; gap: var(--space-component-xxs); }
-.z-schalter button {
-  font-family: var(--font-sans);
-  font-size: var(--ui-body);
-  font-weight: var(--weight-semibold);
-  background: none;
-  border: none;
-  border-bottom: var(--border-width-strong) solid transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: var(--space-component-xxs) 4px;
-}
-.z-schalter button:hover { color: var(--text-strong); }
-.z-schalter button[aria-pressed="true"] {
-  color: var(--text-strong);
-  border-bottom-color: var(--accent);
-}
-
-
-/* ============================================================
-   ZUSTANDSANZEIGE
-   Die Farbe sitzt im Quadrat, die Schrift bleibt schwarz, und
-   der Zustand steht immer als Wort da. Werkzeugfarben, siehe
-   den Block in tokens.css.
-   ============================================================ */
-
-.z-status {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-component-xxs);
-  font-size: var(--ui-body);
-  color: var(--text-strong);
-  white-space: nowrap;
-}
-/* An der Grundlinie, wie das Eyebrow-Quadrat, und 2px darunter,
-   weil dieses Quadrat groesser ist als die Versalhoehe von 14px
-   (12 gegen 9,3) und sonst oben herausragt. */
-.z-status::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  flex: none;
-  align-self: baseline;
-  transform: translateY(2px);
-  background: var(--hairline-faint);
-}
-.z-status--ok::before        { background: var(--signal-ok); }
-.z-status--achtung::before   { background: var(--signal-achtung); }
-.z-status--blockiert::before { background: var(--signal-blockiert); }
-
-
-/* ============================================================
-   UEBERSICHT
-   Ein Board ist kein Fliesstext. Es lebt davon, dass man eine
-   Zeile in einem Blick erfasst: Zustand, Sache, Zahl. Deshalb
-   sind die Bausteine hier praesenter als im Lesedokument.
-
-   Keine Mengenregel (Robin 05.08.2026): so viele Karten oder
-   Zeilen, wie die Sache braucht.
-   ============================================================ */
-
-/* Kennzahlenband */
-.z-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: var(--border-width);
-  background: var(--border-subtle);
-  border: var(--border-width) solid var(--border-subtle);
-  margin-bottom: var(--space-component-s);
-}
-.z-board > * {
-  background: var(--surface-card);
-  padding: var(--space-component-s);
-}
-
-/* Zeile einer Uebersicht: Zustand, Sache, Zusatz, Zahl.
-   Das ist eine unsichtbare Tabelle (Robin 05.08.2026): die vier
-   Spalten stehen ueber alle Zeilen hinweg untereinander, auch
-   wenn die Zustandswoerter verschieden lang sind. Deshalb Grid
-   mit subgrid und nicht flex, sonst faengt jeder Titel an einer
-   anderen Stelle an. */
-.z-rows {
-  list-style: none;
-  margin: 0 0 var(--space-component-s);
-  padding: 0;
-  display: grid;
-  grid-template-columns: max-content max-content 1fr max-content;
-}
-.z-rows > li {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
-  align-items: baseline;
-  gap: var(--space-component-s);
-  padding: var(--space-component-xxs) 0;
-  border-bottom: var(--border-width) solid var(--border-subtle);
-  margin: 0;
-}
-/* Ohne subgrid (aeltere Browser) feste Spalten, damit die
-   Ausrichtung trotzdem haelt. */
-@supports not (grid-template-columns: subgrid) {
-  .z-rows > li { grid-template-columns: 7rem minmax(10rem, max-content) 1fr max-content; }
-}
-.z-rows > li:hover { background: var(--surface-sunken); }
-.z-rows .z-titel { font-weight: var(--weight-bold); }
-.z-rows .z-zusatz { color: var(--text-muted); font-size: var(--doc-small); }
-.z-rows .z-rechts { justify-self: end; font-variant-numeric: tabular-nums; }
-
-/* Kennzahl im Werkzeug: Label OBEN, Zahl darunter, eine Stufe
-   kleiner. Angelegt 07.08.2026.
-   Im Lesedokument ist die Zahl die Aussage und steht zuerst. In
-   einem Werkzeug sucht man ueber das Wort und liest dann die
-   Zahl, deshalb dreht sich die Reihenfolge. Und --doc-kpi (48px)
-   ist Dokumentmass: fuenf Kennzahlen nebeneinander schieben damit
-   alles Weitere unter die Bildschirmkante. 28px ist keine neue
-   Groesse, sondern die naechste vorhandene Stufe der Leiter. */
-.z-kpi--kompakt { gap: 4px; }
-.z-kpi--kompakt .z-kpi-value { font-size: var(--doc-h2); line-height: var(--doc-h2-lh); }
-.z-kpi--kompakt .z-kpi-label { order: -1; }
-
-/* Kennzahl in der Signalfarbe. Bedingungen im Werkzeugfarben-
-   Block von tokens.css: nur ab 24px bzw. 19px bold, nur wo ein
-   Ziel existiert, und das Wort steht immer daneben. Eine Kennzahl
-   in .z-kpi--kompakt traegt 28px in 700 und erfuellt das. */
-.z-kpi--ok .z-kpi-value        { color: var(--signal-ok); }
-.z-kpi--achtung .z-kpi-value   { color: var(--signal-achtung); }
-.z-kpi--blockiert .z-kpi-value { color: var(--signal-blockiert); }
-
-/* Fortschritt. Flach, eckig, ohne Verlauf. */
-.z-progress {
-  height: var(--grid-unit);
-  background: var(--surface-sunken);
-  border: var(--border-width) solid var(--border-subtle);
-}
-.z-progress > span { display: block; height: 100%; background: var(--accent); }
-
-/* Traegt der Balken einen Zustand und nicht nur einen Stand, dann
-   traegt er die Signalfarbe. Der Akzent sagt dort nichts: Orange
-   heisst Marke, nicht "erreicht". Begruendung und Grenzen im
-   Werkzeugfarben-Block von tokens.css. */
-.z-progress--ok > span        { background: var(--signal-ok); }
-.z-progress--achtung > span   { background: var(--signal-achtung); }
-.z-progress--blockiert > span { background: var(--signal-blockiert); }
-
-
-/* ---------------- Werkzeugleiste ---------------- */
-
-/* Die WERKZEUGLEISTE laeuft beim Scrollen mit, der Markenkopf
-   nicht (Robin 05.08.2026). Begruendung: bei einer langen Liste
-   braucht man Suche und Filter dauerhaft, das Logo nicht. */
-.z-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--ui-gap);
-  flex-wrap: wrap;
-  padding: var(--space-component-xxs) var(--doc-pad-x);
-  background: var(--surface-sunken);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-.z-toolbar .z-rechts { margin-left: auto; }
-
-
-/* ---------------- Werkzeug-Tabelle ---------------- */
-
-.z-table-dense { font-size: var(--ui-body); }
-.z-table-dense :is(th, td) { padding: var(--ui-cell-pad-y) var(--space-component-xxs); }
-.z-table-dense tbody tr:hover td { background: var(--surface-sunken); }
-
-/* Der Kopf bleibt stehen. Ohne das weiss man ab Zeile 30 nicht
-   mehr, welche Spalte man liest, und scrollt zurueck. Die Zelle
-   braucht eine deckende Flaeche, sonst scheinen die Zeilen
-   durch.
-
-   DIE TABELLE SCROLLT, NICHT DIE SEITE. Eine lange Liste kommt in
-   .z-scroll--hoch, und der Kopf haengt an der Oberkante DIESER
-   Box. Der naheliegende Weg, den Kopf an der Seite kleben zu
-   lassen und ihn um die Hoehe der Werkzeugleiste zu versetzen,
-   funktioniert nicht: .z-scroll ist wegen overflow-x bereits ein
-   Scrollbereich, "oben" ist dort die Oberkante der Box, und der
-   Versatz schiebt den Kopf mitten in die eigenen Zeilen. Genau so
-   gebaut und am 10.08.2026 im Bild gesehen. Deshalb gibt es keinen
-   Versatzwert, sondern eine Box mit Hoehe. */
-.z-scroll--hoch {
-  overflow: auto;
-  max-height: var(--ui-tabellen-hoehe, calc(100vh - 220px));
-}
-.z-scroll--hoch > table { margin-bottom: 0; }
-.z-scroll--hoch .z-table-dense thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--bg-page);
-  border-bottom: var(--border-width) solid var(--border-strong);
-}
-
-/* SORTIERUNG steht im Markup, nicht nur im Kopf des Benutzers:
-   aria-sort sagt es der Vorlesehilfe, das Dreieck dem Auge. Eine
-   sortierbare Spalte, der man das nicht ansieht, wird nicht
-   benutzt. */
-.z-table-dense th[aria-sort] { cursor: pointer; }
-.z-table-dense th[aria-sort]::after {
-  content: "";
-  display: inline-block;
-  width: 0; height: 0;
-  margin-left: 6px;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--hairline-faint);
-  vertical-align: middle;
-}
-.z-table-dense th[aria-sort="ascending"]::after {
-  border-top: 0;
-  border-bottom: 5px solid var(--text-strong);
-}
-.z-table-dense th[aria-sort="descending"]::after { border-top-color: var(--text-strong); }
-
-/* DICHTE, umschaltbar. Voreinstellung bleibt die weite Zeile. */
-.z-dicht .z-table-dense :is(th, td) { padding: var(--ui-cell-pad-y-dicht) var(--space-component-xxs); }
-.z-dicht .z-rows > li { padding: var(--ui-cell-pad-y-dicht) 0; }
-
-
-/* ============================================================
-   DATENFARBEN IM DIAGRAMM
-   Werte und Begruendung im Datenfarben-Block von tokens.css.
-   Hier stehen nur die Griffe, damit eine Datei nicht anfaengt,
-   Hexwerte in ein <svg> zu schreiben.
-
-   --dv-farbe ist die Reihenfarbe des jeweiligen Stuecks. Wer
-   .z-dv-3 auf eine Gruppe setzt, faerbt Balken, Linie, Punkt,
-   Legendenquadrat und Beschriftung in einem Zug, und die Reihe
-   traegt ueberall dieselbe Farbe. Genau daran scheitert es
-   sonst: die Legende sagt Blau, der Balken ist Petrol.
-   ============================================================ */
-
-.z-dv-1 { --dv-farbe: var(--dv-1); }
-.z-dv-2 { --dv-farbe: var(--dv-2); }
-.z-dv-3 { --dv-farbe: var(--dv-3); }
-.z-dv-4 { --dv-farbe: var(--dv-4); }
-.z-dv-5 { --dv-farbe: var(--dv-5); }
-.z-dv-6 { --dv-farbe: var(--dv-6); }
-.z-dv-rest { --dv-farbe: var(--dv-neutral); }
-
-.z-dv-flaeche { fill: var(--dv-farbe); background: var(--dv-farbe); }
-.z-dv-linie   { stroke: var(--dv-farbe); fill: none; stroke-width: 2; }
-
-/* Legende: farbiges Quadrat, Beschriftung schwarz. Die Schrift
-   wird nicht eingefaerbt, auch nicht bei den vier Datenfarben,
-   die es koennten. Sonst steht in einem Diagramm mit sechs
-   Reihen sechsmal farbige Schrift und die Legende wird zum
-   zweiten Diagramm.
-   Besser als jede Legende: direkt am Element beschriften. Die
-   Legende ist der Notweg, wenn kein Platz dafuer ist. */
-.z-legende {
-  list-style: none;
-  margin: var(--space-component-xxs) 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-component-xxs) var(--space-component-s);
-  font-size: var(--ui-small);
-  color: var(--text-strong);
-}
-.z-legende > li { display: inline-flex; align-items: baseline; gap: 6px; }
-.z-legende > li::before {
-  content: "";
-  width: 10px; height: 10px;
-  flex: none;
-  align-self: baseline;
-  transform: translateY(1px);
-  background: var(--dv-farbe, var(--dv-neutral));
-}
-/* Zahl in der Reihenfarbe. Nur mit den vier Datenfarben, die
-   4,5 bestehen (dv-1, dv-2, dv-3, dv-5). Bei dv-4 und dv-6
-   bleibt die Zahl schwarz und nur das Quadrat traegt Farbe. */
-.z-dv-zahl { color: var(--dv-farbe); font-variant-numeric: tabular-nums; }
-
-.z-achse { stroke: var(--dv-achse); stroke-width: 1; }
-
-
-/* ============================================================
-   ZUSTAENDE EINER LISTE
-   Angelegt 10.08.2026. Eine Liste hat vier Zustaende, nicht
-   einen: gefuellt, leer, leer WEGEN FILTER, kaputt. In fast
-   jedem gewachsenen Werkzeug fehlen die letzten drei, und dann
-   steht der Benutzer vor einer weissen Flaeche und weiss nicht,
-   ob er nichts hat, zu eng gefiltert hat oder ob es hakt.
-
-   Jeder dieser Zustaende sagt drei Dinge, in dieser Reihenfolge:
-   was ist, warum, und was jetzt zu tun ist. Der dritte Teil ist
-   der, der weggelassen wird, und er ist der wichtigste.
-   ============================================================ */
-
-.z-leer {
-  padding: var(--space-component-m) var(--space-component-s);
-  text-align: center;
-  color: var(--text-muted);
-  border: var(--border-width) dashed var(--border-subtle);
-}
-.z-leer > :first-child { margin-top: 0; }
-.z-leer p { max-width: var(--doc-measure); margin-left: auto; margin-right: auto; }
-.z-leer .z-btn { margin-top: var(--space-component-xxs); }
-
-/* LADEN ohne Drehkreisel. Ein Kreisel sagt "irgendwas passiert",
-   ein Platzhalter sagt "hier kommen sechs Zeilen". Und weil er
-   dieselbe Hoehe hat wie das Ergebnis, springt das Layout beim
-   Eintreffen nicht.
-   Erst ab 400ms einblenden. Darunter ist der Wechsel schneller
-   als das Auge und das Aufblitzen stoert mehr als die Wartezeit.
-   Die Animation ist eine Deckkraft, keine Bewegung: sie laeuft
-   unter Umstaenden minutenlang, und etwas, das minutenlang
-   wandert, zieht den Blick vom Rest der Seite ab. */
-.z-skelett {
-  background: var(--surface-sunken);
-  height: 1em;
-  animation: z-puls 1.4s var(--ease-standard) infinite;
-}
-.z-skelett + .z-skelett { margin-top: var(--space-component-xxs); }
-@keyframes z-puls { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-@media (prefers-reduced-motion: reduce) {
-  .z-skelett { animation: none; }
-}
-
-/* Rueckmeldung STEHT AM OBJEKT, nicht am Bildschirmrand. Es gibt
-   in diesem System bewusst keinen Toast: eine Meldung, die nach
-   drei Sekunden verschwindet, ist genau dann weg, wenn jemand
-   kurz weggesehen hat, und sie steht nie da, wo die Sache
-   passiert ist. Also .z-note, direkt ueber oder unter dem, was
-   sie betrifft.
-   Signalfarbe traegt hier nur die 2px-Kante, also ein
-   Zustandsobjekt, nicht die Flaeche. */
-.z-note--ok     { border-left-color: var(--signal-ok); }
-.z-note--fehler { border-left-color: var(--signal-blockiert); }
-/* Meldung mit Gegenhandlung, zum Beispiel Rueckgaengig. Die
-   Handlung steht IN der Meldung, nicht daneben. */
-.z-note--aktion {
-  display: flex;
-  align-items: center;
-  gap: var(--space-component-s);
-}
-.z-note--aktion > :last-child { margin-left: auto; flex: none; }
-
-
-
-
-/* ============================================================
-   WERKBANK
-   Fuer ein Werkzeug, das keine Zeilen zeigt, sondern eine
-   Flaeche bearbeiten laesst. Ergaenzt 28.08.2026 fuers Device
-   Mockup Tool, am 29.08.2026 zweimal auf Robins Vorgabe umgebaut.
-
-   Aufbau, zwei Zonen unter einer Kopfleiste:
-     .z-app.z-app--werkbank
-       header.z-appbar        Marke links, Werkzeuge und Abgabe rechts
-       .z-werkbank
-         aside.z-panel        links: Reiter oben, darunter die
-                              Einstellungen des Reiters
-         .z-buehne            rechts: die Flaeche selbst
-
-   DIE EINSTELLUNGEN STEHEN LINKS, die Flaeche nimmt den ganzen
-   Rest. Das ist die Aufteilung, die jedes Zeichenprogramm zeigt,
-   und sie hat einen messbaren Grund: die Flaeche ist das, was
-   waechst, und sie waechst nach rechts unten. Ein Panel rechts
-   klemmt sie zwischen zwei Kanten.
-
-   Genau EINE Navigation, und sie steht im Panel: die Reiterzeile
-   ueber den Einstellungen. Vier Ziele, mehr erlaubt die Regel in
-   werkzeug-ux.md nicht; alles Weitere (Projekt, Hilfe) steht
-   rechts in der Kopfleiste und ist kein Ort, sondern eine
-   Handlung.
-
-   Die Werkzeugleiste ist keine Navigation: sie schaltet nicht den
-   Ort um, sondern was ein Zug auf der Flaeche bedeutet. Deshalb
-   darf sie in der Kopfleiste neben der Abgabe stehen, ohne dass
-   daraus zwei Navigationen fuer dieselbe Ebene werden. Sie liegt
-   dort, wo die Hand ohnehin hinfaehrt: ueber der Flaeche, nicht
-   an ihrem Rand.
-   ============================================================ */
-
-.z-app--werkbank {
-  display: grid;
-  /* .z-app setzt zwei Spalten fuer die Seitenleiste. Eine Werkbank hat dort keine,
-     sie hat Zeilen: Kopfleiste und darunter alles Weitere. Ohne dieses Zuruecksetzen
-     wird aus der Kopfleiste eine 232px breite Spalte. */
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  min-height: 100vh;
-  height: 100vh;
-}
-.z-werkbank {
-  display: grid;
-  grid-template-columns: var(--ui-panel-breite) minmax(0, 1fr);
-  min-height: 0;
-}
-.z-appbar .z-rechts { display: flex; align-items: center; gap: var(--space-component-xxs); }
-.z-appbar .z-rechts > * { flex: none; }
-
-/* Die Werkzeuge. Wort statt Glyphe, und das ist eine Entscheidung
-   und kein Notbehelf: der zetcom-Iconsatz kennt weder Zeiger noch
-   Hand noch Radierer, freihaendig dazuzeichnen ist verboten, und
-   ein Wort muss niemand lernen. Wer das Werkzeug taeglich nutzt,
-   greift ohnehin zur Taste, die im Titel steht.
-
-   In der Kopfleiste liegen sie waagerecht und ruecken mit der
-   Abgabe nach rechts zusammen: erst was ein Zug bedeutet, dann
-   Rueckgaengig, dann der Stand, dann Download. Eine Reihenfolge,
-   die dem Arbeitsgang folgt. */
-.z-appbar .z-werkzeuge {
-  display: flex;
-  align-items: stretch;
-  gap: var(--space-component-xxs);
-  margin-left: auto;
-  padding: 0;
-  border: 0;
-}
-.z-werkzeuge button {
-  font-family: var(--font-sans);
-  font-size: var(--ui-body);
-  text-align: left;
-  background: none;
-  border: none;
-  border-left: var(--border-width-strong) solid transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: var(--space-component-xxs);
-  min-height: 34px;
-}
-.z-appbar .z-werkzeuge button { padding: var(--space-component-xxs) var(--space-component-xs); }
-.z-werkzeuge button:hover { color: var(--text-strong); background: var(--surface-sunken); }
-.z-werkzeuge button[aria-pressed="true"] {
-  color: var(--text-strong);
-  font-weight: var(--weight-semibold);
-  border-left-color: var(--accent);
-}
-/* Einstellung, die zu genau einem Werkzeug gehoert, steht neben
-   ihm und nicht in einem fernen Panel. Das ist die Werkzeugoption,
-   wie sie jedes Zeichenprogramm zeigt. */
-.z-werkzeuge .z-option { padding: var(--space-component-xxs) var(--space-component-xxs) 0; }
-.z-werkzeuge .z-option label {
-  display: block;
-  font-size: var(--ui-small);
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-.z-appbar .z-werkzeuge .z-option {
-  align-items: center;
-  gap: var(--space-component-xxs);
-  padding: 0 0 0 var(--space-component-xxs);
-}
-.z-appbar .z-werkzeuge .z-option.show { display: flex; }
-.z-appbar .z-werkzeuge .z-option label { margin-bottom: 0; white-space: nowrap; }
-.z-appbar .z-werkzeuge .z-option .z-regler { width: 96px; }
-/* Unter 1080 Punkten passen Marke, Werkzeuge, Pinselgroesse, Stand
-   und Download nicht mehr in eine Zeile. Dann bricht die Leiste um
-   und die Werkzeuge bekommen eine eigene Zeile darunter. Ohne das
-   waere der Download-Knopf aus dem Fenster geschoben und mit keinem
-   Zug erreichbar: die Leiste scrollt nicht. */
-@media (max-width: 1080px) {
-  .z-app--werkbank .z-appbar { flex-wrap: wrap; padding-bottom: var(--space-component-xxs); }
-  .z-app--werkbank .z-appbar .z-werkzeuge { order: 3; flex-basis: 100%; margin-left: 0; }
-}
-
-.z-panel {
-  min-height: 0;
-  overflow-y: auto;
-  border-right: var(--border-width) solid var(--border-subtle);
-  padding: 0 var(--space-component-s) var(--space-component-m);
-}
-/* Die Reiterzeile bleibt stehen, waehrend die Einstellungen unter
-   ihr scrollen. Sonst verliert man auf einem langen Panel den
-   Absender des Inhalts. */
-.z-panel > .z-tabs {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  margin: 0 calc(var(--space-component-s) * -1) var(--space-component-xs);
-  /* Links buendig mit dem Inhalt darunter, rechts offen: vier Reiter
-     plus ihre Zahlen brauchen jeden Punkt der 300px. Der kleine
-     Abstand und das Umbrechen sind die Reserve, damit ein Reiter
-     nie abgeschnitten wird, wenn die Zahlen dazukommen. */
-  padding: 0 0 0 var(--space-component-s);
-  gap: 0 var(--space-component-xxs);
-  flex-wrap: wrap;
-}
-/* 12px statt 14px, und das ist gerechnet, nicht gefuehlt: vier
-   Woerter in 14px messen 241 Punkte, dazu drei Abstaende und der
-   Einzug, macht 289 in einem Panel, das 284 breit ist. Der Reiter
-   ist hier ausserdem eine Beschriftung mit Zahl, und dafuer ist
-   --ui-small gemacht. */
-.z-panel > .z-tabs .z-tab { font-size: var(--ui-small); }
-/* Die Zahl am Reiter holt sich ihren Abstand erst, wenn sie eine
-   Zahl ist. Ein fester Abstand im Markup kostet vier Punkte je
-   Reiter, und die vier fehlen der Zeile. */
-.z-tabs .z-zahl { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-.z-tabs .z-zahl:not(:empty) { margin-left: 6px; }
-.z-tab[aria-selected="true"] .z-zahl { color: var(--text-strong); }
-.z-panel > h2 {
-  font-size: var(--doc-h4);
-  font-weight: var(--weight-semibold);
-  margin: 0 0 var(--space-component-xxs);
-}
-.z-panel section { display: none; }
-.z-panel section.aktiv { display: block; }
-
-/* Gruppe im Panel: Beschriftung oben, Bedienteil darunter, und
-   nur wo noetig ein Satz, der sagt, was der Regler tut. */
-.z-gruppe { margin-top: var(--space-component-xs); }
-.z-gruppe > label,
-.z-gruppe > .z-gruppe-titel {
-  display: block;
-  font-size: var(--ui-small);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: var(--space-component-xxs);
-}
-.z-gruppe .z-hinweis {
-  display: block;
-  font-size: var(--ui-small);
-  line-height: 1.45;
-  color: var(--text-muted);
-  margin-top: 6px;
-}
-.z-gruppe .z-hinweis.z-warn { color: var(--signal-blockiert); }
-.z-gruppe + .z-gruppe { margin-top: var(--space-component-s); }
-
-/* AUFKLAPPER IM PANEL. Der Grund, aus dem es ihn gibt: alle
-   Funktionen bleiben, aber nicht alle stehen gleichzeitig da.
-   Was taeglich gebraucht wird, steht offen; was selten gebraucht
-   wird, steht einen Klick entfernt und ist trotzdem auffindbar,
-   weil die Zeile es benennt. Zugeklappt ist der Normalfall. */
-.z-mehr {
-  margin-top: var(--space-component-s);
-  border-top: var(--border-width) solid var(--border-subtle);
-}
-.z-mehr > summary {
-  list-style: none;
-  cursor: pointer;
-  padding: var(--space-component-xxs) 0;
-  font-size: var(--ui-small);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: var(--space-component-xxs);
-  min-height: 34px;
-}
-.z-mehr > summary::-webkit-details-marker { display: none; }
-.z-mehr > summary::before {
-  content: "";
-  width: 7px; height: 7px;
-  border-right: var(--border-width-strong) solid var(--text-muted);
-  border-bottom: var(--border-width-strong) solid var(--text-muted);
-  transform: rotate(-45deg);
-  flex: none;
-}
-.z-mehr[open] > summary::before { transform: rotate(45deg); }
-.z-mehr > summary:hover { color: var(--text-strong); }
-.z-mehr[open] > summary { color: var(--text-strong); }
-
-/* Ein Schalter mit vielen Optionen bricht um, statt zu quetschen. */
-.z-schalter--umbruch { flex-wrap: wrap; row-gap: 2px; }
-
-/* Regler. Der Browser-Standard traegt eine Rundung, die die CD
-   nicht kennt; hier ist die Bahn eine Linie und der Griff ein
-   Quadrat, wie das Pixelmotiv. */
-.z-regler {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 20px; background: none; cursor: pointer;
-}
-.z-regler::-webkit-slider-runnable-track {
-  height: var(--border-width-strong); background: var(--color-black-30);
-}
-.z-regler::-moz-range-track {
-  height: var(--border-width-strong); background: var(--color-black-30);
-}
-.z-regler::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 14px; height: 14px; margin-top: -6px;
-  background: var(--ui-ink); border: 0; border-radius: 0;
-}
-.z-regler::-moz-range-thumb {
-  width: 14px; height: 14px;
-  background: var(--ui-ink); border: 0; border-radius: 0;
-}
-.z-regler:focus-visible { outline: var(--border-width-strong) solid var(--ui-ink); outline-offset: 3px; }
-
-/* Farbwahl: das Feld zeigt die Farbe, das Textfeld den Wert, die
-   Quadrate darunter sind die gesetzten Farben der CD. Ein
-   Quadrat, keine Pille: rund gibt es hier nicht. */
-.z-farbzeile { display: flex; gap: var(--space-component-xxs); align-items: center; }
-.z-farbzeile input[type="color"] {
-  flex: none; width: 40px; height: var(--ui-control-height);
-  padding: 2px; border: var(--border-width) solid var(--border-subtle);
-  background: var(--surface-sunken); border-radius: 0; cursor: pointer;
-}
-.z-farbzeile .z-field { flex: 1; min-width: 0; }
-.z-farben { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.z-farbe {
-  width: 22px; height: 22px; padding: 0;
-  border: var(--border-width) solid var(--border-subtle);
-  cursor: pointer; border-radius: 0;
-}
-.z-farbe[aria-pressed="true"] { outline: var(--border-width-strong) solid var(--ui-ink); outline-offset: 2px; }
-
-/* Ankreuzfeld mit Text daneben. Der Text ist Teil des Ziels,
-   nicht Beiwerk, deshalb liegt beides im label. */
-.z-haken {
-  display: flex; align-items: flex-start; gap: var(--space-component-xxs);
-  font-size: var(--ui-body); color: var(--text-strong); cursor: pointer;
-  min-height: 24px; line-height: 1.45;
-}
-.z-haken input { flex: none; width: 16px; height: 16px; margin-top: 3px; accent-color: var(--ui-ink); }
-
-/* DIE BUEHNE IST DUNKEL, seit 29.08.2026 (Robin: "dunkel wie bei
-   Photoshop"). Vorher lag dort ein Karo, und das war zweimal
-   falsch: ein Karo bedeutet Durchsichtigkeit, und durchsichtig
-   ist nicht die Buehne, sondern hoechstens die Ausgabeflaeche
-   darauf. Auf hellem Grund war ausserdem nicht zu sehen, wo das
-   Blatt aufhoert und der Arbeitsbereich anfaengt.
-   Der Wert ist ein neutrales Dunkelgrau, kein Schwarz: Schwarz
-   wuerde einen dunklen Export verschlucken. Das Karo bleibt dort,
-   wo es hingehoert, naemlich auf der Ausgabeflaeche selbst. */
-.z-buehne {
-  position: relative; overflow: hidden; min-height: 0;
-  background: var(--color-black-80);
-}
-.z-buehne--karo {
-  background-image:
-    linear-gradient(45deg, var(--color-black-30) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--color-black-30) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--color-black-30) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--color-black-30) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-}
-/* Werkzeugknopf, der nur eine Glyphe traegt: quadratisch, damit
-   Rueckgaengig und Wiederholen als Paar stehen und nicht als zwei
-   verschieden breite Schaltflaechen. */
-.z-btn--glyph { width: var(--ui-control-height); padding: 0; }
-
-/* zetcom-canonical:end */
-</style>
 <style>
   /* DM Sans als Variable Font eingebettet (wght 100 bis 1000). Die Label der Markierungen
      landen im Export, deshalb darf ihre Schrift nicht am Netz haengen. */
@@ -3343,30 +1662,311 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
   .e-legende dt { font-size: var(--ui-small); color: var(--text-strong); }
   .e-legende dd { font-size: var(--ui-small); color: var(--text-muted); margin: 0; }
 </style>
-</head>
+<style>
+/* Self-contained UI. Embedded device assets and DM Sans are retained from v6. */
+:root {
+  color-scheme:light;
+  --font-sans:"DM Sans Var","DM Sans",system-ui,sans-serif;
+  --color-orange:#FF5900; --accent:#FF5900; --accent-soft:#FFF0E8; --accent-ink:#A63800;
+  --color-white:#FFFFFF; --color-black:#18191C; --color-black-20:#E6E7EA;
+  --color-black-30:#D6D8DD; --color-black-95:#26282D; --color-grey-ultra-100:#F4F5F7;
+  --color-yellow:#F4CA45; --color-violet:#9774DB; --color-purple:#7547AB;
+  --color-blue:#336AD7; --color-green:#4EAC85;
+  --bg-page:#F6F7F9; --surface-sunken:#F3F4F6; --text-strong:#202126;
+  --text-muted:#646872; --ui-ink:#202126; --border-subtle:#E2E4E9; --hairline-faint:#ADB1BA;
+  --border-width:1px; --border-width-strong:2px; --weight-semibold:600;
+  --space-component-xxs:8px; --space-component-xs:16px; --space-component-s:24px; --space-component-m:32px;
+  --ui-body:.875rem; --ui-small:.8125rem;
+}
+* {box-sizing:border-box}
+html,body {margin:0;height:100%;overflow:hidden}
+body {font:400 1rem/1.5 var(--font-sans);color:var(--text-strong);background:var(--bg-page);-webkit-font-smoothing:antialiased}
+button,input,select,textarea {font:inherit}
+button {cursor:pointer;touch-action:manipulation}
+button,input,select,summary { -webkit-tap-highlight-color:transparent }
+button {transition:background .15s,border-color .15s,box-shadow .15s,color .15s}
+button:disabled {cursor:not-allowed!important;opacity:.42}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible {outline:3px solid var(--accent);outline-offset:3px}
+[hidden] {display:none!important}
+svg {width:20px;height:20px;flex:none;vertical-align:middle}
+p {margin:0 0 12px}
+h1,h2,h3 {margin:0;font-weight:650;letter-spacing:-.035em;line-height:1.25}
+h2 {font-size:1.375rem;margin-bottom:10px}
+input[type=checkbox] {accent-color:var(--accent);width:17px;height:17px;margin:0;flex:none;cursor:pointer}
+input[type=color] {height:38px;width:42px;flex:none;padding:3px;border:1px solid var(--border-subtle);border-radius:0;background:white;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper {padding:2px}
+input[type=color]::-webkit-color-swatch {border:0;border-radius:0}
+input[type=range] {accent-color:var(--accent)}
+input[type=number] {font-variant-numeric:tabular-nums}
+.z-app {height:100vh;height:100dvh;display:flex;flex-direction:column}
+.z-appbar {min-height:76px;flex:none;background:#fff;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;padding:12px 24px;gap:24px;z-index:5}
+.brand {display:flex;align-items:center;gap:14px;flex:none}
+.brand-name {font-weight:750;font-size:1.5rem;letter-spacing:-.07em;line-height:1}
+.brand-name b {color:var(--accent);font-weight:inherit}
+.brand-divider {width:1px;height:28px;background:var(--border-subtle)}
+.brand-product {font-size:.9375rem;font-weight:600;letter-spacing:-.025em}
+.brand-version {font-size:.6875rem;border:1px solid var(--border-subtle);padding:2px 5px;border-radius:0;color:var(--text-muted);margin-left:4px}
+.z-modus {margin:0!important}
+.z-rechts {margin-left:auto;display:flex;gap:6px;align-items:center;min-width:0}
+.z-appbar .trenner {width:1px;height:22px;background:var(--border-subtle);margin:0 6px}
+.z-btn {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 15px;border:1px solid transparent;border-radius:0;font-size:.875rem;line-height:1.3;font-weight:600;background:var(--accent);color:#21150D;text-decoration:none}
+.z-btn:hover:not(:disabled) {background:#EB5100;box-shadow:0 2px 6px #18191c12}
+.z-btn--outline {background:#fff;border-color:#D8DBE2;color:var(--text-strong)}
+.z-btn--outline:hover:not(:disabled) {background:#F7F8FA;border-color:#B6BBC5;box-shadow:none}
+.z-btn--text {background:transparent;color:var(--text-muted)}
+.z-btn--text:hover:not(:disabled) {background:var(--surface-sunken);color:var(--text-strong);box-shadow:none}
+.z-btn--text.sel {background:var(--accent-soft);color:var(--accent-ink)}
+.z-btn--glyph {width:36px;min-height:36px;padding:8px;flex:none}
+#export {min-width:138px;margin-left:8px}
+#speicherstand {max-width:180px;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.einfach #projektKnopf {display:inline-flex}
+body.einfach #speichertrenner {display:block}
+.z-werkbank,body.einfach .z-werkbank {display:grid;grid-template-columns:352px minmax(0,1fr);flex:1;min-height:0;overflow:hidden}
+.sidebar {display:flex;flex-direction:column;min-height:0;background:#fff;border-right:1px solid var(--border-subtle);overflow:hidden}
+#panel {overflow:auto;overscroll-behavior:contain;padding:0 22px 24px;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#CED1D8 transparent}
+#panel > section {display:none;padding-top:22px}
+#panel > section.aktiv {display:block}
+#panel > section[data-bereich=einfach] {padding-top:22px}
+.panel-intro {margin-bottom:22px}
+.eyebrow {font-size:.6875rem;font-weight:700;letter-spacing:.11em;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:8px}
+.panel-intro h1 {font-size:1.45rem;margin-bottom:7px}
+.panel-intro p {font-size:.875rem;color:var(--text-muted);margin:0}
+.sidebar-footer {border-top:1px solid var(--border-subtle);padding:16px 22px 18px;background:#FAFBFC;flex:none}
+.export-overline {display:flex;align-items:center;gap:8px;font-size:.8125rem;font-weight:600;margin-bottom:5px}
+.export-overline svg {width:17px;height:17px;color:var(--text-muted)}
+#eLaden {display:none}
+#eLadenHinweis {margin:0;font-size:.75rem;line-height:1.55}
+.z-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:sticky;top:0;margin:0 -22px;padding:12px 12px 0;background:#fff;z-index:3;border-bottom:1px solid var(--border-subtle);gap:0}
+.z-tab {padding:12px 2px;border:0;border-bottom:2px solid transparent;background:transparent;font-size:.8125rem;font-weight:500;color:var(--text-muted);white-space:nowrap}
+.z-tab[aria-selected=true] {border-bottom-color:var(--accent);color:var(--text-strong);font-weight:700}
+.z-tab:hover {color:var(--accent-ink);background:#FFF8F4}
+.z-zahl:not(:empty) {display:inline-flex;justify-content:center;align-items:center;min-width:17px;height:17px;padding:0 4px;font-size:.6875rem;background:var(--surface-sunken);border-radius:0;margin-left:4px}
+.z-gruppe,body.einfach .z-gruppe,body.einfach .z-gruppe+.z-gruppe {margin-top:22px}
+.z-gruppe-titel {font-weight:650;font-size:.875rem;display:flex;align-items:center;gap:10px;margin-bottom:11px!important}
+.step-number {display:inline-flex;width:23px;height:23px;align-items:center;justify-content:center;border:1px solid var(--border-subtle);color:var(--text-muted);border-radius:0;font-size:.6875rem;font-weight:600;font-variant-numeric:tabular-nums}
+.has-image .step-number {color:var(--accent-ink);border-color:#FFD1B8;background:var(--accent-soft)}
+.z-hinweis,.z-meta {display:block;font-size:.8125rem;line-height:1.55;color:var(--text-muted)}
+.z-hinweis {margin-top:8px}
+.z-hinweis:empty {display:none}
+.z-hinweis.warn,.warn {color:#985B00}
+.z-note {padding:12px 14px;background:#FFF6ED;color:#704018;border:1px solid #F6D9B7;border-radius:0;font-size:.8125rem;line-height:1.5}
+.z-field {min-width:0;width:100%;height:40px;border:1px solid #D8DBE2;border-radius:0;background:#fff;padding:8px 10px;color:var(--text-strong);font-size:.875rem}
+.z-field:hover {border-color:#B6BBC5}
+label:not(.z-haken) {font-size:.875rem}
+.z-regler {width:100%;height:22px;cursor:pointer;margin:4px 0}
+.z-haken {display:flex;align-items:center;gap:9px;font-size:.875rem;line-height:1.45;cursor:pointer;min-height:30px}
+.z-schalter {display:flex;padding:3px;background:#F1F2F5;border:1px solid #E8EAEE;border-radius:0;gap:2px;min-width:0}
+.z-schalter button {flex:1;min-width:0;min-height:32px;padding:6px 8px;border:1px solid transparent;background:transparent;border-radius:0;font-size:.8125rem;line-height:1.25;color:var(--text-muted);font-weight:500}
+.z-schalter button:hover:not(:disabled) {color:var(--text-strong);background:#E7E9EE}
+.z-schalter button[aria-pressed=true] {background:white;color:var(--text-strong);border-color:#DDE0E6;box-shadow:0 1px 3px #2021260C;font-weight:650}
+.z-modus button {min-width:79px}
+.z-modus button[aria-pressed=true] {background:#202126;color:white;border-color:#202126}
+.z-schalter--umbruch {flex-wrap:wrap}
+.z-schalter--umbruch button {flex:1 1 28%}
+.z-mehr {border-top:1px solid var(--border-subtle);margin-top:22px;padding-top:2px}
+.z-mehr summary {display:flex;align-items:center;gap:9px;list-style:none;cursor:pointer;padding:16px 0;font-size:.875rem;font-weight:600}
+.z-mehr summary::-webkit-details-marker {display:none}
+.z-mehr summary:after {content:"";width:7px;height:7px;border-right:1.5px solid #777D88;border-bottom:1.5px solid #777D88;transform:rotate(45deg);margin-left:auto;margin-right:4px;transition:transform .15s}
+.z-mehr[open] summary:after {transform:rotate(225deg)}
+.z-mehr[open] {padding-bottom:14px}
+.z-mehr[open]>summary {padding-bottom:12px}
+.z-mehr>.z-gruppe {margin-top:8px}
+.z-farbzeile {display:flex;gap:8px;align-items:center}
+.z-farben {display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.z-farbe {width:24px;height:24px;border-radius:0;border:1px solid #0002;padding:0}
+.z-farbe[aria-pressed=true] {outline:2px solid var(--text-strong);outline-offset:3px}
+.z-objekt {border-radius:0;min-height:40px;padding:8px 10px}
+.z-objekt.sel {background:var(--accent-soft);border-color:#FFD0B6}
+.z-objekt.sel .punkt {background:var(--accent)}
+.z-objekt .punkt {border-radius:0}
+.z-objekt .weg {padding:5px;display:inline-flex;border-radius:0}
+.z-objekt .weg:hover {background:#FFE0D0}
+.z-ausrichten button {border-radius:0;min-height:34px;font-size:.8125rem;padding:4px}
+.z-dl {display:grid;grid-template-columns:1fr 1.1fr;font-size:.8125rem;gap:12px;margin:0}
+.z-dl dt {font-weight:600}
+.z-dl dd {margin:0;color:var(--text-muted)}
+.z-list {font-size:.875rem;color:var(--text-muted)}
+.z-list li+li {margin-top:10px}
+.z-leer {padding:16px;background:var(--surface-sunken);border-radius:0;font-size:.875rem}
+.z-leer p:last-child {margin:0;font-size:.8125rem;color:var(--text-muted)}
+.e-kacheln {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.e-kachel {border:1px solid #E1E4E9;border-radius:0;background:#F9FAFB;padding:10px 7px 9px;gap:8px;position:relative;overflow:hidden;text-align:center}
+.e-kachel canvas {width:100%;height:43px}
+.e-kachel .wort {font-size:.8125rem;line-height:1.3}
+.e-kachel:hover {background:#fff;border-color:#ADB2BE}
+.e-kachel[aria-pressed=true] {border-color:var(--accent);background:#FFF7F2;box-shadow:0 0 0 1px var(--accent)}
+.e-kachel[aria-pressed=true]:after {content:"✓";position:absolute;right:5px;top:5px;display:grid;place-items:center;width:15px;height:15px;border-radius:0;background:var(--accent);font-size:10px;color:#21150D;font-weight:800}
+.e-kachel-option {grid-column:1/-1;padding:3px 0 0}
+.e-kachel-option .z-haken {font-size:.8125rem}
+#eGeraetHinweis {min-height:20px;font-size:.75rem;margin-top:8px}
+.e-zeile {grid-template-columns:72px minmax(0,1fr);gap:10px;margin-top:12px}
+.e-was {font-size:.8125rem}
+.e-zeile--haken {flex-wrap:wrap;gap:8px}
+.e-zeile--haken>.z-haken {white-space:normal}
+.e-zeile--haken>.z-field {min-width:110px}
+.e-pad {grid-template-columns:repeat(3,24px);gap:3px}
+.e-pad button {width:24px;height:24px;border-radius:0;background:#F2F3F5}
+.e-pad button[aria-pressed=true] {background:var(--accent);border-color:var(--accent)}
+.e-pad button:after {content:"";display:block;width:3px;height:3px;border-radius:0;background:#838894;margin:auto}
+.e-pad button[aria-pressed=true]:after {background:#25190E}
+.e-farbe {gap:8px;flex-wrap:wrap}
+.e-farbe input[type=color] {width:36px;height:36px;border-radius:0}
+.e-farbe .z-btn {font-size:.75rem;padding:7px 9px;min-height:36px;flex:1}
+.e-lage {font-size:.8125rem}
+.e-legende {display:none}
+.upload-target {border-style:dashed!important;border-color:#C7CCD6!important;min-height:74px!important;padding:18px 12px!important;background:#FAFBFC!important;display:flex;gap:10px!important;font-size:.875rem!important}
+.upload-target:before {content:"+";font-weight:400;font-size:24px;line-height:1;color:var(--accent)}
+.upload-target:hover {background:#FFF7F2!important;border-color:var(--accent)!important}
+.has-image .upload-target {min-height:42px!important;padding:9px 12px!important}
+#eBildStand {font-size:.75rem;overflow-wrap:anywhere}
+.shot-tools {margin-top:10px;display:flex;align-items:center;gap:8px}
+.shot-tools>.e-was {display:none}
+.shot-tools .z-schalter {background:transparent;border:0;padding:0;gap:6px;flex:1}
+.shot-tools button {border:1px solid var(--border-subtle);padding:7px 12px;display:flex;align-items:center;justify-content:center;gap:7px}
+.shot-tools button svg {width:15px;height:15px}
+.shot-tools button[aria-pressed=true] {border-color:#FFD0B6;background:var(--accent-soft);color:var(--accent-ink)}
+.fine-tune {margin-top:20px!important}
+.fine-tune summary .summary-meta {font-size:.75rem;font-weight:400;color:var(--text-muted);margin-left:auto}
+.fine-tune summary:after {margin-left:0}
+.fine-tune>.z-gruppe {margin:0!important}
+.workspace-shell {min-width:0;min-height:0;display:flex;flex-direction:column;background:#202228;padding:0}
+.workspace-top {height:58px;flex:none;display:flex;align-items:center;gap:12px;padding:0 24px;color:#F0F1F4;border-bottom:1px solid #FFFFFF0D}
+.workspace-title {font-size:.875rem;font-weight:550}
+.canvas-type {font-size:.75rem;color:#A8ADB8;padding-left:12px;border-left:1px solid #50535D}
+.local-note {margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.75rem;color:#A8ADB8}
+.local-note svg {width:14px;height:14px}
+.z-buehne {position:relative;min-height:0;flex:1;overflow:hidden;background:#202228;isolation:isolate;touch-action:none}
+#stageWrap {box-shadow:0 5px 28px #0003;background:white;border-radius:0}
+#stageWrap.transparent {background-color:#fff;background-image:linear-gradient(45deg,#ECEEF1 25%,transparent 25%),linear-gradient(-45deg,#ECEEF1 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ECEEF1 75%),linear-gradient(-45deg,transparent 75%,#ECEEF1 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
+#view {touch-action:none}
+.z-buehne.is-empty #stageWrap {opacity:.32;filter:grayscale(1)}
+#ablage {z-index:2;padding:20px;pointer-events:none}
+#ablage>div {border:1px solid #DFE2E8;box-shadow:0 18px 65px #0003;background:white;border-radius:0;padding:28px 32px;max-width:380px;pointer-events:auto}
+.upload-symbol {display:grid;place-items:center;width:44px;height:44px;border-radius:0;background:var(--accent-soft);color:var(--accent-ink);margin:0 auto 16px}
+.upload-symbol svg {width:22px;height:22px}
+#ablage strong {display:block;font-size:1.25rem;letter-spacing:-.03em;font-weight:650}
+#ablage p {margin:0 0 9px}
+#ablageHinweis {font-size:.8125rem;line-height:1.6}
+#canvasUpload {margin-top:9px;min-width:185px}
+.upload-formats {display:block;margin-top:12px;color:var(--text-muted);font-size:.6875rem}
+body.zieht-datei #ablage>div {border-color:var(--accent);box-shadow:0 0 0 4px #FF590044}
+body.zieht-datei #buehne:after {content:"Drop to import";position:absolute;inset:14px;display:grid;place-items:center;color:#fff;background:#202228D9;border:2px dashed var(--accent);border-radius:0;z-index:8;font-size:1.5rem;pointer-events:none}
+.workspace-bottom {display:flex;align-items:center;min-height:54px;flex:none;padding:8px 20px;gap:12px;border-top:1px solid #FFFFFF0D;color:#A8ADB8}
+.canvas-help {font-size:.75rem;flex:1;min-width:0}
+.canvas-help kbd {font:inherit;color:#D8DBE2;border:1px solid #4B4F59;padding:1px 5px;border-radius:0}
+.zoomfeld {position:static;background:#2C2F37;border-color:#444851;padding:2px;border-radius:0;flex:none;margin-left:auto}
+.zoomfeld .wert {font-size:.75rem;color:#E1E4EB;min-width:47px}
+.zoomfeld .z-btn {color:#C6CBD5;min-height:29px;padding:5px 8px;font-size:.75rem;border-radius:0}
+.zoomfeld .z-btn:hover {background:#414652;color:white}
+.zoomfeld svg {width:16px;height:16px}
+.z-werkzeuge {display:flex;align-items:center;gap:4px;margin:0;padding:6px;background:#2C2F37;border:1px solid #444851;border-radius:0}
+.tool-dock {position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:3;max-width:calc(100% - 24px);box-shadow:0 4px 16px #0002}
+.toolbtn {display:flex;align-items:center;gap:7px;min-height:36px;padding:7px 10px;font-size:.8125rem;color:#D0D4DD;border:1px solid transparent;border-radius:0;background:transparent}
+.toolbtn svg {width:16px;height:16px}
+.toolbtn:hover {background:#3C414C}
+.toolbtn[aria-pressed=true] {background:var(--accent);color:#21150D}
+.z-option {padding:0 7px;border-left:1px solid #555A65;color:#DFE2E8;width:145px;font-size:.75rem}
+.z-option label {font-size:.75rem}
+.z-option .z-regler {margin:0;height:16px}
+#backToEditor {width:100%;justify-content:flex-start;margin:16px 0 0;font-size:.8125rem}
+#toast {position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:20;display:flex;align-items:center;gap:12px;max-width:min(480px,calc(100vw - 32px));padding:13px 16px;border:1px solid #484D59;background:#24272E;color:white;border-radius:0;box-shadow:0 8px 32px #0003;font-size:.875rem;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+#toast.visible {opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast[data-error=true] {border-color:#FF946B}
+#toastClose {padding:3px;border:0;background:transparent;color:#D6D9DF;display:flex}
+.mobile-switch {display:none}
+.empty-action-hint {color:var(--text-muted);font-size:.75rem}
+@media(min-width:1500px) {.z-werkbank,body.einfach .z-werkbank {grid-template-columns:380px minmax(0,1fr)} #panel {padding-left:26px;padding-right:26px} .z-tabs{margin-left:-26px;margin-right:-26px}.sidebar-footer{padding-left:26px;padding-right:26px}.e-kachel canvas{height:50px}}
+@media(max-width:1100px) {.z-appbar{gap:14px;padding:12px 18px}.brand-version,#speicherstand{display:none!important}.brand{gap:10px}.brand-name{font-size:1.375rem}.brand-product{font-size:.875rem}.canvas-help{font-size:.6875rem}.local-note{font-size:.6875rem}.z-werkbank,body.einfach .z-werkbank{grid-template-columns:330px minmax(0,1fr)}#panel{padding-left:18px;padding-right:18px}.z-tabs{margin-left:-18px;margin-right:-18px}.sidebar-footer{padding-left:18px;padding-right:18px}.toolbtn{padding:7px}.toolbtn .tool-word{display:none}}
+@media(max-width:820px) {.z-appbar{min-height:108px;flex-wrap:wrap;gap:8px 14px;padding:12px 16px}.brand{flex:1}.brand-product{font-size:.9375rem}.z-rechts{margin-left:0}.z-modus{order:3}.mobile-switch{display:flex;order:4;margin-left:auto;gap:3px;padding:3px;background:#F1F2F5;border-radius:0}.mobile-switch button{padding:6px 13px;font-size:.8125rem;border:0;border-radius:0;color:#646872;background:transparent}.mobile-switch button[aria-pressed=true]{background:white;color:#202126;box-shadow:0 1px 3px #0001}#export{min-width:115px;margin-left:3px}.z-rechts .trenner,#hilfeKnopf{display:none}.z-werkbank,body.einfach .z-werkbank{display:block;position:relative}.sidebar,.workspace-shell{position:absolute;inset:0;width:100%;height:100%;border:0}.sidebar{z-index:1}.workspace-shell{visibility:hidden;pointer-events:none}body.mobile-preview .sidebar{visibility:hidden;pointer-events:none}body.mobile-preview .workspace-shell{visibility:visible;pointer-events:auto;z-index:2}#panel{padding-left:24px;padding-right:24px}#panel>section{max-width:520px;margin:auto}.z-tabs{margin:0 -24px}.sidebar-footer{padding:13px 24px}.e-kacheln{grid-template-columns:repeat(5,minmax(0,1fr))}.e-kachel canvas{height:45px}.e-kachel-option{grid-column:1/-1}.workspace-top{padding:0 16px;height:48px}.workspace-bottom{padding:7px 12px}.canvas-help{font-size:.6875rem}.local-note{display:none}.toolbtn .tool-word{display:inline}#ablage>div{padding:24px;max-width:340px}.fine-tune{margin-top:16px!important}.e-zeile{grid-template-columns:90px minmax(0,1fr)}}
+@media(max-width:480px) {.brand-divider,.brand-version{display:none}.brand-product{font-size:.8125rem}.brand{gap:12px}.z-appbar{padding:10px 12px;gap:8px}.z-rechts{gap:1px}.z-rechts>.z-btn--glyph{width:30px;padding:6px}#projektKnopf{padding:7px;font-size:.8125rem}#export{min-width:98px;padding:8px 10px;font-size:.8125rem}.e-kacheln{grid-template-columns:repeat(3,minmax(0,1fr))}#panel{padding-left:20px;padding-right:20px}.z-tabs{margin-left:-20px;margin-right:-20px}.canvas-help{max-width:145px}.toolbtn{font-size:.75rem;padding:6px 8px}.toolbtn svg{display:none}.brand-name{font-size:1.25rem}.z-btn--glyph svg{width:18px;height:18px}.panel-intro{margin-bottom:16px}}
+@media(prefers-reduced-motion:reduce) {*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+<style>
+.object-select {display:flex;align-items:center;gap:8px;flex:1;min-width:0;border:0;padding:4px 0;background:transparent;text-align:left;color:inherit;font-size:inherit;font-weight:inherit}
+.z-schalter button,.e-kachel .wort,.e-was,.z-tab {font-size:.875rem}
+.e-kachel .wort {font-size:.875rem}
+@media(max-width:480px){.z-tab{font-size:.8125rem}}
+</style><style>
+/* Angular corporate design, and a three-step Simple workspace. */
+*, *::before, *::after {border-radius:0!important}
+input[type=color]::-webkit-color-swatch {border-radius:0!important}
+input[type=range]::-webkit-slider-thumb {border-radius:0!important}
+input[type=range]::-moz-range-thumb {border-radius:0!important}
+.pixel-logo {width:58px;height:58px;object-fit:contain;display:block;margin:-9px -5px -9px -11px;flex:none}
+.brand {gap:12px}.brand-version {display:none}
+body.einfach .panel-intro {margin-bottom:24px}
+body.einfach .panel-intro h1 {font-size:1.375rem;margin-bottom:8px}
+body.einfach .panel-intro p {font-size:.875rem;max-width:250px;line-height:1.6}
+body.einfach .simple-step+.simple-step {margin-top:24px;padding-top:22px;border-top:1px solid var(--border-subtle)}
+body.einfach .step-number {background:var(--accent-soft);border:0;color:var(--accent-ink);width:24px;height:24px;font-size:.75rem}
+body.einfach .upload-target {min-height:78px!important}
+body.einfach.has-image .upload-target {min-height:40px!important}
+body.einfach #eBildStand {margin-top:9px}
+body.einfach .e-kacheln {gap:8px}
+body.einfach .e-kachel {padding:12px 6px 9px;gap:9px;min-height:87px;position:relative}
+body.einfach .e-kachel canvas {height:42px}
+body.einfach .e-kachel[aria-pressed=true] {box-shadow:inset 0 0 0 1px var(--accent)}
+body.einfach .e-kachel[aria-pressed=true]:after {width:14px;height:14px;font-size:10px;top:4px;right:4px}
+.frame-recommendation {font-size:.625rem;line-height:1.2;font-weight:650;letter-spacing:.01em;color:var(--accent-ink);grid-column:1/-1}
+body.einfach #eGeraetHinweis {font-size:.75rem;line-height:1.5;min-height:0;margin-top:11px}
+.simple-fit {margin-top:18px}
+.simple-fit>.z-gruppe-titel {font-weight:500;font-size:.8125rem;margin-bottom:8px!important}
+.simple-fit .z-schalter {padding:0;background:#fff;border-color:var(--border-subtle);gap:0}
+.simple-fit .z-schalter button {padding:9px 8px;font-size:.875rem;border:0;box-shadow:none}
+.simple-fit .z-schalter button+button {border-left:1px solid var(--border-subtle)}
+.simple-fit .z-schalter button[aria-pressed=true] {background:var(--accent-soft);color:var(--accent-ink)}
+#simpleFitHint {font-size:.75rem;line-height:1.5}
+.simple-options {margin-top:22px!important;padding-top:0}
+.simple-options summary {font-size:.875rem;gap:8px;flex-wrap:wrap}
+.simple-options .summary-meta {font-size:.75rem;font-weight:400;color:var(--text-muted);margin-left:auto}
+.simple-options summary:after {margin-left:0}
+.simple-options h3 {font-size:.8125rem;font-weight:650;letter-spacing:0;margin-bottom:10px}
+.option-section+.option-section {padding-top:18px;margin-top:18px;border-top:1px solid var(--border-subtle)}
+.option-section .z-gruppe {margin-top:0!important}
+.option-section .e-kachel-option {padding:0}
+.simple-advanced-only {display:none!important}
+#eLookHinweis {display:none}
+#eCentreImage {margin-top:14px;min-height:34px;font-size:.8125rem}
+#eDoneEditing {width:100%;background:var(--accent-soft);color:var(--accent-ink);margin-top:10px}
+.simple-download-title {display:none}
+body.einfach .simple-download-title {display:flex;margin-bottom:10px!important}
+body.einfach #eLaden {display:flex;margin-top:14px;min-height:45px;font-size:.9375rem}
+body.einfach #export {display:none}
+body.einfach .sidebar-footer {padding-top:18px;padding-bottom:20px;background:#FAFBFC}
+body.einfach .export-overline {font-size:.75rem;font-weight:400;color:var(--text-muted);line-height:1.5}
+body.einfach .export-overline svg {display:none}
+body.einfach #eLadenHinweis {margin-top:7px;font-size:.6875rem}
+.simple-edit-bar {position:absolute;z-index:4;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;max-width:calc(100% - 28px);padding:8px 10px 8px 16px;background:#fff;border:1px solid #D8DBE2;box-shadow:0 4px 16px #0002;font-size:.8125rem}
+.simple-edit-bar .z-btn {min-height:32px;padding:6px 12px;font-size:.8125rem}
+@media(max-width:820px){body.einfach.mobile-preview #export {display:flex}.pixel-logo{width:46px;height:46px;margin:-7px -3px -7px -7px}.brand-product{font-size:.875rem}.simple-options{margin-bottom:10px}.simple-edit-bar{font-size:.75rem;gap:10px}body.einfach .sidebar-footer{padding-top:12px;padding-bottom:13px}body.einfach .simple-download-title{display:none}body.einfach #eLaden{margin-top:9px}.simple-options .summary-meta{display:none}}
+@media(max-width:480px){.pixel-logo{width:40px;height:40px}.brand{gap:8px}body.einfach .e-kachel .wort{font-size:.8125rem}}
+</style><style>
+/* Essential appearance controls belong beside the frame choices. */
+.frame-quick-options {display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0;padding:4px 1px 4px 5px;align-self:stretch}
+.frame-quick-options .z-haken {font-size:.8125rem;line-height:1.35;min-height:30px;gap:7px;min-width:0}
+.frame-quick-options input[type=checkbox] {width:16px;height:16px}
+body.einfach .frame-angle {margin-top:14px;grid-template-columns:54px minmax(0,1fr)}
+.frame-url.show {display:block;width:100%;margin-top:10px}
+@media(min-width:481px) and (max-width:820px) {
+ .frame-quick-options {grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:24px;padding:4px 0}
+ .frame-quick-options .z-haken {font-size:.875rem}
+}
+</style></head>
 <body>
 <div class="z-app z-app--werkbank">
 
   <header class="z-appbar">
-    <img class="z-logo z-logo--pfeil" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTA0IiBoZWlnaHQ9IjUwNCIgdmlld0JveD0iMCAwIDUwNCA1MDQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQo8cmVjdCB4PSIyMDEuNjAyIiB5PSIxMDAuOCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyMDEuNjAyIDEwMC44KSIgZmlsbD0iI0QxMzNDMyI+PC9yZWN0Pg0KPHJlY3QgeD0iMzAyLjQwMiIgeT0iMTAwLjgiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMzAyLjQwMiAxMDAuOCkiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjQwMy4xOTkiIHk9IjEwMC44IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDQwMy4xOTkgMTAwLjgpIiBmaWxsPSIjRkY1OTAwIj48L3JlY3Q+DQo8cmVjdCB4PSIzMDIuNDAyIiB5PSIyMDEuNiIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAzMDIuNDAyIDIwMS42KSIgZmlsbD0iIzY0MzJDOSI+PC9yZWN0Pg0KPHJlY3QgeD0iNDAzLjE5OSIgeT0iMjAxLjYiIHdpZHRoPSIxMDAuOCIgaGVpZ2h0PSIxMDAuOCIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgNDAzLjE5OSAyMDEuNikiIGZpbGw9IiNGRjU5MDAiPjwvcmVjdD4NCjxyZWN0IHg9IjIwMS42MDIiIHk9IjMwMi40IiB3aWR0aD0iMTAwLjgiIGhlaWdodD0iMTAwLjgiIHRyYW5zZm9ybT0icm90YXRlKDkwIDIwMS42MDIgMzAyLjQpIiBmaWxsPSIjRjVCNDAwIj48L3JlY3Q+DQo8cmVjdCB4PSI0MDMuMTk5IiB5PSIzMDIuNCIgd2lkdGg9IjEwMC44IiBoZWlnaHQ9IjEwMC44IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCA0MDMuMTk5IDMwMi40KSIgZmlsbD0iIzJBOTFGRiI+PC9yZWN0Pg0KPC9zdmc+" alt="zetcom">
+    <div class="brand"><img class="pixel-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAYAAACmKP9/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAkNSURBVHgB7dg7ih5kGIbh94/jjJNCTfBATITBIhErS7FKZ2NAcAWpAq5BsBDsXYEuQVCxsBAs0gUCFoqHaCEERXDIIDFMwp/JApL64+a6NnHzPJvtiQEAUk4NAJAj8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAELQzLOXB0f25+/N/wzqeOnU0+3u/DvAEB2/OnH5+WIfAL+ZR3G9d+2FYx5nnvplXX/5kgCf48LuZNy4P63DRA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQJDAA0CQwANAkMADQNDOsJTdc3tz9spLwzruHr4+1395d1jHxf0b88LTtwd4PIFfzO4rz8yFjy4O67j+5dn57PtLwzqunvv4JPBfDfB4LnoACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAIEngACBJ4AAgSeAAI2mxPDMvY3rk5x79/Oqzj33tvzW9/vT+s48c/bsytv28P6/jg6uU5/9rBsI6dYSnb48O5/+fnwzrOXJh5+8q1YR1ff/vOfGGaLOW93Znzw0pc9AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABAk8AAQJPAAECTwABC02Z4YlrE9PpztnZvDOjanD2azfzCs46d/Zo7+HxZy6cWZZ/eGhQg8AAS56AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASBI4AEgSOABIEjgASDoIVWmVLCoCyIQAAAAAElFTkSuQmCC" width="58" height="58" alt="zetcom"><span class="brand-divider" aria-hidden="true"></span><span class="brand-product">Mockup Studio <span class="brand-version">v7</span></span></div>
 
-    <div class="z-schalter z-modus" role="group" aria-label="How much of the tool you see">
+    <div class="z-schalter z-modus" role="group" aria-label="Editing mode">
       <button class="modusbtn" data-modus="einfach"   aria-pressed="true"
-        title="Four steps and nothing else. The tool decides the rest">Simple</button>
+        title="Image, device and essential adjustments">Simple</button>
       <button class="modusbtn" data-modus="erweitert" aria-pressed="false"
-        title="Every setting the tool has">Advanced</button>
+        title="Multiple devices, callouts, overlays and export settings">Advanced</button>
     </div>
 
-    <nav class="z-werkzeuge" id="werkzeugleiste" aria-label="Tools">
-      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)">Select</button>
-      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)">Erase</button>
-      <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)">Callout</button>
-      <button class="toolbtn" data-tool="hand"  aria-pressed="false" title="Move the view. Holding the space bar does the same in any tool (H)">Pan</button>
-      <div class="z-option hideable" id="brushOption">
-        <label for="brush" id="brushLabel">Brush 40 px</label>
-        <input type="range" class="z-regler" id="brush" min="4" max="200" value="40">
-      </div>
-    </nav>
+
 
     <span class="z-rechts">
       <button class="z-btn z-btn--text z-btn--glyph" id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>
@@ -3376,17 +1976,18 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M4 5 V11 H20"/><path d="M15 6 L20 11 L15 16"/></svg>
       </button>
       <span class="trenner" id="speichertrenner" aria-hidden="true"></span>
-      <span class="z-meta" id="speicherstand">Nothing saved yet</span>
+      <span class="z-meta" id="speicherstand">Project not saved</span>
       <button class="z-btn z-btn--text" data-bereich="projekt" id="projektKnopf">Project</button>
       <button class="z-btn z-btn--text" data-bereich="hilfe" id="hilfeKnopf">Help</button>
       <span class="trenner" aria-hidden="true"></span>
-      <button class="z-btn" id="export">Download</button>
-    </span>
+      <button class="z-btn" id="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span id="exportLabel">Export PNG</span></button>
+    </span><nav class="mobile-switch" aria-label="Workspace view"><button id="showSettings" aria-pressed="true">Settings</button><button id="showPreview" aria-pressed="false">Preview</button></nav>
   </header>
 
   <div class="z-werkbank">
 
-    <aside class="z-panel" id="panel">
+    <aside class="sidebar" aria-label="Mockup settings"><div class="z-panel" id="panel">
+<button class="z-btn z-btn--text" id="backToEditor" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg>Back to editor</button>
 
         <nav class="z-tabs" role="tablist" aria-label="Sections">
           <button class="z-tab" role="tab" data-bereich="geraet" aria-selected="true">Device<span class="z-zahl" id="devCount"></span></button>
@@ -3398,32 +1999,20 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         <!-- ============ DEVICE ============ -->
         <!-- ============ SIMPLE ============ -->
         <section data-bereich="einfach">
-          <div class="z-note" id="eExtra" hidden></div>
+          <div class="panel-intro"><h1>Create your mockup</h1><p>Add a screenshot. Pick a frame. Download.</p></div><div class="z-note" id="eExtra" hidden></div>
 
-          <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 1, your screenshot</span>
-            <button class="z-btn z-btn--outline" id="eBildWaehlen" style="width:100%">Choose an image</button>
-            <div class="e-zeile">
-              <span class="e-was">Change it</span>
-              <div class="z-schalter" role="group" aria-label="Change the screenshot">
-                <button class="ewerkzeug" data-tool="crop" aria-pressed="false"
-                  title="Press this, then drag a box in the picture. Everything outside the box is cut away">Crop</button>
-                <button class="ewerkzeug" data-tool="erase" aria-pressed="false"
-                  title="Press this, then paint over what should disappear. The colour behind the image shows through">Erase</button>
-              </div>
-            </div>
-            <div class="e-zeile hideable" id="ePinselZeile">
-              <span class="e-was">Brush</span>
-              <input type="range" class="z-regler" id="ePinsel" min="4" max="200" value="40"
-                aria-label="How wide the eraser is">
-            </div>
-            <span class="z-hinweis" id="eWerkzeugHinweis"></span>
+          <div class="z-gruppe simple-step">
+            <span class="z-gruppe-titel"><span class="step-number" aria-hidden="true">01</span>Add your screenshot</span>
+            <button class="z-btn z-btn--outline upload-target" id="eBildWaehlen" style="width:100%">Choose image</button>
+            
+            
+            
             <span class="z-hinweis" id="eBildStand"></span>
           </div>
 
-          <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 2, what it sits in</span>
-            <div class="e-kacheln" role="group" aria-label="What the screenshot sits in">
+          <div class="z-gruppe simple-step">
+            <span class="z-gruppe-titel"><span class="step-number" aria-hidden="true">02</span>Choose a frame</span>
+            <div class="e-kacheln" role="group" aria-label="Device frame">
               <button class="e-kachel" data-egeraet="desktop" aria-pressed="true">
                 <canvas width="240" height="112" aria-hidden="true"></canvas>
                 <span class="wort">Monitor</span>
@@ -3442,50 +2031,51 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
               </button>
               <button class="e-kachel" data-egeraet="window" aria-pressed="false">
                 <canvas width="240" height="112" aria-hidden="true"></canvas>
-                <span class="wort">Plain frame</span>
+                <span class="wort">Frame only</span>
               </button>
-              <div class="e-kachel-option">
-                <label class="z-haken" title="A soft shadow under the device, so it lifts off the page">
+              
+            <div class="frame-quick-options" role="group" aria-label="Frame appearance"><label class="z-haken" title="A soft shadow under the device, so it lifts off the page">
                   <input type="checkbox" id="eSchatten" checked> Shadow
-                </label>
-              </div>
-            </div>
-            <span class="z-hinweis" id="eGeraetHinweis"></span>
-          </div>
-
-          <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 3, how the device looks</span>
-            <div class="e-zeile">
+                </label><label class="z-haken" for="eChrome"
+                title="Draws an address line with three dots at the top of the screen">
+                <input type="checkbox" id="eChrome"> Browser bar
+              </label></div></div><div class="e-zeile frame-angle">
               <span class="e-was">Angle</span>
               <div class="z-schalter" role="group" aria-label="Angle">
                 <button class="eviewbtn" data-view="left"  aria-pressed="false"
                   title="Turned a little to the left">Left</button>
                 <button class="eviewbtn" data-view="front" aria-pressed="true"
-                  title="Seen straight from the front">Straight</button>
+                  title="Seen straight from the front">Front</button>
                 <button class="eviewbtn" data-view="right" aria-pressed="false"
                   title="Turned a little to the right">Right</button>
               </div>
-            </div>
-            <div class="e-zeile e-zeile--haken">
-              <label class="z-haken" for="eChrome"
-                title="Draws an address line with three dots at the top of the screen">
-                <input type="checkbox" id="eChrome"> Browser bar
-              </label>
-              <input type="text" class="z-field hideable" id="eUrl"
+            </div><input type="text" class="z-field hideable frame-url" id="eUrl"
                 aria-label="Address in the browser bar" placeholder="zetcom.com">
-            </div>
-            <div class="e-zeile hideable" id="eFormZeile">
+            <span class="z-hinweis" id="eGeraetHinweis"></span><div class="simple-fit" id="simpleFit" hidden><span class="z-gruppe-titel">How should the image fit?</span><div class="z-schalter" role="group" aria-label="Screenshot fit"><button class="simple-fit-btn" data-fit="fit" aria-pressed="true">Whole image</button><button class="simple-fit-btn" data-fit="fill" aria-pressed="false">Fill screen</button></div><p class="z-hinweis" id="simpleFitHint">The whole screenshot stays visible.</p></div>
+          </div>
+
+          
+
+          
+
+          
+
+          <details class="z-mehr simple-options" id="simpleOptions"><summary>Optional adjustments<span class="summary-meta">Position, crop & erase</span></summary>
+ <div class="simple-advanced-only" hidden><div class="z-gruppe">
+            
+            
+            <div class="e-zeile hideable simple-advanced-only" id="eFormZeile">
               <span class="e-was">Frame shape</span>
               <div class="z-schalter" role="group" aria-label="Frame shape">
                 <button class="eformbtn" data-framesize="shot" aria-pressed="true"
-                  title="The frame takes the shape of your screenshot, so nothing is cut off">Like the image</button>
+                  title="The frame takes the shape of your screenshot, so nothing is cut off">Match image</button>
                 <button class="eformbtn" data-framesize="standard" aria-pressed="false"
                   title="The shape the frame was built in, 16 to 9">Standard</button>
                 <button class="eformbtn" data-framesize="custom" aria-pressed="false"
                   title="Type a width and a height yourself">Custom</button>
               </div>
             </div>
-            <div class="e-zeile hideable" id="eMassZeile">
+            <div class="e-zeile hideable simple-advanced-only" id="eMassZeile">
               <span class="e-was">Width, height</span>
               <span class="e-masse">
                 <input type="number" class="z-field" id="eFrameW" min="100" max="8000" step="10" aria-label="Frame width">
@@ -3494,39 +2084,39 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
               </span>
             </div>
             <span class="z-hinweis" id="eLookHinweis"></span>
-          </div>
-
-          <div class="z-gruppe">
-            <span class="z-gruppe-titel">Step 4, the image in the screen</span>
-            <div class="e-zeile e-zeile--haken">
-              <label class="z-haken" for="eGanz"
-                title="Off, the image covers the whole screen and what does not fit is cut off. On, all of it is visible and the rest takes the colour below">
-                <input type="checkbox" id="eGanz"> Show the whole image
-              </label>
-            </div>
+          </div></div>
+ <div class="option-section"><h3>Image position & background</h3><div class="z-gruppe">
+            <input type="checkbox" id="eGanz" hidden>
             <div class="e-zeile">
-              <span class="e-was">Where</span>
+              <span class="e-was">Position</span>
               <span class="e-inline">
                 <div class="e-pad" role="group" aria-label="Where the image sits"></div>
                 <span class="e-lage" id="eLage"></span>
               </span>
             </div>
             <div class="e-zeile">
-              <span class="e-was">Behind it</span>
+              <span class="e-was">Background</span>
               <span class="e-farbe e-inline">
                 <button class="z-btn z-btn--outline" id="eBgPipette" aria-pressed="false"
-                  title="Press this, then click anywhere in the picture. That colour goes behind your image">Pick from the picture</button>
+                  title="Press this, then click anywhere in the picture. That colour goes behind your image">Pick colour</button>
                 <input type="color" id="eBgColor" aria-label="Colour behind the image">
               </span>
             </div>
-          </div>
-
-          <div class="z-gruppe">
-            <button class="z-btn" id="eLaden" style="width:100%">Download the mockup</button>
-            <span class="z-hinweis" id="eLadenHinweis"></span>
-          </div>
-
-          <div class="e-legende">
+          </div><button type="button" class="z-btn z-btn--outline" id="eCentreImage">Centre image</button></div>
+ <div class="option-section"><h3>Edit screenshot</h3><p class="z-hinweis">Crop removes the edges. Erase hides a detail. You can undo either change.</p><div class="e-zeile shot-tools">
+              <span class="e-was">Edit</span>
+              <div class="z-schalter" role="group" aria-label="Change the screenshot">
+                <button class="ewerkzeug" data-tool="crop" aria-pressed="false"
+                  title="Press this, then drag a box in the picture. Everything outside the box is cut away"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M6 3v15h15M3 6h15v15"/></svg>Crop</button>
+                <button class="ewerkzeug" data-tool="erase" aria-pressed="false"
+                  title="Press this, then paint over what should disappear. The colour behind the image shows through"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg>Erase</button>
+              </div>
+            </div><div class="e-zeile hideable" id="ePinselZeile">
+              <span class="e-was">Brush</span>
+              <input type="range" class="z-regler" id="ePinsel" min="4" max="200" value="40"
+                aria-label="How wide the eraser is">
+            </div><span class="z-hinweis" id="eWerkzeugHinweis"></span><button type="button" class="z-btn z-btn--text" id="eDoneEditing" hidden>Done editing</button></div>
+ </details><div class="e-legende">
             <dl>
               <dt>Drag in the screen</dt><dd>moves your image</dd>
               <dt>Scroll wheel</dt><dd>zooms the view, not the file</dd>
@@ -3971,16 +2561,11 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         <!-- ============ HELP ============ -->
         <section data-bereich="hilfe">
           <h2>Help</h2>
-          <p class="z-meta">Four steps to an image. For everything else, walk through the four tabs on the left.</p>
+          <p class="z-meta">Add your screenshot, choose a device, then export. Open Appearance or Image fit for adjustments.</p>
 
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Simple and Advanced</span>
-            <span class="z-hinweis">Top left you switch between the two. <strong>Simple</strong> walks
-              down four steps and decides the rest: one device, no callouts, and always the same file, a
-              transparent PNG cut to the mockup itself, which drops onto any slide or page. It can
-              crop and rub out parts of your screenshot as well.
-              <strong>Advanced</strong> shows every setting the tool has, including the output sizes.
-              Nothing is lost when you switch, and the choice is remembered for the next time.</span>
+            <span class="z-hinweis"><strong>Simple</strong> keeps image upload, device selection and essential adjustments together. New mockups start with a transparent PNG, cropped to the content. Simple suggests a frame based on the screenshot proportions and shows the whole image. Pick Fill screen if you prefer to crop the edges. <strong>Advanced</strong> adds multiple devices, callouts, overlays and export settings. Switching modes preserves your composition and export settings. Your preferred mode is remembered.</span>
           </div>
 
           <div class="z-gruppe">
@@ -4017,16 +2602,33 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
           </div>
         </section>
 
-      </aside>
+      </div><div class="sidebar-footer"><span class="z-gruppe-titel simple-download-title"><span class="step-number" aria-hidden="true">03</span>Download your mockup</span><div class="export-overline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6M8 13h8m-8 4h5"/></svg><span id="exportSummary">PNG · Transparent background</span></div>
+            <button class="z-btn" id="eLaden" style="width:100%">Download mockup</button>
+            <span class="z-hinweis" id="eLadenHinweis"></span>
+          </div></aside>
 
-    <div class="z-buehne" id="buehne" data-werkzeug="move">
+    <main class="workspace-shell" aria-label="Mockup preview"><div class="workspace-top"><span class="workspace-title">Preview</span><span class="canvas-type" id="canvasDevice">Monitor</span><span class="local-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><rect x="5" y="10" width="14" height="11"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg>Images stay on this device</span></div>
+<div class="z-buehne" id="buehne" data-werkzeug="move"><div class="simple-edit-bar" id="simpleEditBar" hidden><span id="simpleEditLabel"></span><button class="z-btn z-btn--outline" id="simpleEditDone">Done</button></div>
       <div id="stageWrap"><canvas id="view"></canvas><canvas id="sel"></canvas></div>
       <div id="ablage">
         <div>
-          <p><strong>Drop a screenshot here.</strong></p>
+          <span class="upload-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 15v5h16v-5"/></svg></span><p><strong>Start with your screenshot</strong></p>
           <p class="z-meta" id="ablageHinweis">Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.</p>
+          <button class="z-btn" id="canvasUpload">Choose image</button><span class="upload-formats">PNG, JPG, WebP and other browser-supported images</span>
         </div>
       </div>
+    <nav class="z-werkzeuge tool-dock" id="werkzeugleiste" aria-label="Tools">
+      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7L5 3Z"/></svg><span class="tool-word">Select</span></button>
+      <button class="toolbtn" data-tool="crop" aria-pressed="false" title="Crop the screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M6 3v15h15M3 6h15v15"/></svg><span class="tool-word">Crop</span></button>
+      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg><span class="tool-word">Erase</span></button>
+      <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="4" width="18" height="13"/><path d="m7 17-1 4 6-4"/></svg><span class="tool-word">Callout</span></button>
+      <button class="toolbtn" data-tool="hand"  aria-pressed="false" title="Move the view. Holding the space bar does the same in any tool (H)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M8 12V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-4a2 2 0 0 1 4 0v9c0 4-3 6-6 6h-2c-3 0-4-2-6-5l-3-4a2 2 0 0 1 3-2l2 2"/></svg><span class="tool-word">Pan</span></button>
+      <div class="z-option hideable" id="brushOption">
+        <label for="brush" id="brushLabel">Brush 40 px</label>
+        <input type="range" class="z-regler" id="brush" min="4" max="200" value="40">
+      </div>
+    </nav>
+</div><div class="workspace-bottom"><span class="canvas-help" id="canvasHelp">Drop an image or paste with <kbd>Ctrl V</kbd></span>
       <div class="zoomfeld" role="group" aria-label="View zoom">
         <button class="z-btn z-btn--text z-btn--glyph" id="zoomAus" title="Zoom out (Ctrl and minus)" aria-label="Zoom out">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" aria-hidden="true"><path d="M5 12 H19"/></svg>
@@ -4037,10 +2639,11 @@ textarea.z-field { height: auto; padding: var(--space-component-xxs); line-heigh
         </button>
         <button class="z-btn z-btn--text" id="zoomFit" title="Show the whole output area (key 0)">Fit</button>
       </div>
-    </div>
+    </div></main>
 
     </div>
   </div>
+<div id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastClose" aria-label="Dismiss notification"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button></div>
 
 <script>
 "use strict";
@@ -4058,7 +2661,7 @@ const TOKEN = n => getComputedStyle(document.documentElement).getPropertyValue(n
 const CHROMA_GRUEN = "#04F404";                          // Screen der Green-Screen-Rahmen
 const MAC_AMPEL = ["#ff5f57", "#febc2e", "#28c840"];      // Fensterknoepfe von macOS
 const CHROME_TEXT = "#3a3a3f", CHROME_LEER = "#9a9aa2";  // Adresszeile und leerer Bildschirm
-const AUSWAHL = "#2a6cff";                               // Anfasser und Auswahlrahmen
+const AUSWAHL = "#FF5900";                               // Anfasser und Auswahlrahmen
 /* zetcom-technisch:end */
 
 /* ---- views & frames: your hand-made PNGs (bezel + stand, transparent screen hole) ----
@@ -4129,7 +2732,7 @@ const WINDOW = {
    longer share a ratio — the browser keeps its own, each device reports its own in the
    fit hint. The oversampling keeps the hairline crisp when scaled up. Every layer is
    drawn from the view's quad, so the tilted views carry their own shadow and edge.        */
-const WIN_FW = 3630, WIN_FH = 2334, WIN_R = 12;   // ~4 output px on a 1000px wide window: minimal, not square
+const WIN_FW = 3630, WIN_FH = 2334, WIN_R = 0;   // Square browser frame, matching the corporate design
 const WIN_RECT = {x:140, y:140, w:3350, h:1994};   // 1.68 to 1, Robin-confirmed; margins carry the shadow
 const WIN_TILT = 0.055;   // share of its height the far edge loses — a plane turned about its vertical axis
 const WIN_SHADOW = [[0,36,.14],[22,66,.22]];   // [offsetY, blur, alpha] — ambient, then key
@@ -4572,7 +3175,13 @@ function drawInstance(i){
   const L = layout(i);
   // keep pan/zoom stable across content-size changes (view switches)
   if(i.img){
-    if(i.fitMode !== "custom") applyFit(i.fitMode, i, L);
+    if(i.fitMode !== "custom"){
+      applyFit(i.fitMode, i, L);
+      // Keep the chosen alignment when the renderer recalculates the layout.
+      const area = effRect(L, i);
+      i.ix = area.x + (area.w - i.w*i.is)*i.alignH;
+      i.iy = area.y + (area.h - i.h*i.is)*i.alignV;
+    }
     else if(i.lastContentW && Math.abs(i.lastContentW - L.cw) > 1){
       const f = L.cw / i.lastContentW;
       i.ix *= f; i.iy *= f; i.is *= f;
@@ -4653,7 +3262,7 @@ function drawSelection(){
   }
   /* Beim Zuschnitt auf den Inhalt bleibt die Arbeitsflaeche stehen und nur der Export
      wird beschnitten. Ohne sichtbare Linie waere das ein unsichtbarer Zustand.       */
-  if(state.ratio === "content"){
+  if(state.ratio === "content" && modus !== "einfach"){
     const r = inhaltsRahmen();
     if(r){
       sctx.save();
@@ -4741,27 +3350,24 @@ const GLYPH_WEG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
   + 'stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true">'
   + '<path d="M5 5 L19 19"/><path d="M19 5 L5 19"/></svg>';
 function objektZeile({name, neben, gewaehlt, mit, punktFarbe, aufKlick, wegKlick, wegTitel}){
-  const row = document.createElement("button");
-  row.type = "button";
+  const row = document.createElement("div");
   row.className = "z-objekt" + (gewaehlt ? " sel" : mit ? " mit" : "");
-  row.onclick = e => { if(e.target.closest(".weg")) return; aufKlick(e); };
-  const punkt = document.createElement("span");
-  punkt.className = "punkt";
+  const select = document.createElement("button"); select.type = "button"; select.className = "object-select";
+  select.setAttribute("aria-pressed", String(!!gewaehlt || !!mit)); select.onclick = aufKlick;
+  const punkt = document.createElement("span"); punkt.className = "punkt"; punkt.setAttribute("aria-hidden", "true");
   if(punktFarbe) punkt.style.background = punktFarbe;
   const nm = document.createElement("span"); nm.className = "name"; nm.textContent = name;
-  row.append(punkt, nm);
-  if(neben){ const n = document.createElement("span"); n.className = "neben"; n.textContent = neben; row.append(n); }
+  select.append(punkt, nm);
+  if(neben){ const n = document.createElement("span"); n.className = "neben"; n.textContent = neben; select.append(n); }
+  row.append(select);
   if(wegKlick){
-    const x = document.createElement("span");
-    x.className = "weg"; x.title = wegTitel; x.setAttribute("role", "button");
-    x.setAttribute("aria-label", wegTitel); x.tabIndex = 0;
-    x.innerHTML = GLYPH_WEG;
-    x.onclick = ev => { ev.stopPropagation(); wegKlick(); };
-    x.onkeydown = ev => { if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); ev.stopPropagation(); wegKlick(); } };
-    row.append(x);
+    const remove = document.createElement("button"); remove.type = "button"; remove.className = "weg";
+    remove.title = wegTitel; remove.setAttribute("aria-label", wegTitel); remove.innerHTML = GLYPH_WEG;
+    remove.onclick = ev => { ev.stopPropagation(); wegKlick(); }; row.append(remove);
   }
   return row;
 }
+
 function renderDevList(){
   const box = $("#devList"); if(!box) return;
   box.innerHTML = "";
@@ -4894,27 +3500,35 @@ $("#devSameSize").addEventListener("click", geraetAngleichen);
 /* ---------------- image loading ---------------- */
 function loadScreenshot(f, i){
   i = i || act;
-  if(!f || !f.type.startsWith("image/")) return;
-  const im = new Image();
+  if(!f) return;
+  if(!f.type.startsWith("image/")){ studioToast("Please choose a browser-supported image or a .zdm.json project.", true); return; }
+  const request = {}; i.pendingImport = request;
+  const im = new Image(), url = URL.createObjectURL(f);
+  studioToast("Loading image…");
   im.onload = () => {
-    i.img = im; i.w = im.naturalWidth; i.h = im.naturalHeight;
+    URL.revokeObjectURL(url);
+    if(i.pendingImport !== request || !insts.includes(i)) return;
+    snap();
+    i.img = im; i.w = im.naturalWidth; i.h = im.naturalHeight; i.fileName = f.name || "Pasted image";
     i.edit = document.createElement("canvas");
     i.edit.width = i.w; i.edit.height = i.h;
     i.edit.getContext("2d").drawImage(im, 0, 0);
-    i.undo.length = 0;
-    i.fitMode = "fill";
-    /* Im einfachen Modus nimmt ein Rahmen ohne eigenes Bildschirmmass die Form des
-       Screenshots an. Sonst beschneidet er still, und genau das versteht dort niemand.
-       Dazu die Farbe hinter dem Bild aus seinem eigenen Rand: liegt "Show all of it" an,
-       verschwindet der Balken damit, statt weiss aufzufallen. */
+    i.undo.length = 0; i.fitMode = modus === "einfach" ? "fit" : "fill"; i.lastContentW = 0;
+    i.alignH = .5; i.alignV = .5;
+    if(modus === "einfach" && !i.simpleFrameChosen){
+      i.device = suggestFrame(i.w, i.h); i.view = "front"; i.chromeOn = false;
+    }
     if(modus === "einfach" && KANN_ANPASSEN(i.device)) i.frameSize = "shot";
     beruehrt();
-    if(i === act) syncControls();   // der Hinweis zur Fensteranpassung nennt das neue Mass
-    render();
+    if(i === act) syncControls();
+    render(); einpassen();
+    studioToast("Your mockup is ready. Choose another frame or download it.");
+    if(window.innerWidth <= 820) mobileView(true);
   };
-  im.src = URL.createObjectURL(f);
+  im.onerror = () => { URL.revokeObjectURL(url); if(i.pendingImport === request) studioToast("This image could not be opened. Try a PNG, JPG or WebP file.", true); };
+  im.src = url;
 }
-$("#file").addEventListener("change", e => loadScreenshot(e.target.files[0]));
+$("#file").addEventListener("change", e => { loadScreenshot(e.target.files[0]); e.target.value = ""; });
 window.addEventListener("paste", e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/"));
   if(it){ e.preventDefault(); loadScreenshot(it.getAsFile()); }
@@ -5105,6 +3719,7 @@ document.querySelectorAll(".devicebtn").forEach(b =>
   b.addEventListener("click", () => {
     snap("device");
     act.device = b.dataset.device;
+    act.simpleFrameChosen = true;
     const dev = DEVICES[act.device];
     if(!dev[act.view]) act.view = "front";   // devices without the current view fall back to front
     if(act.device === "browser") act.chromeOn = true;   // the bar is the point of this device
@@ -6002,7 +4617,7 @@ let histKey = "", histZeit = 0;
 const INST_SKALARE = ["device","view","frame","frameSize","frameW","frameH","devScale","devX","devY","sizeMode","url",
   "screenBg","chromeAccent","chromeOn","fitMode","ix","iy","is","lastContentW","alignH","alignV",
   /* seit dem Zuschneiden: die Bildgroesse aendert sich, also muss sie zurueckkommen */
-  "w","h"];
+  "w","h","fileName","simpleFrameChosen"];
 
 const FUTURE = [];   // der Stapel nach vorn, seit 28.08.2026
 
@@ -6019,7 +4634,7 @@ function zustand(mitPixeln){
     insts: insts.map(i => {
       const sk = {};
       for(const k of INST_SKALARE) sk[k] = i[k];
-      const e = {ref:i, sk};
+      const e = {ref:i, sk, img:i.img, edit:i.edit, fileName:i.fileName};
       if(mitPixeln && i.edit){
         const c = document.createElement("canvas");
         c.width = i.edit.width; c.height = i.edit.height;
@@ -6039,6 +4654,7 @@ function anwenden(h){
   insts.length = 0;
   for(const e of h.insts){
     Object.assign(e.ref, e.sk);
+    e.ref.img = e.img; e.ref.edit = e.edit; e.ref.fileName = e.fileName;
     if(e.pixel && e.ref.edit){
       /* Die Arbeitsflaeche wird auf das gesicherte Mass gezogen, bevor gezeichnet wird.
          Nach einem Zuschnitt ist sie kleiner als der Stand davor, und ohne das kaeme
@@ -6198,6 +4814,7 @@ function updateExportInfo(){
 }
 function updateSizePreview(){
   updateExportInfo();
+  queueMicrotask(syncStudio);
   clearTimeout(sizeTimer);
   sizeTimer = setTimeout(() => {
     const t = ++sizeToken;
@@ -6263,22 +4880,36 @@ async function speichernMitDialog(blob, name, typen){
   try{
     griff = await window.showSaveFilePicker(opt);
   } catch(err){
-    if(err && err.name === "AbortError") return;   // abgebrochen heisst: nichts speichern
-    speichern(blob, name); return;                 // sonst der alte Weg, lieber Datei als nichts
+    if(err && err.name === "AbortError") return false;   // Cancelled
+    speichern(blob, name); return true;
   }
   const w = await griff.createWritable();
   await w.write(blob); await w.close();
   letzterGriff = griff;
+  return true;
 }
-$("#export").addEventListener("click", () => {
-  render();
-  const q = state.exportFormat === "png" ? undefined : state.exportQuality;
-  const name = exportFilename();
-  exportCanvas().toBlob(blob => {
-    if(!blob) return;
-    if(KANN_ZIELORT && $("#askPath").checked) speichernMitDialog(blob, name);
+let exportBusy = false;
+$("#export").addEventListener("click", async () => {
+  if(exportBusy || $("#export").disabled) return;
+  exportBusy = true;
+  syncStudio();
+  let handle = null;
+  const format = state.exportFormat, name = exportFilename();
+  try {
+    // Open the native picker while the click still carries user activation.
+    if(KANN_ZIELORT && $("#askPath").checked){
+      try { handle = await window.showSaveFilePicker({suggestedName:name, types:[{description:FMT_NAME[format],accept:{[MIME[format]]:ENDUNG[format]}}]}); }
+      catch(err){ if(err.name === "AbortError") return; }
+    }
+    $("#export").disabled = true;
+    $("#exportLabel").textContent = "Exporting…";
+    const blob = await new Promise(resolve => exportCanvas().toBlob(resolve, MIME[format], format === "png" ? undefined : state.exportQuality));
+    if(!blob) throw new Error("The image could not be generated.");
+    if(handle){ const writable = await handle.createWritable(); await writable.write(blob); await writable.close(); letzterGriff = handle; }
     else speichern(blob, name);
-  }, MIME[state.exportFormat], q);
+    studioToast(handle ? "Mockup saved." : "Mockup download started.");
+  } catch(err){ studioToast("Export failed. " + err.message, true); }
+  finally { exportBusy = false; syncStudio(); }
 });
 
 /* ---------------- Projekt speichern und laden ----------------
@@ -6336,11 +4967,15 @@ async function projektSpeichern(){
   catch(err){ $("#projectNote").textContent = "The project could not be built: " + err.message; return; }
   const blob = new Blob([json], {type:"application/json"});
   const name = projektName();
-  if(KANN_ZIELORT && $("#askPath").checked) await speichernMitDialog(blob, name, PROJEKT_TYPEN);
-  else speichern(blob, name);
-  sauber();
-  $("#projectNote").innerHTML = "Saved as <b>" + name + "</b>, " + fmtBytes(blob.size)
-    + ", screenshots and overlays embedded. Open it again to carry on.";
+  try {
+    if(KANN_ZIELORT && $("#askPath").checked){
+      if(!await speichernMitDialog(blob, name, PROJEKT_TYPEN)) return;
+    } else speichern(blob, name);
+    sauber();
+    $("#projectNote").textContent = "Saved as " + name + ", " + fmtBytes(blob.size) + ". Screenshots and overlays are included. Open the file to continue editing.";
+    studioToast("Project saved for later editing.");
+  } catch(err){ studioToast("Project could not be saved. " + err.message, true); }
+
 }
 const istProjektDatei = f => !!f && (/\.json$/i.test(f.name) || f.type === "application/json");
 
@@ -6367,6 +5002,7 @@ async function projektAnwenden(P){
   for(const g of (P.geraete || [])){
     const i = mkInst();
     for(const k of INST_SKALARE) if(g[k] !== undefined) i[k] = g[k];
+    if(g.simpleFrameChosen === undefined) i.simpleFrameChosen = true;
     /* Dateien bis PROJEKT_VERSION 4 kennen nur den Haken fitFrame. Gesetzt hiess "an den
        Screenshot", nicht gesetzt hiess "Grundverhaeltnis" — genau die beiden Aussenformen
        der neuen Dreierwahl, die Datei laedt also unveraendert aussehend.                */
@@ -6588,8 +5224,8 @@ const GROESSEN = [
 ];
 const FMT_NAME = {png:"PNG", webp:"WebP", jpeg:"JPEG"};
 const FMT_GRUND = {
-  webp: "WebP, the website standard in the vault, q75 to 80",
-  jpeg: "JPEG, a link preview has to be JPEG and needs no transparency",
+  webp: "WebP, a compact format for website images",
+  jpeg: "JPEG, a compact image when transparency is not needed",
   png:  "PNG, lossless, for slides, Word and LinkedIn"
 };
 (function baueGroessenListe(){
@@ -6662,7 +5298,10 @@ function zeigeBereich(name, ausAdresse){
      ihr Panel offen ist, sonst sieht man rechts einen Inhalt ohne Absender.        */
   document.querySelectorAll(".z-appbar .z-btn[data-bereich]").forEach(b =>
     b.classList.toggle("sel", b.dataset.bereich === name));
+  $("#backToEditor").hidden = ARBEITSORTE.includes(name);
+  document.querySelectorAll(".z-tab").forEach(b => b.tabIndex = b.dataset.bereich === name ? 0 : -1);
   $("#panel").scrollTop = 0;
+  if(name === "projekt" || name === "hilfe") mobileView(false);
   if(!ausAdresse && location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
 }
 document.querySelectorAll("[data-bereich]").forEach(b => {
@@ -6697,7 +5336,7 @@ function buehnenMass(){
 function einpassen(){
   const [W,H] = stageSize(), [bw,bh] = buehnenMass();
   if(bw < 40 || bh < 40){ requestAnimationFrame(einpassen); return; }
-  const rand = 48;
+  const rand = window.innerWidth <= 820 ? 32 : 104;
   ANSICHT.z = clamp(Math.min((bw - rand)/W, (bh - rand)/H), ZOOM_MIN, ZOOM_MAX);
   zentrieren();
 }
@@ -6724,7 +5363,7 @@ function zoomStufe(richtung){
 $("#zoomEin").addEventListener("click", () => zoomStufe(1));
 $("#zoomAus").addEventListener("click", () => zoomStufe(-1));
 $("#zoomFit").addEventListener("click", einpassen);
-window.addEventListener("resize", () => { if(ANSICHT.z) zentrieren(); });
+window.addEventListener("resize", () => { if(ANSICHT.z) einpassen(); });
 
 /* Das Rad zoomt die Ansicht. Das ist die Erwartung aus jedem Zeichenprogramm, und es
    macht den Weg frei fuer die zweite Bedeutung: im Bildmodus zoomt dasselbe Rad den
@@ -6825,7 +5464,7 @@ function syncSpeicherstand(){
   const el = $("#speicherstand"); if(!el) return;
   el.textContent = schmutzig
     ? (gesichertUm ? "Unsaved changes, last saved " + uhrzeit(gesichertUm) : "Not saved")
-    : (gesichertUm ? "Saved " + uhrzeit(gesichertUm) : "Nothing saved yet");
+    : (gesichertUm ? "Saved " + uhrzeit(gesichertUm) : "Project not saved");
 }
 const zwei = n => String(n).padStart(2, "0");
 function uhrzeit(d){
@@ -6859,13 +5498,14 @@ function syncOberflaeche(){
      Im einfachen Modus steht kein Reiter "Device" da, auf den er zeigen koennte. */
   const ah = $("#ablageHinweis");
   if(ah) ah.textContent = modus === "einfach"
-    ? "Or paste it with Ctrl and V, or press Choose an image on the left. Then work down the four steps."
-    : "Or paste it with Ctrl+V, or pick a file under Device. Then choose the device type and download it, top right.";
+    ? "Drop an image here, or paste it with Ctrl+V."
+    : "Drop an image here, or paste it with Ctrl+V.";
   const inh = $("#buehne");
   if(inh) inh.classList.toggle("greift", !!inhaltModus);
   syncFokus();
   syncDevAlign();
   syncEinfach();
+  syncStudio();
 }
 function syncFokus(){
   const f = $("#fokusAn"); if(!f) return;
@@ -7066,6 +5706,7 @@ for(const [key, dev] of Object.entries(DEVICES)){
       treffen, nicht den Anfaenger zum Fortgeschrittenen machen.                       */
 const MODUS_SCHLUESSEL = "zetcom-mockup-modus";
 let modus = "einfach";
+let uiInitialised = false;
 
 /* Die Arbeitsflaeche im einfachen Modus. Sie ist kein Ausgabemass, sie entscheidet nur,
    wie fein das Mockup gerechnet wird: der Zuschnitt auf den Inhalt schneidet den Rest
@@ -7078,7 +5719,7 @@ const E_GERAET = {
   desktop: "A screen on a stand. The usual choice for a website.",
   laptop:  "A notebook with the lid open.",
   phone:   "A phone, upright. Take a narrow screenshot for this one.",
-  browser: "Your screenshot alone, with a soft shadow.",
+  browser: "A floating screenshot with optional browser bar.",
   window:  "A plain frame, without any device."
 };
 
@@ -7145,7 +5786,7 @@ function pipette(an){
   const b = $("#eBgPipette");
   b.setAttribute("aria-pressed", an ? "true" : "false");
   b.classList.toggle("sel", an);
-  b.textContent = an ? "Click in the picture" : "Pick from the picture";
+  b.textContent = an ? "Click image" : "Pick colour";
 }
 /* Der Griff sitzt vor allem anderen im pointerdown der Flaeche, siehe dort. */
 function pipetteGriff(p){
@@ -7154,7 +5795,7 @@ function pipetteGriff(p){
   catch(e){ pipette(false); return; }
   if(d[3] < 128){
     // Durchsichtig heisst: daneben getippt. Die Pipette bleibt an, der Knopf sagt es weiter.
-    $("#eBgPipette").textContent = "Nothing there, click the picture";
+    $("#eBgPipette").textContent = "Click an opaque pixel";
     return;
   }
   snap("screenBg");
@@ -7274,7 +5915,7 @@ const E_LAGEN = [[0,0,"Top left"],   [0.5,0,"Top"],    [1,0,"Top right"],
     w.appendChild(b);
   }
 })();
-$("#eBgPipette").addEventListener("click", () => pipette(!pipetteAn));
+$("#eBgPipette").addEventListener("click", () => { pipette(!pipetteAn); syncStudio(); if(pipetteAn && window.innerWidth <= 820) mobileView(true); });
 $("#eBgColor").addEventListener("input", e => {
   act.screenBg = e.target.value;
   $("#bgColor").value = act.screenBg; $("#bgHex").value = act.screenBg;
@@ -7290,6 +5931,7 @@ document.querySelectorAll(".ewerkzeug").forEach(b =>
   b.addEventListener("click", () => {
     if(pipetteAn) pipette(false);
     setTool(state.tool === b.dataset.tool ? "move" : b.dataset.tool);
+    if(state.tool !== "move" && window.innerWidth <= 820) mobileView(true);
   }));
 $("#ePinsel").addEventListener("input", e => {
   state.brush = +e.target.value;
@@ -7302,10 +5944,10 @@ $("#eLaden").addEventListener("click", () => { if(!$("#eLaden").disabled) $("#ex
 function syncEinfach(){
   if(!$("#eBildStand")) return;
   const hat = insts.some(i => i.img);
-  $("#eBildWaehlen").textContent = act.img ? "Choose a different image" : "Choose an image";
+  $("#eBildWaehlen").textContent = act.img ? "Replace image" : "Choose image";
   $("#eBildStand").textContent = act.img
     ? act.w + " by " + act.h + " pixels."
-    : "Nothing yet. You can also drop a file on the dark area, or paste one with Ctrl and V.";
+    : "Or drop an image into the preview, or paste with Ctrl+V.";
   markiere(".e-kachel",   b => b.dataset.egeraet === act.device);
   markiere(".eviewbtn",   b => b.dataset.view === act.view);
   markiere(".eformbtn",   b => b.dataset.framesize === act.frameSize);
@@ -7334,14 +5976,14 @@ function syncEinfach(){
   $("#eFrameW").value = act.frameW; $("#eFrameH").value = act.frameH;
   $("#eBgColor").value = act.screenBg;
   $("#eLookHinweis").textContent = KANN_ANPASSEN(act.device)
-    ? "This frame takes the shape of your image." : "";
+    ? (act.frameSize === "shot" ? "Frame proportions match your screenshot." : act.frameSize === "custom" ? "Using your custom frame proportions." : "Using the standard frame proportions.") : "";
   /* Ohne Bild waere die Datei ein leerer Rahmen. Der Knopf sagt, warum er nicht geht:
      ein grauer Knopf ohne Grund daneben ist eine Sackgasse.                           */
   const R = exportRahmen();
   $("#eLaden").disabled = !hat;
   $("#eLadenHinweis").textContent = hat
-    ? "A see-through PNG, cut to the mockup, " + R.w + " by " + R.h + " pixels."
-    : "Choose a screenshot first, then this works.";
+    ? "Transparent PNG · " + R.w + " by " + R.h + " pixels."
+    : "Add an image to enable export.";
   if(modus === "einfach"){
     $("#export").disabled = !hat;
     $("#export").title = hat ? "" : "Choose a screenshot first";
@@ -7369,21 +6011,136 @@ function setModus(m){
   try { localStorage.setItem(MODUS_SCHLUESSEL, modus); } catch(e){ /* privates Fenster */ }
   if(modus === "einfach"){
     setTool("move");
-    einfachAusgabe();
+    if(!uiInitialised) einfachAusgabe();
     zeichneMiniaturen();
     zeigeBereich("einfach");
   } else {
     /* Zuschneiden kennt die Werkzeugleiste des erweiterten Modus nicht, dort saehe man
        ein Werkzeug, das nirgends gedrueckt ist. */
-    if(state.tool === "crop") setTool("move");
+    // Crop remains available in the advanced toolbar.
     if(bereich === "einfach") zeigeBereich("geraet");
   }
+  uiInitialised = true;
   syncEinfach();
   /* Die Leiste ist in den beiden Modi verschieden breit, die Buehne also auch. */
   render(); einpassen();
 }
 document.querySelectorAll(".modusbtn").forEach(b =>
   b.addEventListener("click", () => setModus(b.dataset.modus)));
+
+
+/* Studio UI: no extra dependencies, no network requests. */
+var toastTimer;
+function studioToast(message, error){
+  const box = $("#toast"); if(!box) return;
+  clearTimeout(toastTimer); $("#toastText").textContent = message;
+  box.dataset.error = error ? "true" : "false"; box.classList.add("visible");
+  toastTimer = setTimeout(() => box.classList.remove("visible"), error ? 9000 : 4500);
+}
+function mobileView(preview){
+  document.body.classList.toggle("mobile-preview", preview);
+  $("#showSettings").setAttribute("aria-pressed", String(!preview));
+  $("#showPreview").setAttribute("aria-pressed", String(preview));
+  requestAnimationFrame(() => { einpassen(); zeichneMiniaturen(); });
+}
+function syncStudio(){
+  const hasImage = !!act.img, empty = insts.every(i => !i.img) && !OVERLAYS.length && !MARKS.length;
+  document.body.classList.toggle("has-image", hasImage);
+  $("#buehne").classList.toggle("is-empty", empty);
+  $("#canvasDevice").textContent = (insts.length > 1 ? insts.length + " devices · " : "") + (act.device === "desktop" ? "Monitor" : DEV_NAMES[act.device]);
+  const fmt = FMT_NAME[state.exportFormat], R = exportRahmen();
+  const transparent = state.bgMode === "transparent" && state.exportFormat !== "jpeg";
+  $("#exportSummary").textContent = fmt + " · " + (transparent ? "Transparent background" : "Solid background");
+  $("#eLadenHinweis").textContent = empty ? "Add an image to enable export." : R.w + " × " + R.h + " px" + (R.zugeschnitten ? " · Cropped to content" : "");
+  $("#export").disabled = empty || exportBusy;
+  $("#export").title = empty ? "Add an image first" : "Export mockup as " + fmt;
+  $("#exportLabel").textContent = exportBusy ? "Exporting…" : "Export " + fmt;
+  $("#eLaden").disabled = empty || exportBusy;
+  document.querySelectorAll('.ewerkzeug, .toolbtn[data-tool="crop"], .toolbtn[data-tool="erase"], #eGanz, #eBgPipette, .epad').forEach(b => b.disabled = !hasImage);
+  if(hasImage){ $("#eBildStand").textContent = (act.fileName ? act.fileName + " · " : "") + act.w + " × " + act.h + " px"; }
+  const help = $("#canvasHelp");
+  help.textContent = empty ? "Drop an image · Ctrl+V to paste" : pipetteAn ? "Click a colour in your image · Esc to cancel" : state.tool === "crop" ? "Drag to crop · Ctrl+Z to undo" : state.tool === "erase" ? "Paint to erase · Ctrl+Z to undo" : state.tool === "mark" ? "Drag to draw a callout" : modus === "einfach" || inhaltModus ? "Drag image to position · Scroll to zoom view" : "Drag to move · Double-click screen to edit";
+  syncSimpleGuide();
+}
+$("#canvasUpload").addEventListener("click", () => $("#file").click());
+$("#showSettings").addEventListener("click", () => mobileView(false));
+$("#showPreview").addEventListener("click", () => mobileView(true));
+$("#backToEditor").addEventListener("click", () => zeigeBereich(modus === "einfach" ? "einfach" : letzterArbeitsort));
+$("#toastClose").addEventListener("click", () => $("#toast").classList.remove("visible"));
+document.querySelectorAll("#ablage > div, #werkzeugleiste").forEach(el => el.addEventListener("pointerdown", e => e.stopPropagation()));
+document.querySelectorAll(".z-tab").forEach((tab, i, tabs) => {
+  tab.id = "tab-" + tab.dataset.bereich;
+  tab.setAttribute("aria-controls", "section-" + tab.dataset.bereich);
+  const panel = document.querySelector('section[data-bereich="' + tab.dataset.bereich + '"]');
+  panel.id = "section-" + tab.dataset.bereich; panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", tab.id);
+  tab.addEventListener("keydown", e => {
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) return;
+    e.preventDefault(); const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length-1 : (i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    zeigeBereich(tabs[next].dataset.bereich); tabs[next].focus();
+  });
+});
+document.querySelectorAll('input[type="range"]').forEach(el => {
+  if(!el.hasAttribute("aria-label") && !document.querySelector('label[for="' + el.id + '"]')){
+    el.setAttribute("aria-label", el.closest(".z-gruppe")?.querySelector(".z-gruppe-titel")?.textContent || "Adjust " + el.id);
+  }
+});
+
+
+/* Simple-mode defaults: suggest a native screen only when the aspect ratios are close.
+   A flexible frame is the fallback for square images, long pages and unusual ratios. */
+function suggestFrame(w, h){
+  if(!(w > 0 && h > 0)) return "window";
+  const ratio = w/h;
+  const candidates = [["desktop",1803/1013],["laptop",795/518],["phone",284/614]];
+  let best = "window", difference = .055;
+  for(const [key, native] of candidates){
+    const d = Math.abs(Math.log(ratio/native));
+    if(d < difference){ difference = d; best = key; }
+  }
+  return best;
+}
+function syncSimpleGuide(){
+  const has = !!act.img, recommended = has ? suggestFrame(act.w, act.h) : "";
+  $("#simpleFit").hidden = !has;
+  $("#simpleOptions").hidden = !has;
+  document.querySelectorAll(".e-kachel").forEach(button => {
+    const recommendedHere = button.dataset.egeraet === recommended;
+    button.classList.toggle("recommended", recommendedHere);
+    let badge = button.querySelector(".frame-recommendation");
+    if(!badge){badge = document.createElement("span"); badge.className = "frame-recommendation";button.appendChild(badge);}
+    badge.textContent = recommendedHere ? "Suggested" : "";
+    badge.hidden = !recommendedHere;
+  });
+  $("#eGeraetHinweis").textContent = !has ? "Add an image and we’ll suggest a frame to match." : act.device === recommended ? "Suggested for your screenshot’s proportions. You can choose any frame." : "Your choice. Change the frame at any time.";
+  document.querySelectorAll(".simple-fit-btn").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.fit === act.fitMode)));
+  let hint = "Drag the screenshot to adjust its position.";
+  if(act.fitMode === "fit"){
+    const L = act.L;
+    const area = L ? effRect(L,act) : null;
+    const bars = area && (Math.abs(area.w-act.w*act.is) > 2 || Math.abs(area.h-act.h*act.is) > 2);
+    hint = bars ? (KANN_ANPASSEN(act.device) ? "The full image is visible. Space around it keeps its proportions." : "The full image is visible. Empty space? Choose Frame only for a closer fit.") : "The full image is visible. No stretching.";
+  } else if(act.fitMode === "fill") hint = "Fills the screen. Some edges may be cropped; drag the image to choose what stays visible.";
+  $("#simpleFitHint").textContent = hint;
+  const tool = state.tool === "crop" || state.tool === "erase";
+  $("#eDoneEditing").hidden = !tool;
+  $("#simpleEditBar").hidden = modus !== "einfach" || (!tool && !pipetteAn);
+  $("#simpleEditLabel").textContent = pipetteAn ? "Click a colour in the image" : state.tool === "crop" ? "Drag around the area to keep" : "Paint over the detail to hide";
+  $("#eLaden").textContent = exportBusy ? "Preparing download…" : "Download mockup";
+  if(modus === "einfach"){
+    $("#exportSummary").textContent = state.exportFormat === "png" && state.bgMode === "transparent" ? "Transparent PNG · Ready for slides & documents" : FMT_NAME[state.exportFormat] + " · Using your Advanced export settings";
+  }
+}
+document.querySelectorAll(".simple-fit-btn").forEach(button => button.addEventListener("click", () => {
+  snap("fit"); applyFit(button.dataset.fit, act); bildAusrichten(act, act.alignH, act.alignV); render();
+}));
+$("#eCentreImage").addEventListener("click", () => {
+  snap("fit"); applyFit("fit", act); bildAusrichten(act,.5,.5); render();
+});
+function finishSimpleEdit(){ if(pipetteAn) pipette(false); setTool("move"); }
+$("#eDoneEditing").addEventListener("click", finishSimpleEdit);
+$("#simpleEditDone").addEventListener("click", finishSimpleEdit);
+$("#simpleEditBar").addEventListener("pointerdown", e => e.stopPropagation());
+$("#simpleOptions").addEventListener("toggle", () => { if(!$("#simpleOptions").open && (state.tool === "erase" || state.tool === "crop" || pipetteAn)) finishSimpleEdit(); });
 
 /* Startzustand der Oberflaeche: der Ort kommt aus der Adresse, damit ein weitergegebener
    Link dort landet, wo er hinzeigt. Nennt die Adresse einen Ort, den es nur im erweiterten
@@ -7392,10 +6149,11 @@ document.querySelectorAll(".modusbtn").forEach(b =>
 const startOrt = location.hash.slice(1);
 let startModus = "einfach";
 try { startModus = localStorage.getItem(MODUS_SCHLUESSEL) || "einfach"; } catch(e){}
-if(startOrt && startOrt !== "einfach" && BEREICHE.includes(startOrt)) startModus = "erweitert";
+if(startOrt && ["geraet","markierung","overlay","ausgabe"].includes(startOrt)) startModus = "erweitert";
 zeigeBereich(startOrt || (startModus === "einfach" ? "einfach" : "geraet"), true);
 setTool("move");
 setModus(startModus);
+if(startOrt === "hilfe" || startOrt === "projekt") zeigeBereich(startOrt, true);
 syncSpeicherstand(); updateUndoBtn(); updateRedoBtn();
 einpassen();
 </script>
