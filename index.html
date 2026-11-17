@@ -125,6 +125,7 @@
   --weight-extralight: 200;   /* [A] grosse Display-Zeilen */
   --weight-light: 300;        /* [A] Headlines, Subheads, Fliesstext */
   --weight-regular: 400;      /* [F] kleine UI-Labels, Karten-Labels */
+  --weight-medium: 500;       /* [V] wichtiger Hinweis im Lesedokument, 22.10.2026 */
   --weight-semibold: 600;     /* [F] Button-Labels, Eyebrows */
   --weight-bold: 700;         /* [A] Hervorhebung, Kennzahlen, Karten-
                                      Titel. Off-site schwerstes Gewicht;
@@ -1052,8 +1053,7 @@
   --doc-pad-x:     40px;   /* [V] Seitenrand am Bildschirm */
   --doc-pad-y:     48px;   /* [V] */
 
-  /* Druck. A4 hoch = 794 x 1123 px @96dpi, siehe formats.md der
-     zetcom-graphics-Skill. Im Druck rechnet der Browser in pt,
+  /* Druck. A4 hoch = 794 x 1123 px @96dpi. Im Druck rechnet der Browser in pt,
      deshalb hier eigene Werte statt der px-Stufen oben. */
   --doc-print-margin: 16mm;    /* [V] alle vier Seiten */
   --doc-print-body:   10.5pt;  /* [V] Fliesstext auf Papier */
@@ -1107,6 +1107,87 @@
      eine Einstellung des Benutzers, kein zweiter Standard: die
      Voreinstellung bleibt --ui-cell-pad-y. */
   --ui-cell-pad-y-dicht: 4px;   /* [V] .z-dicht, 26px Zeilenhoehe */
+}
+
+/* LESEDOKUMENT, Neufassung 22.10.2026 (Robin, Variante "Kopfzeile
+   oben", aus dem Vergleich von fuenf Fassungen gewaehlt).
+   Gilt NUR im Blatt (.z-sheet). Werkzeuge und Dashboards lesen
+   weiter die Leiter oben, damit sich nichts verschiebt, was
+   ausserhalb eines Lesedokuments gebaut ist (Philips Dashboard).
+   Leichter grosser Titel, ruhige Abschnittsueberschrift, Fliesstext
+   Regular 400 in 17px, Kennzahl duenn statt fett. */
+.z-sheet {
+  --doc-h1:      48px;  --doc-h1-lh:   1.08;  --doc-h1-w:   300;
+  --doc-h2:      30px;  --doc-h2-lh:   1.20;  --doc-h2-w:   400;
+  --doc-h3:      17px;  --doc-h3-lh:   1.35;  --doc-h3-w:   600;
+  --doc-body:    17px;  --doc-body-lh: 1.65;  --doc-body-w: 400;
+  --doc-lead:    20px;  --doc-lead-lh: 1.55;  --doc-lead-w: 300;
+  --doc-kpi:     52px;  --doc-kpi-lh:  1.00;  --doc-kpi-w:  300;
+  --doc-measure: 680px;
+  --doc-width:   960px;
+  --doc-pad-x:    56px;
+}
+
+/* OBERFLAECHEN, Neufassung 25.10.2026 (Robin). Ersetzt fuer neue
+   Werkzeuge, Dashboards, Apps und Portale die Werkzeugwerte oben.
+   Ein System, zwei Dichten, gewaehlt aus drei Gesamtrichtungen:
+     arbeiten   = taeglich genutzte Werkzeuge, Studios, Listen, Admin
+                  (Vorbild Linear, Vercel: dicht, Haarlinien, Seitenleiste)
+     ueberblick = Dashboards zum Anschauen, Portale, Berichte, seltene
+                  Nutzer (Vorbild Stripe, Notion: Luft, weisse Karten
+                  auf Grau, Navigation oben)
+   Gesetzt wird der Modus am Wurzelelement: <body data-modus="arbeiten">.
+   Gemeinsam: Akzent nur fuer aktiven Punkt, aktuellen Wert und Fokus,
+   Hauptaktion schwarz, Schatten nur fuer schwebende Ebenen,
+   Icons aus Tabler, Felder als getoente Flaeche mit Linie unten. */
+:root {
+  --app-text:        var(--color-near-black);
+  --app-text-leise:  var(--color-black-70);
+  --app-text-blass:  var(--color-black-60);
+  --app-linie:       var(--color-grey-light);
+  --app-linie-fein:  var(--color-black-20);
+  --app-rand:        var(--color-black-30);
+  --app-grau:        var(--color-grey-ultra-100);
+  --app-akzent:      var(--color-orange);
+  --app-haupt:       var(--color-black);
+  --app-haupt-text:  var(--color-white);
+  --app-gefahr:      var(--signal-blockiert);
+  --app-feld:        var(--color-grey-ultra-100);   /* Feld B: getoent */
+  --app-feld-linie:  var(--color-black-60);         /* 3,35:1 auf dem Feld, ueber 3:1 fuer Bedienteile (WCAG 1.4.11) */
+  /* Status als Etikett (Ueberblick): getoente Flaeche, dunkle Schrift, AA */
+  --app-ok-flaeche:        #e6f5ee;  --app-ok-schrift:        #126b40;   /* [V] 5,83:1 */
+  --app-achtung-flaeche:   #fbf0e0;  --app-achtung-schrift:   #8a5300;   /* [V] 5,62:1 */
+  --app-blockiert-flaeche: #fbe7e7;  --app-blockiert-schrift: #a32020;   /* [V] 6,35:1 */
+  /* Schatten nur fuer Ebenen, die schweben */
+  --app-schatten-menue:   0 0 0 1px var(--color-grey-light), 0 8px 24px #0000001f;   /* [V] */
+  --app-schatten-dialog:  0 0 0 1px var(--color-grey-light), 0 16px 48px #00000029;  /* [V] */
+  --app-schatten-meldung: 0 8px 24px #0000002e;                                       /* [V] */
+}
+[data-modus="arbeiten"] {
+  --app-grund:     var(--color-white);
+  --app-flaeche:   var(--color-white);
+  --app-leiste:    var(--color-grey-ultra-100);
+  --app-titel: 20px;   --app-titel-w: 600;   --app-titel-lh: 1.25;
+  --app-abschnitt: 13px; --app-abschnitt-w: 600;
+  --app-text-groesse: 13px; --app-text-lh: 1.5;
+  --app-klein: 12px;   --app-klein-w: 500;
+  --app-zahl: 24px;    --app-zahl-w: 500;
+  --app-zeile: 36px;   --app-bedien: 32px;  --app-icon: 16px;
+  --app-abstand-1: 4px; --app-abstand-2: 8px; --app-abstand-3: 12px; --app-abstand-4: 16px; --app-abstand-5: 24px;
+  --app-leiste-breite: 232px;
+}
+[data-modus="ueberblick"] {
+  --app-grund:     var(--color-grey-ultra-100);
+  --app-flaeche:   var(--color-white);
+  --app-leiste:    var(--color-white);
+  --app-titel: 36px;   --app-titel-w: 300;   --app-titel-lh: 1.1;
+  --app-abschnitt: 18px; --app-abschnitt-w: 600;
+  --app-text-groesse: 15px; --app-text-lh: 1.6;
+  --app-klein: 14px;   --app-klein-w: 400;
+  --app-zahl: 44px;    --app-zahl-w: 300;
+  --app-zeile: 56px;   --app-bedien: 44px;  --app-icon: 20px;
+  --app-abstand-1: 8px; --app-abstand-2: 16px; --app-abstand-3: 24px; --app-abstand-4: 32px; --app-abstand-5: 40px;
+  --app-leiste-breite: 100%;
 }
 
 
@@ -4490,11 +4571,13 @@ view.addEventListener("pointerup", () => {
 document.querySelectorAll(".devicebtn").forEach(b =>
   b.addEventListener("click", () => {
     snap("device");
+    const vorher = act.device;
     act.device = b.dataset.device;
     act.simpleFrameChosen = true;
     const dev = DEVICES[act.device];
     if(!dev[act.view]) act.view = "front";   // devices without the current view fall back to front
     if(act.device === "browser") act.chromeOn = true;   // the bar is the point of this device
+    else if(vorher === "browser") act.chromeOn = false; // wer den Browser verlaesst, nimmt seine Leiste mit (17.11.2026)
     syncControls();
     render();
   }));
@@ -7907,7 +7990,7 @@ body.set-modus.zieht-datei #buehne:after{display:none}
     const Q = s.studio ? STUDIO_Q : Q_AUS;
     c.width = s.b*Q; c.height = s.h*Q;
     komposit(c.getContext("2d"), s, await foto(s), Q, false);
-    c.toBlob(b => { speichern(b, "mockup-device-set-" + s.id + ".png"); studioToast("Device set downloaded."); }, "image/png");
+    c.toBlob(b => { speichern(b, "zetcom-mockup-device-set-" + s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png"); studioToast("Device set downloaded."); }, "image/png");
   }, true);
 
   function syncAlles(){
@@ -7926,6 +8009,104 @@ body.set-modus.zieht-datei #buehne:after{display:none}
   const vorher = syncSimpleGuide;
   syncSimpleGuide = function(){ vorher(); syncAlles(); };
   window.setAn = setAn;
+})();
+</script>
+<style id="studio-hilfe-1711">
+/* Durchgang 17.11.2026 vor dem Versand an die ganze Firma.
+   1. Kopfleiste auf Laptopbreiten: das Adressfeld lag ueber Rueckgaengig und Help.
+   2. Help oeffnet einen Dialog, der in Simple und Advanced sichtbar ist
+      (vorher nur in der Seitenleiste, die es in Simple nicht gibt).
+   Steht zuletzt und gewinnt ueber alles darueber. */
+.sm-url{width:auto;flex:0 1 150px;min-width:84px}
+.sm-mitte{overflow-x:auto;scrollbar-width:none}
+@media(max-width:1360px){.sm-art .lbl{display:none}.sm-art{padding:0 9px}}
+@media(max-width:1250px){.sm-wz .lbl{display:none}.sm-wz{padding:0 9px}.brand-product,.brand-divider{display:none!important}}
+@media(max-width:1000px){
+  .z-appbar{height:auto;min-height:0;flex-wrap:wrap;padding:8px 12px}
+  body.einfach .sm-mitte{order:5;flex-basis:100%;margin-left:0}
+  .sm-hinweis{display:none}
+}
+#hilfeDialog{width:min(620px,calc(100vw - 32px));max-height:calc(100vh - 48px);padding:0;border:0;border-radius:var(--v8-r-xl);box-shadow:var(--v8-shadow-l);color:var(--v8-ink);font-family:inherit}
+#hilfeDialog[open]{display:flex;flex-direction:column;overflow:hidden}
+#hilfeDialog::backdrop{background:rgba(14,17,22,.35)}
+#hilfeDialog .hd-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 6px}
+#hilfeDialog h2{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em}
+#hilfeDialog .hd-lead{margin:6px 0 0;color:var(--v8-ink-2);font-size:14px}
+#hilfeDialog .hd-inhalt{padding:10px 24px 24px;overflow:auto;flex:1 1 auto;min-height:0}
+#hilfeDialog .hd-fuss{padding-top:14px!important;border-top:1px solid var(--v8-line)}
+#hilfeDialog ol.hd-schritte{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+#hilfeDialog ol.hd-schritte li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;padding:12px 14px;background:var(--v8-sunken);border-radius:var(--v8-r-l)}
+#hilfeDialog .hd-nr{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--v8-accent);color:#fff;font-weight:700;font-size:14px}
+#hilfeDialog li b{display:block;font-size:15px;margin:4px 0 2px}
+#hilfeDialog li span,#hilfeDialog .hd-liste li,#hilfeDialog dd{font-size:13.5px;line-height:1.5;color:var(--v8-ink-2)}
+#hilfeDialog h3{margin:22px 0 8px;font-size:13px;font-weight:650;color:var(--v8-muted)}
+#hilfeDialog .hd-liste{margin:0;padding-left:1.1em;display:grid;gap:6px}
+#hilfeDialog .hd-liste strong{color:var(--v8-ink)}
+#hilfeDialog dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+#hilfeDialog dt{font-size:13px;font-weight:600;white-space:nowrap}
+#hilfeDialog dd{margin:0}
+#hilfeDialog kbd{font-family:inherit;font-size:12px;padding:1px 6px;border:1px solid var(--v8-line);border-bottom-width:2px;border-radius:5px;background:#fff}
+#hilfeDialog .hd-fuss{display:flex;justify-content:flex-end;padding:0 24px 20px}
+</style>
+<dialog id="hilfeDialog" aria-labelledby="hilfeTitel">
+  <div class="hd-kopf">
+    <div>
+      <h2 id="hilfeTitel">How the Mockup Studio works</h2>
+      <p class="hd-lead">Three steps. Your images stay on your computer, nothing is uploaded.</p>
+    </div>
+    <button type="button" class="sm-zu" id="hilfeZu" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="hd-inhalt">
+    <ol class="hd-schritte">
+      <li><span class="hd-nr">1</span><div><b>Add your screenshot</b><span>Drop it onto the canvas, paste it with <kbd>Ctrl</kbd> <kbd>V</kbd>, or press Choose image.</span></div></li>
+      <li><span class="hd-nr">2</span><div><b>Pick a device</b><span>Monitor, laptop, phone, browser window or glass frame, in the bar at the top. The device takes the shape of your screenshot, so nothing is cut off. A wide screenshot turns the phone on its side.</span></div></li>
+      <li><span class="hd-nr">3</span><div><b>Download</b><span>Top right. You get a PNG with a transparent background at twice the size, ready for PowerPoint, Word, e-mail and the web.</span></div></li>
+    </ol>
+
+    <h3>If you want more</h3>
+    <ul class="hd-liste">
+      <li><strong>Angle</strong>: turn the device a little to the left or right. Not available for the phone.</li>
+      <li><strong>Shadow and browser bar</strong>: switch them on or off. Type the address that should show in the bar into the field next to it.</li>
+      <li><strong>Screenshot menu</strong>: replace the image, crop it, erase parts of it or pick the colour behind it.</li>
+      <li><strong>Device set</strong>: monitor, laptop, tablet and phone in one scene. Click a screen to add its screenshot, drag to move it, scroll to resize it.</li>
+      <li><strong>Advanced</strong>, bottom right: several devices on one canvas, callouts, overlays and exact output sizes.</li>
+    </ul>
+
+    <h3>For a good screenshot</h3>
+    <ul class="hd-liste">
+      <li>Take it at full size on a large screen. Windows: <kbd>Win</kbd> <kbd>Shift</kbd> <kbd>S</kbd>. Mac: <kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>4</kbd>.</li>
+      <li>Show demo data only, never real customer records, names or e-mail addresses.</li>
+      <li>Close notifications, chats and private tabs before you take it.</li>
+    </ul>
+
+    <h3>Keys</h3>
+    <dl>
+      <dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo</dd>
+      <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd></dt><dd>Redo</dd>
+      <dt><kbd>Ctrl</kbd> <kbd>V</kbd></dt><dd>Paste a screenshot</dd>
+      <dt>Scroll wheel</dt><dd>Zoom the view</dd>
+      <dt><kbd>0</kbd></dt><dd>Fit the view</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Close a menu or stop cropping</dd>
+    </dl>
+  </div>
+  <div class="hd-fuss"><button type="button" class="z-btn" id="hilfeOk">Got it</button></div>
+</dialog>
+<script id="studio-hilfe-1711-js">
+(function hilfeDialog(){
+  const d = document.getElementById("hilfeDialog"), knopf = document.getElementById("hilfeKnopf");
+  if(!d || !knopf) return;
+  const zu = () => { d.close(); knopf.classList.remove("sel"); };
+  // Fangphase: vor dem alten Bereichswechsel, der in Simple ins Leere zeigte
+  knopf.addEventListener("click", e => {
+    e.stopImmediatePropagation(); e.preventDefault();
+    if(d.open) zu(); else { d.showModal(); knopf.classList.add("sel"); }
+  }, true);
+  document.getElementById("hilfeZu").addEventListener("click", zu);
+  document.getElementById("hilfeOk").addEventListener("click", zu);
+  d.addEventListener("close", () => knopf.classList.remove("sel"));
+  d.addEventListener("click", e => { if(e.target === d) zu(); });
+  // Ein alter Link auf #hilfe liess Help gedrueckt stehen, ohne dass etwas offen war
+  if(location.hash === "#hilfe"){ history.replaceState(null, "", "#einfach"); knopf.classList.remove("sel"); }
 })();
 </script>
 </body>
