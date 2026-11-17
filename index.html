@@ -3264,6 +3264,18 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
 <script>
 "use strict";
 
+/* Aeltere Browser (Safari vor 16, Firefox vor 112) kennen roundRect nicht. Ohne diese
+   Zeilen bliebe dort die Flaeche leer, sobald ein gerundetes Rechteck gezeichnet wird. */
+if(window.CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r){
+    r = Math.max(0, Math.min(Array.isArray(r) ? (r[0] || 0) : (r || 0), Math.abs(w)/2, Math.abs(h)/2));
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+  };
+}
+
 /* Ein Farbwert steht in diesem Werkzeug nirgends als Zahl. Er kommt aus tokens.css,
    auch dort, wo Canvas ihn braucht: Canvas kennt keine CSS-Variable, also wird der
    Wert einmal gelesen und weitergereicht. */
@@ -3915,9 +3927,64 @@ function drawContent(L, i){
 
 /* ---------------- WebGL warp ---------------- */
 const glc = document.createElement("canvas");
-const gl = glc.getContext("webgl", {alpha:true, premultipliedAlpha:true, preserveDrawingBuffer:true});
+/* Ohne WebGL (Grafikbeschleunigung abgeschaltet, manche Fernsitzungen, strenge Browser-
+   Einstellungen) blieb die Seite leer. Seit 18.11.2026 rechnet dann die Zeichenflaeche
+   selbst, siehe warp2D. Zum Pruefen: die Adresse mit ?ohne-webgl oeffnen. */
+let gl = null;
+try {
+  if(!/[?&]ohne-webgl\b/.test(location.search))
+    gl = glc.getContext("webgl", {alpha:true, premultipliedAlpha:true, preserveDrawingBuffer:true})
+      || glc.getContext("experimental-webgl", {alpha:true, premultipliedAlpha:true, preserveDrawingBuffer:true});
+} catch(e){ gl = null; }
+let warpCtx = null;
 let uni = {};
+/* Der Inhalt wird in ein Gitter geteilt und Feld fuer Feld als zwei Dreiecke gezeichnet.
+   Jedes Dreieck ist fuer sich nur verschoben, gedreht und gestreckt; bei 24 Feldern je
+   Seite liegt das unter einem Punkt neben der echten Perspektive. Ein gerader Bildschirm
+   ist ein einziges drawImage. */
+function warp2D(L){
+  glc.width = Math.max(2, L.bbox.w); glc.height = Math.max(2, L.bbox.h);
+  const x = warpCtx, Q = L.Q, bx = L.bbox.x, by = L.bbox.y;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, glc.width, glc.height);
+  x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+  const gerade = Math.abs(Q[0][1] - Q[1][1]) < .01 && Math.abs(Q[3][1] - Q[2][1]) < .01
+              && Math.abs(Q[0][0] - Q[3][0]) < .01 && Math.abs(Q[1][0] - Q[2][0]) < .01;
+  if(gerade){
+    x.drawImage(cont, 0, 0, L.cw, L.chh, Q[0][0] - bx, Q[0][1] - by, Q[1][0] - Q[0][0], Q[3][1] - Q[0][1]);
+    return;
+  }
+  const H = computeH([[0,0],[L.cw,0],[L.cw,L.chh],[0,L.chh]], Q);   // Inhalt -> Flaeche
+  const N = 24, P = [];
+  for(let j = 0; j <= N; j++){
+    P.push([]);
+    for(let i = 0; i <= N; i++){
+      const q = applyH(H, L.cw*i/N, L.chh*j/N);
+      P[j].push({x:q.x - bx, y:q.y - by, u:L.cw*i/N, v:L.chh*j/N});
+    }
+  }
+  const dreieck = (a, b, c) => {
+    const den = a.u*(b.v - c.v) + b.u*(c.v - a.v) + c.u*(a.v - b.v);
+    if(Math.abs(den) < 1e-9) return;
+    const m = k => [(a[k]*(b.v - c.v) + b[k]*(c.v - a.v) + c[k]*(a.v - b.v))/den,
+                    (a[k]*(c.u - b.u) + b[k]*(a.u - c.u) + c[k]*(b.u - a.u))/den,
+                    (a[k]*(b.u*c.v - c.u*b.v) + b[k]*(c.u*a.v - a.u*c.v) + c[k]*(a.u*b.v - b.u*a.v))/den];
+    const X = m("x"), Y = m("y");
+    // der Ausschnitt geht einen halben Punkt ueber das Dreieck hinaus, sonst bleiben Haarlinien
+    const mx = (a.x + b.x + c.x)/3, my = (a.y + b.y + c.y)/3;
+    const aus = q => { const dx = q.x - mx, dy = q.y - my, l = Math.hypot(dx, dy) || 1; return [q.x + dx/l*.7, q.y + dy/l*.7]; };
+    x.save(); x.beginPath();
+    x.moveTo(...aus(a)); x.lineTo(...aus(b)); x.lineTo(...aus(c)); x.closePath(); x.clip();
+    x.transform(X[0], Y[0], X[1], Y[1], X[2], Y[2]);
+    x.drawImage(cont, 0, 0);
+    x.restore();
+  };
+  for(let j = 0; j < N; j++) for(let i = 0; i < N; i++){
+    dreieck(P[j][i], P[j][i+1], P[j+1][i+1]);
+    dreieck(P[j][i], P[j+1][i+1], P[j+1][i]);
+  }
+}
 function initGL(){
+  if(!gl){ warpCtx = glc.getContext("2d"); return; }
   const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
   const fs = `precision highp float;
     uniform sampler2D tex; uniform vec3 h0, h1, h2;
@@ -3956,6 +4023,7 @@ function initGL(){
   gl.clearColor(0, 0, 0, 0);
 }
 function warp(L){
+  if(!gl){ warp2D(L); return; }
   glc.width = Math.max(2, L.bbox.w); glc.height = Math.max(2, L.bbox.h);
   gl.viewport(0, 0, glc.width, glc.height);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cont);
@@ -5863,8 +5931,9 @@ const ENDUNG = {png:[".png"], webp:[".webp"], jpeg:[".jpg", ".jpeg"]};
 function speichern(blob, name){
   const a = document.createElement("a");
   a.download = name; a.href = URL.createObjectURL(blob);
+  a.style.display = "none"; document.body.appendChild(a);   // aeltere Safari und Firefox klicken nur, was im Dokument haengt
   a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 5000);
 }
 async function speichernMitDialog(blob, name, typen){
   const opt = {
@@ -6593,11 +6662,17 @@ window.addEventListener("keyup", e => {
 window.addEventListener("blur", () => { leertaste = false; });
 
 /* Eine gezogene Datei soll man sehen, bevor man loslaesst. */
-window.addEventListener("dragenter", () => document.body.classList.add("zieht-datei"));
-window.addEventListener("dragleave", e => {
-  if(e.relatedTarget === null) document.body.classList.remove("zieht-datei");
+/* Gezaehlt wird, wie oft der Zeiger eingetreten und ausgetreten ist. relatedTarget, wie es
+   hier vorher stand, fuellen Firefox und Safari bei Zieh-Ereignissen nicht. */
+let ziehTiefe = 0;
+window.addEventListener("dragenter", () => { ziehTiefe++; document.body.classList.add("zieht-datei"); });
+window.addEventListener("dragleave", () => {
+  ziehTiefe = Math.max(0, ziehTiefe - 1);
+  if(!ziehTiefe) document.body.classList.remove("zieht-datei");
 });
-window.addEventListener("drop", () => document.body.classList.remove("zieht-datei"));
+const ziehEnde = () => { ziehTiefe = 0; document.body.classList.remove("zieht-datei"); };
+window.addEventListener("drop", ziehEnde, true);
+window.addEventListener("dragend", ziehEnde);
 
 /* ---------------- init ---------------- */
 function frameBBox(im){
@@ -7217,9 +7292,10 @@ $("#simpleOptions").addEventListener("toggle", () => { if(!$("#simpleOptions").o
    das nicht da ist. Danach einmal einpassen, sonst steht die Flaeche in der Ecke.     */
 const startOrt = location.hash.slice(1);
 let startModus = "einfach";
-try { startModus = localStorage.getItem(MODUS_SCHLUESSEL) || "einfach"; } catch(e){}
-if(startOrt && ["geraet","markierung","overlay","ausgabe"].includes(startOrt)) startModus = "erweitert";
-zeigeBereich(startOrt || (startModus === "einfach" ? "einfach" : "geraet"), true);
+/* Seit 18.11.2026 (Robin: "Standard soll immer Simple geoeffnet werden") beginnt jeder Besuch
+   in Simple, auch nach einem Neuladen aus Advanced und auch mit einem alten Link auf einen
+   Advanced-Ort. Advanced ist ein Klick unten rechts. */
+zeigeBereich("einfach", true);
 setTool("move");
 setModus(startModus);
 if(startOrt === "hilfe" || startOrt === "projekt") zeigeBereich(startOrt, true);
@@ -8258,7 +8334,7 @@ body.set-modus.zieht-datei #buehne:after{display:none}
     <ul class="hd-liste">
       <li><strong>Angle</strong>: turn the device a little to the left or right. Not available for the phone.</li>
       <li><strong>Shadow and browser bar</strong>: switch them on or off. Type the address that should show in the bar into the field next to it.</li>
-      <li><strong>Screenshot menu</strong>: replace the image, crop it, erase parts of it or pick the color behind it.</li>
+      <li><strong>Click the screenshot</strong> for a small menu: replace it, crop it or erase parts of it. The Screenshot button at the top has the same, plus the color behind the image.</li>
       <li><strong>Device set</strong>: monitor, laptop, tablet and phone in one scene. Click a screen to add its screenshot, drag to move it, scroll to resize it. Drop several screenshots at once and each one finds its screen.</li>
       <li><strong>Advanced</strong>, bottom right: several devices on one canvas, callouts, overlays and exact output sizes. Drop several screenshots at once to get one device each.</li>
     </ul>
@@ -9569,7 +9645,13 @@ body.adv-w-mark .leer-karte,body.adv-w-ov .leer-karte{display:none!important}
     laeuft = true;
     try{
       // Das Versprechen geht direkt in den Eintrag: so gilt der Klick noch als Anlass
-      await navigator.clipboard.write([new ClipboardItem({"image/png": mockupBlob()})]);
+      // (Safari verlangt es so). Nimmt ein Browser kein Versprechen, bekommt er das fertige Bild.
+      const bild = mockupBlob();
+      try { await navigator.clipboard.write([new ClipboardItem({"image/png": bild})]); }
+      catch(erst){
+        if(erst && erst.name === "NotAllowedError") throw erst;
+        await navigator.clipboard.write([new ClipboardItem({"image/png": await bild})]);
+      }
       studioToast("Copied. Paste it with Ctrl+V into PowerPoint, Word, Teams or an e-mail.");
       k.classList.add("ok"); k.querySelector("svg").outerHTML = HAKEN;
       clearTimeout(okTimer);
@@ -10144,6 +10226,113 @@ body:not(.einfach) #panel{padding-left:6px!important;padding-right:6px!important
   sync();
   // Die Buehne ist um die Leiste niedriger geworden
   if(adv()) requestAnimationFrame(() => einpassen());
+})();
+</script>
+<style id="studio-bildmenue-1711">
+/* Simple: ein kleines Menue am Screenshot (Robin, 17.11.2026: "wenn man auf den Screenshot
+   klickt, dass Crop, Erase und Replace kommt"). Ein Klick ohne Zug auf den Bildschirm des
+   Geraets oeffnet es an der Klickstelle, darueber oder darunter, je nachdem, wo Platz ist.
+   Die drei Knoepfe druecken die bestehenden Bedienteile, es gibt keine zweite Logik. */
+#smBildMenue{position:fixed;left:0;top:0;z-index:30;display:none;align-items:center;gap:2px;padding:4px;background:#fff;border:1px solid var(--v8-line);border-radius:14px;box-shadow:var(--v8-shadow-l);white-space:nowrap}
+#smBildMenue.da{display:flex;animation:smauf .14s ease-out}
+#smBildMenue .sm-wz{height:34px}
+#smBildMenue .sm-wz:hover{background:var(--v8-hover);color:var(--v8-ink)}
+</style>
+<div id="smBildMenue" role="toolbar" aria-label="Edit the screenshot">
+  <button type="button" class="sm-wz" id="bmErsetzen" title="Choose another screenshot"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg><span class="lbl">Replace</span></button>
+  <button type="button" class="sm-wz" id="bmZuschnitt" title="Crop the screenshot"><svg class="i" viewBox="0 0 24 24"><path d="M6 3v15h15M3 6h15v15"/></svg><span class="lbl">Crop</span></button>
+  <button type="button" class="sm-wz" id="bmRadieren" title="Paint over what should disappear. The color behind the screenshot shows through"><svg class="i" viewBox="0 0 24 24"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg><span class="lbl">Erase</span></button>
+</div>
+<script id="studio-bildmenue-1711-js">
+(function bildMenue(){
+  const menue = $("#smBildMenue"), buehne = $("#buehne");
+  if(!menue || !buehne) return;
+  const einzeln = () => modus === "einfach" && !document.body.classList.contains("set-modus");
+  const zu = () => menue.classList.remove("da");
+  function auf(x, y){
+    menue.classList.add("da");
+    const w = menue.offsetWidth, h = menue.offsetHeight, b = buehne.getBoundingClientRect(), G = 14;
+    const links = Math.max(b.left + 10, Math.min(x - w/2, b.right - 10 - w));
+    // ueber der Klickstelle, damit sie frei bleibt; fehlt oben der Platz, darunter
+    const oben = y - G - h >= b.top + 10 ? y - G - h : y + G + 10;
+    menue.style.left = Math.round(links) + "px"; menue.style.top = Math.round(oben) + "px";
+  }
+  /* Ein Klick ist ein Klick, wenn der Zeiger zwischen Druecken und Loslassen stehen blieb.
+     Ein Zug schiebt den Screenshot wie bisher und oeffnet nichts. */
+  let start = null;
+  view.addEventListener("pointerdown", e => {
+    zu();
+    start = e.button === 0 && einzeln() && state.tool === "move" && !pipetteAn && !leertaste
+      ? {x:e.clientX, y:e.clientY, schritte:HIST.length} : null;
+  }, true);
+  view.addEventListener("pointerup", e => {
+    const s = start; start = null;
+    if(!s || !einzeln() || state.tool !== "move" || pipetteAn) return;
+    if(Math.hypot(e.clientX - s.x, e.clientY - s.y) > 4) return;
+    const treffer = pickDevice(evtPoint(e));
+    if(!treffer || treffer.type !== "screen" || !treffer.inst.img) return;
+    // Der Griff hat vorsorglich einen Schritt gesichert; ein Klick hat nichts geaendert
+    if(HIST.length === s.schritte + 1){ HIST.pop(); updateUndoBtn(); }
+    auf(e.clientX, e.clientY);
+  });
+  menue.addEventListener("pointerdown", e => e.stopPropagation());
+  document.addEventListener("pointerdown", e => { if(e.target !== view && !menue.contains(e.target)) zu(); });
+  window.addEventListener("keydown", e => { if(e.key === "Escape") zu(); });
+  window.addEventListener("resize", zu);
+  buehne.addEventListener("wheel", zu, {passive:true});
+  document.querySelectorAll(".modusbtn, .sm-art").forEach(b => b.addEventListener("click", zu));
+  const druecke = sel => { const b = document.querySelector(sel); if(b && !b.disabled) b.click(); };
+  $("#bmErsetzen").addEventListener("click", () => { zu(); $("#file").click(); });
+  $("#bmZuschnitt").addEventListener("click", () => { zu(); druecke('.ewerkzeug[data-tool="crop"]'); });
+  $("#bmRadieren").addEventListener("click", () => { zu(); if(state.tool !== "erase") druecke('.ewerkzeug[data-tool="erase"]'); });
+})();
+</script>
+<style id="studio-browser-1811">
+/* Alle Browser (Robin, 18.11.2026): Chrome, Edge, Firefox, Safari. */
+.s-toggle,.zs-flaeche{-webkit-user-select:none}
+.zs::backdrop{-webkit-backdrop-filter:blur(3px)}
+#view,#sel,#vorschau,#setRand{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* Vor dem ersten Bild heisst der Knopf "Add screenshot" und ist breiter: bei 1440 px ragte
+   "Browser bar" dadurch aus der Leiste. Solange kein Bild da ist, weichen die zwei Woerter frueher. */
+@media(max-width:1480px){body.einfach .sm-mitte .sm-wz{padding:0 9px!important}}
+/* Mit dem Adressfeld der Browserleiste wird es noch enger: dann weichen die zwei Woerter auch mit Bild */
+@media(max-width:1520px){.sm-mitte:has(#smUrl:not([hidden])) :is(#smShadow,#smBar) .lbl{display:none!important}.sm-mitte:has(#smUrl:not([hidden])) :is(#smShadow,#smBar){padding:0 9px!important}}
+@media(max-width:1520px){body.einfach:not(.has-image) #smShadow .lbl,body.einfach:not(.has-image) #smBar .lbl{display:none!important}body.einfach:not(.has-image) #smShadow,body.einfach:not(.has-image) #smBar{padding:0 9px!important}}
+</style>
+<script id="studio-browser-1811-js">
+(function alleBrowser(){
+  /* WebP als Dateiformat: Safari schreibt auf Wunsch "image/webp" still eine PNG-Datei mit
+     falscher Endung. Kann der Browser es nicht, gibt es den Knopf nicht. */
+  try {
+    const c = document.createElement("canvas"); c.width = c.height = 2;
+    if(c.toDataURL("image/webp").indexOf("data:image/webp") !== 0){
+      const b = document.querySelector('.fmtbtn[data-fmt="webp"]');
+      if(b){ b.hidden = true; b.style.display = "none"; }
+      if(state.exportFormat === "webp"){ state.exportFormat = "png"; updateBtns(); }
+    }
+  } catch(e){}
+
+  /* Auf dem Mac heisst die Taste Cmd. Die Tasten selbst gingen dort schon (metaKey), nur die
+     Beschriftung sagte ueberall Ctrl. */
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform || "") || /Mac OS X/.test(navigator.userAgent || "");
+  if(mac){
+    const neu = t => t.replace(/\bCtrl\b/g, "Cmd").replace(/\bStrg\b/g, "Cmd");
+    const lauf = wurzel => {
+      const w = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT);
+      const liste = []; let n;
+      while((n = w.nextNode())) if(/Ctrl|Strg/.test(n.nodeValue) && !n.parentElement.closest("script,style")) liste.push(n);
+      liste.forEach(k => { k.nodeValue = neu(k.nodeValue); });
+      wurzel.querySelectorAll("[title]").forEach(el => { if(/Ctrl/.test(el.title)) el.title = neu(el.title); });
+      wurzel.querySelectorAll("[placeholder]").forEach(el => { if(/Ctrl/.test(el.placeholder)) el.placeholder = neu(el.placeholder); });
+    };
+    lauf(document.body);
+    // Titel und Hinweise werden im Betrieb neu geschrieben: nachziehen, ohne Schleife
+    let laeuft = false;
+    new MutationObserver(() => {
+      if(laeuft) return; laeuft = true;
+      requestAnimationFrame(() => { lauf(document.body); laeuft = false; });
+    }).observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:["title"]});
+  }
 })();
 </script>
 </body>
