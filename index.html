@@ -2542,7 +2542,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
     <div class="sm-mitte" id="smMitte" role="toolbar" aria-label="Mockup">
       <div class="sm-seg sm-art-seg" role="group" aria-label="Layout">
         <button type="button" class="sm-art" data-art="einzel" aria-pressed="true" title="One device that takes the shape of your screenshot"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/></svg><span class="lbl">One device</span></button>
-        <button type="button" class="sm-art" data-art="set" aria-pressed="false" title="Monitor, tablet and phone in one scene"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="13" height="9" rx="1.3"/><path d="M6.5 18.5h4M8.5 14v4.5"/><rect x="17" y="8" width="5" height="10.5" rx="1.2"/></svg><span class="lbl">Device set</span></button>
+        <button type="button" class="sm-art" data-art="set" aria-pressed="false" title="Monitor, laptop, tablet and phone in one scene"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="13" height="9" rx="1.3"/><path d="M6.5 18.5h4M8.5 14v4.5"/><rect x="17" y="8" width="5" height="10.5" rx="1.2"/></svg><span class="lbl">Device set</span></button>
       </div>
       <span class="sm-trenn" aria-hidden="true"></span>
       <button type="button" class="sm-wz nur-set" id="smSzeneBtn" aria-expanded="false" aria-controls="smPopSzene" title="Choose the background behind the devices"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-4 4 3 4-3 5 4"/></svg><span class="lbl">Background</span><svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -2749,7 +2749,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
           <div class="z-gruppe">
             <span class="z-gruppe-titel">Screenshot</span>
             <button class="z-btn z-btn--outline" id="bildWaehlen" style="width:100%">Choose image</button>
-            <input type="file" id="file" accept="image/*" hidden>
+            <input type="file" id="file" accept="image/*" multiple hidden>
             <span class="z-hinweis" id="bildStand"></span>
             <div class="z-schalter" role="group" aria-label="How the image sits in the screen" style="margin-top:8px">
               <button class="fitbtn" data-fit="fill" aria-pressed="false" title="Fill the screen, cropping what does not fit">Fill screen</button>
@@ -4389,17 +4389,22 @@ document.querySelectorAll("[data-dv]").forEach(b =>
 $("#devSameSize").addEventListener("click", geraetAngleichen);
 
 /* ---------------- image loading ---------------- */
+/* Gibt seit 17.11.2026 ein Versprechen zurueck, das sich erfuellt, sobald das Bild im Geraet
+   liegt (oder nicht geladen werden konnte). bilderLaden braucht das, um mehrere Dateien
+   nacheinander auf eigene Geraete zu legen.                                           */
 function loadScreenshot(f, i){
   i = i || act;
-  if(!f) return;
-  if(!f.type.startsWith("image/")){ studioToast("Please choose a browser-supported image or a .zdm.json project.", true); return; }
+  if(!f) return Promise.resolve(false);
+  if(!f.type.startsWith("image/")){ studioToast("Please choose a browser-supported image or a .zdm.json project.", true); return Promise.resolve(false); }
   const request = {}; i.pendingImport = request;
   const im = new Image(), url = URL.createObjectURL(f);
   studioToast("Loading image…");
+  let fertig; const versprechen = new Promise(r => fertig = r);
   im.onload = () => {
     URL.revokeObjectURL(url);
-    if(i.pendingImport !== request || !insts.includes(i)) return;
+    if(i.pendingImport !== request || !insts.includes(i)){ fertig(false); return; }
     snap();
+    const warLeer = !i.img;
     i.img = im; i.w = im.naturalWidth; i.h = im.naturalHeight; i.fileName = f.name || "Pasted image";
     i.edit = document.createElement("canvas");
     i.edit.width = i.w; i.edit.height = i.h;
@@ -4421,11 +4426,44 @@ function loadScreenshot(f, i){
     if(modus !== "einfach") studioToast("Your mockup is ready. Choose another frame or download it.");
     else $("#toast").classList.remove("visible");
     if(window.innerWidth <= 820) mobileView(true);
+    /* Advanced (17.11.2026): ein leeres Geraet, dessen Typ niemand gewaehlt hat, nimmt den
+       Typ, der zum Screenshot passt. Sonst landet ein Handy-Screenshot beschnitten auf einem
+       Monitor. Der Weg geht ueber den Geraeteknopf, damit die Groesse neben anderen Geraeten
+       stimmt. Ein gewaehlter Typ und ein ersetztes Bild bleiben, wie sie sind.        */
+    if(modus !== "einfach" && warLeer && !i.simpleFrameChosen && i === act){
+      const vorschlag = suggestFrame(i.w, i.h);
+      const knopf = vorschlag && vorschlag !== i.device && document.querySelector('.devicebtn[data-device="' + vorschlag + '"]');
+      if(knopf) knopf.click();
+    }
+    fertig(true);
   };
-  im.onerror = () => { URL.revokeObjectURL(url); if(i.pendingImport === request) studioToast("This image could not be opened. Try a PNG, JPG or WebP file.", true); };
+  im.onerror = () => { URL.revokeObjectURL(url); if(i.pendingImport === request) studioToast("This image could not be opened. Try a PNG, JPG or WebP file.", true); fertig(false); };
   im.src = url;
+  return versprechen;
 }
-$("#file").addEventListener("change", e => { loadScreenshot(e.target.files[0]); e.target.value = ""; });
+/* Mehrere Bilder auf einmal (17.11.2026): das erste geht ins gewaehlte Geraet. In Advanced
+   bekommt jedes weitere ein eigenes Geraet daneben, in Simple bleibt es bei einem Geraet,
+   und ein Satz sagt, wohin man mit mehreren geht.                                      */
+async function bilderLaden(liste){
+  const alle = [...(liste || [])];
+  const bilder = alle.filter(f => f.type.startsWith("image/"));
+  if(!bilder.length){ loadScreenshot(alle[0]); return; }
+  await loadScreenshot(bilder[0]);
+  if(bilder.length < 2) return;
+  if(modus === "einfach"){
+    studioToast("One device shows one screenshot, so the first one is used. For several, switch to Device set or Advanced.");
+    return;
+  }
+  for(const f of bilder.slice(1)){
+    snap("addDevice"); addInst();
+    await loadScreenshot(f, act);
+  }
+  // nebeneinander mit gleichen Abstaenden, derselbe Weg wie der Knopf "Arrange side by side"
+  $("#arrangeDevices").click();
+  render(); einpassen();
+  studioToast(bilder.length + " screenshots added, one device each.");
+}
+$("#file").addEventListener("change", e => { bilderLaden(e.target.files); e.target.value = ""; });
 window.addEventListener("paste", e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/"));
   if(it){ e.preventDefault(); loadScreenshot(it.getAsFile()); }
@@ -4438,7 +4476,7 @@ window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => {
   e.preventDefault();
   const f = e.dataTransfer.files[0]; if(!f) return;
-  if(istProjektDatei(f)) projektLaden(f); else loadScreenshot(f);
+  if(istProjektDatei(f)) projektLaden(f); else bilderLaden(e.dataTransfer.files);
 });
 
 /* ---- Zuschneiden, seit 04.09.2026 ----
@@ -5867,6 +5905,8 @@ $("#export").addEventListener("click", async () => {
     if(handle){ const writable = await handle.createWritable(); await writable.write(blob); await writable.close(); letzterGriff = handle; }
     else speichern(blob, name);
     studioToast(handle ? "Mockup saved." : "Mockup download started.");
+    /* Simple kennt kein Projekt: wer sein Bild hat, wird beim Schliessen nicht mehr gefragt. */
+    if(modus === "einfach") schmutzig = false;
   } catch(err){ studioToast("Export failed. " + err.message, true); }
   finally { exportBusy = false; syncStudio(); }
 });
@@ -7550,7 +7590,7 @@ einpassen();
   <div class="sm-pop-kopf"><h3>Background</h3><button type="button" class="sm-zu" id="smSzeneZu" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="sm-pop-inhalt"><div class="set-szenen" id="setSzenen"></div></div>
 </div>
-<input type="file" id="setDatei" accept="image/*" hidden>
+<input type="file" id="setDatei" accept="image/*" multiple hidden>
 <style id="studio-set-css">
 /* Device set (13.10.2026): Monitor, Tablet und Phone in einer Szene des Explore Studios */
 .workspace-shell{position:relative}
@@ -7968,22 +8008,55 @@ body.set-modus.zieht-datei #buehne:after{display:none}
   // ---- Screenshots laden ----
   let ladeZiel = null;
   function waehleDatei(k){ ladeZiel = k; $("#setDatei").click(); }
-  $("#setDatei").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; if(f) laden(f, ladeZiel); });
-  function laden(f, k){
-    if(!f || !f.type.startsWith("image/")){ studioToast("Please choose an image.", true); return; }
-    k = k || SET.wahl || schluessel().find(x => !SET.schirme[x]) || "desktop";
+  $("#setDatei").addEventListener("change", e => { const fs = [...e.target.files]; e.target.value = ""; if(fs.length) ladenViele(fs, ladeZiel); });
+  /* Ein Bild in einen Bildschirm legen. Ohne Ziel sucht sich das Bild seinen Platz selbst:
+     hochkant ins Phone, alles andere in den ersten freien grossen Bildschirm (17.11.2026). */
+  function platzFuer(verh, vergeben){
+    const frei = schluessel().filter(x => !SET.schirme[x] && !(vergeben && vergeben.has(x)));
+    if(verh < 0.8 && frei.includes("mobil")) return "mobil";
+    return frei.find(x => x !== "mobil") || frei[0] || null;
+  }
+  function einsetzen(c, k){
+    SET.schirme[k] = {edit:c, w:c.width, h:c.height, img:{}, lock:true, sx:1, sy:1, ox:0, oy:0};
+    fuellen(k); SET.wahl = k;
+  }
+  const alsCanvas = f => new Promise(ok => {
+    if(f instanceof HTMLCanvasElement){ ok(f); return; }
     const url = URL.createObjectURL(f), im = new Image();
     im.onload = () => {
       URL.revokeObjectURL(url);
       const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
-      c.getContext("2d").drawImage(im, 0, 0);
-      merke();
-      SET.schirme[k] = {edit:c, w:c.width, h:c.height, img:{}, lock:true, sx:1, sy:1, ox:0, oy:0};
-      fuellen(k); SET.wahl = k;
-      syncAlles(); bald();
+      c.getContext("2d").drawImage(im, 0, 0); ok(c);
     };
-    im.onerror = () => { URL.revokeObjectURL(url); studioToast("This image could not be opened. Try a PNG, JPG or WebP file.", true); };
+    im.onerror = () => { URL.revokeObjectURL(url); ok(null); };
     im.src = url;
+  });
+  async function laden(f, k){
+    if(!f || !(f instanceof HTMLCanvasElement || f.type.startsWith("image/"))){ studioToast("Please choose an image.", true); return; }
+    const c = await alsCanvas(f);
+    if(!c){ studioToast("This image could not be opened. Try a PNG, JPG or WebP file.", true); return; }
+    k = k || SET.wahl || platzFuer(c.width/c.height) || "desktop";
+    merke(); einsetzen(c, k);
+    syncAlles(); bald();
+  }
+  /* Mehrere Dateien auf einmal: die erste geht in den angeklickten Bildschirm, die anderen
+     verteilen sich auf die freien. Ein Schritt im Verlauf, damit Strg+Z alle zuruecknimmt. */
+  async function ladenViele(liste, k){
+    const bilder = [...liste].filter(f => f.type.startsWith("image/"));
+    if(!bilder.length){ studioToast("Please choose an image.", true); return; }
+    if(bilder.length === 1){ laden(bilder[0], k); return; }
+    const cs = (await Promise.all(bilder.map(alsCanvas))).filter(Boolean);
+    if(!cs.length){ studioToast("These images could not be opened. Try PNG, JPG or WebP files.", true); return; }
+    merke();
+    const vergeben = new Set(); let uebrig = 0, erster = null;
+    cs.forEach((c, n) => {
+      const ziel = n === 0 && k ? k : platzFuer(c.width/c.height, vergeben);
+      if(!ziel){ uebrig++; return; }
+      vergeben.add(ziel); einsetzen(c, ziel); erster = erster || ziel;
+    });
+    if(erster) SET.wahl = erster;
+    syncAlles(); bald();
+    if(uebrig) studioToast("All screens are filled. " + uebrig + (uebrig === 1 ? " screenshot was" : " screenshots were") + " not used.");
   }
 
   // ---- Zeiger ----
@@ -8031,8 +8104,8 @@ body.set-modus.zieht-datei #buehne:after{display:none}
   buehne.addEventListener("dragover", e => e.preventDefault());
   buehne.addEventListener("drop", e => {
     e.preventDefault(); e.stopPropagation(); document.body.classList.remove("zieht-datei");
-    const f = [...(e.dataTransfer?.files || [])].find(x => x.type.startsWith("image/"));
-    if(f) laden(f, treffer(szenePunkt(e)));
+    const fs = [...(e.dataTransfer?.files || [])].filter(x => x.type.startsWith("image/"));
+    if(fs.length) ladenViele(fs, treffer(szenePunkt(e)));
   });
   window.addEventListener("paste", e => {
     if(!SET.an) return;
@@ -8089,15 +8162,27 @@ body.set-modus.zieht-datei #buehne:after{display:none}
   new ResizeObserver(() => { if(SET.an) zeichne(); }).observe($("#setFlaeche"));
 
   // Herunterladen: im Set die ganze Szene, doppelt so fein wie das Foto
+  const ausMass = () => { const s = szene(), Q = s.studio ? STUDIO_Q : Q_AUS; return {w:s.b*Q, h:s.h*Q, Q}; };
+  async function setCanvas(){
+    const s = szene(), c = document.createElement("canvas"), M = ausMass();
+    c.width = M.w; c.height = M.h;
+    komposit(c.getContext("2d"), s, await foto(s), M.Q, false);
+    return c;
+  }
   $("#export").addEventListener("click", async e => {
     if(!SET.an) return;
     e.stopImmediatePropagation(); e.preventDefault();
-    const s = szene(), c = document.createElement("canvas");
-    const Q = s.studio ? STUDIO_Q : Q_AUS;
-    c.width = s.b*Q; c.height = s.h*Q;
-    komposit(c.getContext("2d"), s, await foto(s), Q, false);
+    const s = szene(), c = await setCanvas();
     c.toBlob(b => { speichern(b, "zetcom-mockup-device-set-" + s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png"); studioToast("Device set downloaded."); }, "image/png");
   }, true);
+  /* Fuer den Abschlussblock (17.11.2026): Kopieren, Groessenanzeige, Uebernahme aus "One device". */
+  window.zetSet = {
+    an: () => SET.an,
+    canvas: setCanvas,
+    mass: ausMass,
+    gefuellt: () => schluessel().filter(k => SET.schirme[k]).length,
+    laden
+  };
 
   function syncAlles(){
     syncLeiste();
@@ -8166,7 +8251,7 @@ body.set-modus.zieht-datei #buehne:after{display:none}
     <ol class="hd-schritte">
       <li><span class="hd-nr">1</span><div><b>Add your screenshot</b><span>Drop it onto the canvas, paste it with <kbd>Ctrl</kbd> <kbd>V</kbd>, or press Choose image.</span></div></li>
       <li><span class="hd-nr">2</span><div><b>Pick a device</b><span>Monitor, laptop, phone, browser window or glass frame, in the bar at the top. The device takes the shape of your screenshot, so nothing is cut off. A wide screenshot turns the phone on its side.</span></div></li>
-      <li><span class="hd-nr">3</span><div><b>Download</b><span>Top right. You get a PNG with a transparent background at twice the size, ready for PowerPoint, Word, e-mail and the web.</span></div></li>
+      <li><span class="hd-nr">3</span><div><b>Download or copy</b><span>Top right. Download gives you a PNG with a transparent background, ready for PowerPoint, Word, e-mail and the web. Copy puts the same image on the clipboard: paste it with <kbd>Ctrl</kbd> <kbd>V</kbd> straight into your slide, document or chat.</span></div></li>
     </ol>
 
     <h3>If you want more</h3>
@@ -8174,8 +8259,8 @@ body.set-modus.zieht-datei #buehne:after{display:none}
       <li><strong>Angle</strong>: turn the device a little to the left or right. Not available for the phone.</li>
       <li><strong>Shadow and browser bar</strong>: switch them on or off. Type the address that should show in the bar into the field next to it.</li>
       <li><strong>Screenshot menu</strong>: replace the image, crop it, erase parts of it or pick the color behind it.</li>
-      <li><strong>Device set</strong>: monitor, laptop, tablet and phone in one scene. Click a screen to add its screenshot, drag to move it, scroll to resize it.</li>
-      <li><strong>Advanced</strong>, bottom right: several devices on one canvas, callouts, overlays and exact output sizes.</li>
+      <li><strong>Device set</strong>: monitor, laptop, tablet and phone in one scene. Click a screen to add its screenshot, drag to move it, scroll to resize it. Drop several screenshots at once and each one finds its screen.</li>
+      <li><strong>Advanced</strong>, bottom right: several devices on one canvas, callouts, overlays and exact output sizes. Drop several screenshots at once to get one device each.</li>
     </ul>
 
     <h3>For a good screenshot</h3>
@@ -8190,6 +8275,7 @@ body.set-modus.zieht-datei #buehne:after{display:none}
       <dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo</dd>
       <dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd></dt><dd>Redo</dd>
       <dt><kbd>Ctrl</kbd> <kbd>V</kbd></dt><dd>Paste a screenshot</dd>
+      <dt><kbd>Ctrl</kbd> <kbd>C</kbd></dt><dd>Copy the finished mockup</dd>
       <dt>Scroll wheel</dt><dd>Zoom the view</dd>
       <dt><kbd>0</kbd></dt><dd>Fit the view</dd>
       <dt><kbd>Esc</kbd></dt><dd>Close a menu or stop cropping</dd>
@@ -8456,7 +8542,15 @@ body.set-modus.zieht-datei #buehne:after{display:none}
        ihren Quellen, ein groesserer Massstab kostet also nichts und haelt den Export scharf,
        auch nachdem die Anordnung einmal auf ein kleines festes Mass gelegt war. */
     const seite = Math.max(T.w, T.h);
-    const f = nurWachsen ? Math.min(1, MAX_SEITE / seite) : clamp(MIN_SEITE / seite, Math.min(1, MAX_SEITE / seite), MAX_SEITE / seite);
+    let f = nurWachsen ? Math.min(1, MAX_SEITE / seite) : clamp(MIN_SEITE / seite, Math.min(1, MAX_SEITE / seite), MAX_SEITE / seite);
+    /* Groesser rechnen nur, bis der am staerksten vergroesserte Screenshot 1:1 in der Datei
+       liegt (17.11.2026 abends). Darueber wird er hochgerechnet: nach dem ersten Ziehen einer
+       Markierung stand sonst "Soft" unten, obwohl niemand etwas vergroessert hatte. */
+    if(f > 1){
+      const k = state.exportScale / RES;
+      const fs = insts.filter(i => i.img && i.is > 0).map(i => i.is * k);
+      if(fs.length) f = Math.max(1, Math.min(f, 1 / Math.max(...fs)));
+    }
     const d = drag && drag.t === "dev" ? drag : null;
     const vorDX = d ? d.i.devX : 0, vorDY = d ? d.i.devY : 0;
     const m = flaecheSetzen(T, f);
@@ -8811,7 +8905,8 @@ body:not(.einfach) #outKnopf{display:inline-flex}
     const seite = document.querySelector(".sidebar"), sr = seite && seite.getBoundingClientRect();
     if(p.classList.contains("adv-links") && sr && sr.width > 200){
       // ueber der Seitenleiste: das Bild bleibt sichtbar, waehrend man einstellt (17.11.2026)
-      p.style.width = Math.min(400, sr.width - 16) + "px";
+      // die Seitenleiste ist seit dem Menueband schmal, der Aufklapper behaelt seine Breite
+      p.style.width = Math.max(372, Math.min(400, sr.width - 16)) + "px";
       p.style.left = (sr.left + 8) + "px";
       p.style.top = (sr.top + 8) + "px";
       p.style.maxHeight = (innerHeight - sr.top - 16) + "px";
@@ -9138,7 +9233,8 @@ button:focus:not(:focus-visible){outline:none!important;box-shadow:none}
     const adv = document.createElement("div"); adv.className = "hd-adv";
     adv.innerHTML = '<h3>In Advanced</h3><ul class="hd-liste">'
       + '<li><strong>Add</strong>, top left: another device, a callout that points at something, or an image like a logo.</li>'
-      + '<li><strong>Layers</strong>, on the left: click a device, callout or image to select it. Its settings appear below the list.</li>'
+      + '<li><strong>Layers</strong>, on the left: click a device, callout or image to select it. Its settings are in the bar above the canvas, and a small menu with the most used ones opens right next to it.</li>'
+      + '<li><strong>Callouts</strong>: click the rectangle for its menu (color, line, dim, copy, remove), click the label for the label menu (text, size, position, style). Double-click a callout or press <kbd>Enter</kbd> to type the label. <kbd>Ctrl</kbd> <kbd>D</kbd> makes a copy with the same look.</li>'
       + '<li><strong>The bar at the top</strong> changes the selected device: screenshot, device, angle, shadow, browser bar.</li>'
       + '<li><strong>Move</strong> things by dragging, or with the arrow keys (Shift for bigger steps). <kbd>Delete</kbd> removes the selected thing.</li>'
       + '<li><strong>Double-click a screen</strong> to move or zoom the screenshot inside it. Esc ends it.</li>'
@@ -9374,7 +9470,18 @@ body:not(.einfach) .dock-info:hover{background:#fff;box-shadow:inset 0 0 0 1px v
   };
   function sync(){
     const mitBild = insts.filter(i => i.img);
-    if(document.body.classList.contains("set-modus") || (!mitBild.length && !insts.some(i => i.leerOk))){ b.hidden = true; return; }
+    /* Im Device set steht hier das Mass der Szene; vorher blieb die Zahl des einzelnen
+       Geraets stehen, weil das Set render() nicht ruft (17.11.2026). */
+    if(document.body.classList.contains("set-modus")){
+      const M = window.zetSet && window.zetSet.mass();
+      b.hidden = !M; if(!M) return;
+      b.className = "dock-info nur-mass";
+      b.querySelector(".mass").textContent = M.w + " × " + M.h + " px";
+      b.querySelector(".verh").textContent = ""; b.querySelector(".wort").textContent = "";
+      b.title = "The file will be " + M.w + " by " + M.h + " pixels.";
+      return;
+    }
+    if(!mitBild.length && !insts.some(i => i.leerOk)){ b.hidden = true; return; }
     b.hidden = false;
     const R = exportRahmen();
     b.querySelector(".mass").textContent = R.w + " × " + R.h + " px";
@@ -9390,6 +9497,7 @@ body:not(.einfach) .dock-info:hover{background:#fff;box-shadow:inset 0 0 0 1px v
   const renderAlt = render;
   render = function(){ renderAlt(); sync(); };
   document.querySelectorAll(".scalebtn").forEach(x => x.addEventListener("click", () => setTimeout(sync, 0)));
+  window.dockInfoSync = sync;
   sync();
 })();
 </script>
@@ -9401,5 +9509,642 @@ body:not(.einfach) .dock-info:hover{background:#fff;box-shadow:inset 0 0 0 1px v
 @media(max-width:1360px){#smShadow .lbl,#smBar .lbl{display:none!important}#smShadow,#smBar{padding:0 9px!important}}
 @media(max-width:1180px){#smFit .lbl{display:none!important}#smFit{padding:0 9px!important}}
 </style>
+<style id="studio-final-1711">
+/* Abschluss vor dem Versand an die Firma (Robin, 17.11.2026). Steht zuletzt.
+   1. Copy: das Mockup in die Zwischenablage, neben Download, in allen drei Ansichten.
+   2. Der Hinweis unten weicht dem Dock aus, statt darunter zu verschwinden.
+   3. Die Leiste gibt dem neuen Knopf Platz: was bisher bei 1440/1360/1180 wich, weicht 50 px frueher.
+   4. Einstellungen einer Markierung mit Luft zwischen den Gruppen. */
+#kopieKnopf{height:38px;min-height:38px;padding:0 10px;gap:7px;border:1px solid var(--v8-line);border-radius:10px;background:#fff;color:var(--v8-ink);font-weight:600;font-size:14px}
+#kopieKnopf:hover:not(:disabled){border-color:var(--v8-ink-2);background:var(--v8-sunken)}
+#kopieKnopf:disabled{opacity:.45;cursor:default}
+#kopieKnopf svg{width:18px;height:18px;flex:none}
+#kopieKnopf .lbl{display:none}
+#kopieKnopf.ok{border-color:#2e9d5b;color:#1f7a45}
+#kopieKnopf[hidden]{display:none!important}
+@media(min-width:1700px){#kopieKnopf .lbl{display:inline}#kopieKnopf{padding:0 13px}}
+@media(max-width:1490px){.sm-mitte .sm-trenn{margin:0 3px!important}.sm-mitte{gap:1px!important}}
+@media(max-width:1410px){#smShadow .lbl,#smBar .lbl{display:none!important}#smShadow,#smBar{padding:0 9px!important}}
+@media(max-width:1230px){#smFit .lbl{display:none!important}#smFit{padding:0 9px!important}}
+.dock-info.nur-mass .p{display:none}
+body.adv-w-mark .leer-karte,body.adv-w-ov .leer-karte{display:none!important}
+/* Markierung: die Gruppen klebten ohne Abstand aneinander (Titel direkt unter dem Feld davor) */
+#ebEigenMark .z-gruppe + .z-gruppe,#ebEigenMark > #markEdit + .z-gruppe{margin-top:18px}
+#ebEigenMark details > summary + .z-gruppe{margin-top:12px}
+</style>
+<script id="studio-final-1711-js">
+(function abschluss(){
+  const exp = $("#export"); if(!exp) return;
+
+  /* ============ 1. Copy ============
+     Dasselbe Bild wie der Download, als PNG in der Zwischenablage. Der Weg ueber eine Datei
+     ist fuer eine Folie oder eine Nachricht ein Umweg: kopieren, einfuegen, fertig.
+     Die Zwischenablage nimmt nur PNG, also auch dann PNG, wenn als Datei JPEG oder WebP
+     gewaehlt ist. Kann der Browser es nicht, gibt es den Knopf nicht. */
+  const KANN = !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
+  const k = document.createElement("button");
+  k.type = "button"; k.id = "kopieKnopf"; k.className = "z-btn"; k.hidden = !KANN;
+  k.setAttribute("aria-label", "Copy the mockup");
+  const ZEICHEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg>';
+  const HAKEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  k.innerHTML = ZEICHEN + '<span class="lbl">Copy</span>';
+  exp.before(k);
+  const titel = () => {
+    k.title = k.disabled ? exp.title
+      : "Copy the mockup. Then paste it with Ctrl+V into PowerPoint, Word, Teams or an e-mail (Ctrl+C)";
+  };
+  const gleich = () => { k.disabled = exp.disabled; titel(); };
+  new MutationObserver(gleich).observe(exp, {attributes:true, attributeFilter:["disabled", "title"]});
+  gleich();
+
+  const imSet = () => !!(window.zetSet && window.zetSet.an());
+  const alsBlob = c => new Promise((ok, fehl) => c.toBlob(b => b ? ok(b) : fehl(new Error("no image")), "image/png"));
+  async function mockupBlob(){
+    if(imSet()) return alsBlob(await window.zetSet.canvas());
+    return alsBlob(exportCanvas());
+  }
+  let laeuft = false, okTimer = 0;
+  async function kopieren(){
+    if(!KANN || laeuft || k.disabled) return;
+    laeuft = true;
+    try{
+      // Das Versprechen geht direkt in den Eintrag: so gilt der Klick noch als Anlass
+      await navigator.clipboard.write([new ClipboardItem({"image/png": mockupBlob()})]);
+      studioToast("Copied. Paste it with Ctrl+V into PowerPoint, Word, Teams or an e-mail.");
+      k.classList.add("ok"); k.querySelector("svg").outerHTML = HAKEN;
+      clearTimeout(okTimer);
+      okTimer = setTimeout(() => { k.classList.remove("ok"); k.querySelector("svg").outerHTML = ZEICHEN; }, 1800);
+      if(modus === "einfach") schmutzig = false;   // wie beim Download: das Bild ist abgeholt
+    } catch(err){
+      studioToast("Copying did not work here. Use Download instead.", true);
+    } finally { laeuft = false; }
+  }
+  k.addEventListener("click", kopieren);
+  /* Strg+C kopiert das Mockup, solange niemand Text meint: kein Feld, keine Textauswahl,
+     kein offener Dialog. */
+  window.addEventListener("keydown", e => {
+    if(!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "c") return;
+    const t = e.target, tag = t && t.tagName;
+    if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+    if(String(window.getSelection && window.getSelection()).length) return;
+    if(document.querySelector("dialog[open]")) return;
+    if(!KANN || k.disabled) return;
+    e.preventDefault(); kopieren();
+  });
+
+  /* ============ 2. Der Hinweis weicht dem Dock aus ============
+     Auf schmalen Fenstern lag die Hinweiszeile halb unter dem Dock. Jetzt rueckt sie links
+     neben das Dock, und wenn auch das nicht passt, bleibt sie weg. */
+  const hinweis = $("#smHinweis"), dock = $("#smDock");
+  function hinweisPlatz(){
+    if(!hinweis || !dock) return;
+    hinweis.style.left = hinweis.style.transform = hinweis.style.visibility = "";
+    if(hinweis.hidden || getComputedStyle(hinweis).display === "none") return;
+    const h = hinweis.getBoundingClientRect(), d = dock.getBoundingClientRect();
+    if(h.right <= d.left - 12) return;
+    if(h.width <= d.left - 28){ hinweis.style.left = (d.left - 12 - h.width) + "px"; hinweis.style.transform = "none"; }
+    else hinweis.style.visibility = "hidden";
+  }
+
+  /* ============ 3. One device und Device set gehoeren zusammen ============
+     Wer seinen Screenshot schon geladen hat und auf Device set wechselt, fand eine leere
+     Szene vor und musste dasselbe Bild noch einmal holen. Jetzt liegt es im passenden
+     Bildschirm: hochkant im Phone, sonst im Monitor. Einmal je Bild, damit ein bewusst
+     geleertes Set leer bleibt. Beim Verlassen stimmen Knopftitel und Groessenanzeige wieder. */
+  let uebernommen = null, warSet = false;
+  function setWechsel(){
+    const an = document.body.classList.contains("set-modus");
+    if(an === warSet) return;
+    warSet = an;
+    if(an && window.zetSet && !window.zetSet.gefuellt() && act.img && act.edit && uebernommen !== act.edit){
+      uebernommen = act.edit;
+      const c = document.createElement("canvas"); c.width = act.edit.width; c.height = act.edit.height;
+      c.getContext("2d").drawImage(act.edit, 0, 0);
+      window.zetSet.laden(c, null);
+    }
+    if(!an) syncStudio();
+    if(window.dockInfoSync) window.dockInfoSync();
+    hinweisPlatz();
+  }
+  new MutationObserver(setWechsel).observe(document.body, {attributes:true, attributeFilter:["class"]});
+
+  /* ============ Abgleich ============ */
+  const renderAlt = render;
+  render = function(){ renderAlt(); hinweisPlatz(); };
+  const guideAlt = syncSimpleGuide;
+  syncSimpleGuide = function(){ guideAlt(); hinweisPlatz(); };
+  window.addEventListener("resize", hinweisPlatz);
+  if(window.ResizeObserver && dock){ const ro = new ResizeObserver(hinweisPlatz); ro.observe(dock); ro.observe(hinweis); }
+  hinweisPlatz();
+})();
+</script>
+<style id="studio-band-1711">
+/* Menue am Objekt (Robin, 17.11.2026 abends). Erst als Band ueber der Flaeche gebaut ("die
+   linke Seitenleiste ist mir viel zu lang, vielleicht mit einem Menueband arbeiten und links
+   einfach eine Ebenenuebersicht"), danach auf seinen Wunsch "nativer": das Menue oeffnet sich
+   direkt neben dem, was gewaehlt ist, und nie ueber dem Inhalt, den man gerade bearbeitet.
+   - Links nur noch die Ebenen.
+   - #advBand schwebt neben dem gewaehlten Geraet, Rahmen, Label oder Bild. Es sucht sich
+     die Seite selbst: darueber, darunter, rechts oder links, je nachdem, wo Platz ist.
+   - Eine Markierung hat zwei Menues: eines fuer den Rahmen, eines fuer das Label. Welches
+     aufgeht, entscheidet, wohin man klickt.
+   - Die Aufklapper (Color, Line, Position, Style ...) weichen ebenfalls aus.
+   - Dazu die Leiste #advLeiste fest ueber der Flaeche (Robin: "beides, also Leiste oben und
+     Menue, das sich zusaetzlich oeffnet"): dieselben Einstellungen, immer am selben Ort.
+     Ihre Felder und Regler sind Spiegel der Bedienteile im Menue, die Aufklapper sind dieselben.
+   Die Bedienteile sind die alten, nur umgehaengt: ihre Handler bleiben. Steht zuletzt. */
+#advLeiste{display:none}
+body:not(.einfach) #advLeiste{display:flex;align-items:center;flex:none;height:52px;padding:0 12px;background:#fff;border-bottom:1px solid var(--v8-line);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap;position:relative;z-index:5}
+#advLeiste::-webkit-scrollbar{display:none}
+#advLeiste .band-teil{flex:1 0 auto}
+#advLeiste[data-art=geraet] [data-fuer=geraet],#advLeiste[data-art=mark] [data-fuer=mark],#advLeiste[data-art=ov] [data-fuer=ov],#advLeiste[data-art=leer] [data-fuer=leer]{display:flex}
+#advLeiste .set-name{padding:0 8px 0 4px}
+#advLeiste .band-feld input{width:180px!important}
+.band-feder{flex:1 1 auto;min-width:8px}
+.band-hinweis{font-size:13px;color:var(--v8-muted);padding:0 6px}
+.l-schaerfe{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 8px;font-size:12.5px;font-weight:600;color:var(--v8-ink-2);cursor:help}
+.l-schaerfe .p{width:10px;height:10px;border-radius:50%;background:#2e9d5b;flex:none}
+.l-schaerfe.mittel .p{background:#e0a100}
+.l-schaerfe.weich .p{background:#d93a2b}
+.l-schaerfe[hidden]{display:none}
+@media(max-width:1400px){#advLeiste .band-feld input{width:150px!important}}
+@media(max-width:1280px){#lFokus .lbl,#lAusrBtn .lbl,#lLinieBtn .lbl{display:none!important}#lFokus,#lAusrBtn,#lLinieBtn{padding:0 9px!important}}
+@media(max-width:1100px){#lStilBtn .lbl,#lFarbeBtn .lbl{display:none!important}#lStilBtn,#lFarbeBtn{padding:0 9px!important}#advLeiste .band-feld input{width:120px!important}#advLeiste input[type=range]{width:70px}}
+#advBand{display:none}
+body:not(.einfach) #advBand{position:fixed;left:0;top:0;z-index:30;display:flex;align-items:center;padding:4px;background:#fff;border:1px solid var(--v8-line);border-radius:14px;box-shadow:var(--v8-shadow-l);white-space:nowrap;max-width:calc(100vw - 24px);visibility:hidden;opacity:0;transition:opacity .12s}
+body:not(.einfach) #advBand.da{visibility:visible;opacity:1}
+body:not(.einfach) #advBand.da.weg{opacity:0;pointer-events:none}
+.band-teil{display:none;align-items:center;gap:2px}
+#advBand[data-art=geraet] #bandGeraet,#advBand[data-art=mark] #bandMark,#advBand[data-art=label] #bandMark,#advBand[data-art=ov] #bandOv{display:flex}
+#advBand[data-art=mark] .nur-label,#advBand[data-art=label] .nur-rahmen{display:none!important}
+#advBand .set-name{padding:0 8px 0 8px}
+:is(#advBand,#advLeiste) .sm-wz{height:34px}
+:is(#advBand,#advLeiste) .sm-wz[hidden]{display:none!important}
+:is(#advBand,#advLeiste) .sm-wz:hover{background:var(--v8-hover);color:var(--v8-ink)}
+:is(#advBand,#advLeiste) .sm-wz[aria-expanded=true],:is(#advBand,#advLeiste) .sm-wz[aria-expanded=true]:hover{background:var(--v8-ink);color:#fff}
+:is(#advBand,#advLeiste) .sm-an[aria-pressed=true],:is(#advBand,#advLeiste) .sm-an[aria-pressed=true]:hover{background:var(--v8-accent-soft);color:var(--v8-accent-ink)}
+:is(#advBand,#advLeiste) .sm-an.band-auf[aria-pressed=true][aria-expanded=true]{background:var(--v8-ink);color:#fff}
+:is(#advBand,#advLeiste) .sm-wz.nur-zeichen{padding:0 9px!important}
+:is(#advBand,#advLeiste) .band-auf .pfeil{display:none}
+:is(#advBand,#advLeiste) input[type=range]{width:96px;margin:0!important;accent-color:var(--v8-ink)}
+:is(#advBand,#advLeiste) .set-regler .wert{min-width:42px}
+.band-feld{display:inline-flex;align-items:center;padding:0 4px 0 2px}
+.band-feld input{height:34px;width:170px!important;padding:0 10px;border:1px solid var(--v8-line);border-radius:9px;background:#fff;font:inherit;font-size:14px;font-weight:500;color:var(--v8-ink)}
+.band-feld input:focus{outline:none;border-color:var(--v8-accent);box-shadow:0 0 0 3px var(--v8-accent-soft)}
+.band-punkt{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(14,17,22,.18);flex:none}
+#bandSchaerfe .schaerfe{display:inline-flex;align-items:center;gap:8px;height:34px;margin:0;padding:0 10px 0 8px;border:0;background:none;font-size:0;cursor:help}
+#bandSchaerfe .schaerfe .p{margin:0}
+#bandSchaerfe .schaerfe b{font-size:12.5px;font-weight:600;color:var(--v8-ink-2)}
+#bandSchaerfe .schaerfe[hidden]{display:none}
+.band-pop{width:320px}
+.band-pop details.z-mehr{display:block!important;height:auto!important;overflow:visible!important}
+.band-pop details.z-mehr > summary{display:none!important}
+.band-pop .z-gruppe{margin-top:0}
+.band-pop .z-gruppe + .z-gruppe,.band-pop details + details{margin-top:16px;padding-top:16px;border-top:1px solid var(--v8-line)}
+.band-pop .z-ausrichten button[data-kurz]{display:inline-flex;flex-direction:column;align-items:center;gap:2px;height:auto;padding:6px 2px;line-height:1}
+.band-pop .z-ausrichten button[data-kurz]::after{content:attr(data-kurz);font-size:10px;color:var(--v8-muted);white-space:nowrap}
+#bandPopLabel .z-gruppe-titel,#bandPopFarbe .z-gruppe-titel,#bandPopFokus .z-gruppe-titel{display:none}
+#bandPopFarbe,#bandPopFokus{width:290px}
+#bandPopLage #ebEigenGeraet{display:block!important}
+#bandPopLage #devSizeRow{display:none!important}
+#bandPopLage #ebEigenGeraet .z-gruppe:first-child{margin-top:0}
+/* Bei "Crop to the content" gibt es keine Groessenstufen: die leere Gruppe faellt weg */
+body.adv-inhalt #bandPopLage .z-gruppe:has(.sizebtn){display:none!important}
+body.adv-inhalt #bandPopLage .z-gruppe:has([data-da]){margin-top:0!important;padding-top:0!important;border-top:0!important}
+/* Die Seitenleiste ist nur noch die Ebenenliste und darf schmaler sein */
+body:not(.einfach) #ebEigen{display:none!important}
+@media(min-width:821px){body:not(.einfach) .z-werkbank{grid-template-columns:272px minmax(0,1fr)!important}}
+body:not(.einfach) #panel{padding-left:6px!important;padding-right:6px!important}
+</style>
+<script id="studio-band-1711-js">
+(function menueAmObjekt(){
+  const buehne = $("#buehne");
+  if(!buehne || !$("#ebEigenGeraet")) return;
+  const adv = () => modus !== "einfach";
+  const SVG = d => '<svg class="i" viewBox="0 0 24 24">' + d + '</svg>';
+  const TRENN = '<span class="sm-trenn" aria-hidden="true"></span>';
+  const NAMEN = {desktop:"Monitor", laptop:"Laptop", phone:"Phone", browser:"Browser", window:"Frame"};
+  const auf_ = (id, zeichen, wort, titel, klasse) => '<button type="button" class="sm-wz band-auf' + (klasse ? " " + klasse : "") + '" id="' + id + '" aria-expanded="false" title="' + titel + '">' + zeichen + '<span class="lbl">' + wort + '</span></button>';
+  const MUELL = '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>';
+  const AUSR = SVG('<path d="M4 3v18M8 6h11v4H8zM8 14h7v4H8z"/>');
+
+  /* ---------- Das Menue ---------- */
+  const band = document.createElement("div");
+  band.id = "advBand"; band.setAttribute("role", "toolbar"); band.setAttribute("aria-label", "Settings of the selected element");
+  band.dataset.art = "geraet";
+  band.innerHTML =
+    '<div class="band-teil" id="bandGeraet">'
+    + '<span class="set-name" id="bandGeraetName"></span>' + TRENN
+    + '<label class="set-regler" title="Size of the device on the canvas">Size<span class="platz"></span><span class="wert" id="bandGroesseWert"></span></label>'
+    + auf_("bandLageBtn", AUSR, "Position", "Line the devices up with each other or with the output area")
+    + TRENN + '<span id="bandSchaerfe"></span>'
+    + '</div>'
+    + '<div class="band-teil" id="bandMark">'
+    + '<label class="band-feld" title="The text in the label. Leave it empty for the rectangle alone (Enter)"><span class="platz"></span></label>'
+    // Rahmen
+    + auf_("bandFarbeBtn", '<span class="band-punkt" id="bandFarbePunkt"></span>', "Color", "Color of rectangle, line and label", "nur-rahmen")
+    + auf_("bandLinieBtn", SVG('<rect x="4" y="6" width="16" height="12" rx="2"/>'), "Line", "Line width, rounded corners and the connector to the label", "nur-rahmen")
+    + auf_("bandFokus", SVG('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none"/>'), "Dim", "Dim everything outside the callouts, so the eye goes to what they show", "nur-rahmen sm-an")
+    + auf_("bandAusrBtn", AUSR, "Align", "Line the selected callouts up with each other", "nur-rahmen")
+    + '<span class="sm-trenn nur-rahmen" aria-hidden="true"></span>'
+    + '<button type="button" class="sm-wz nur-zeichen nur-rahmen" id="bandDup" title="Duplicate the callout with the same look (Ctrl+D)" aria-label="Duplicate the callout">' + SVG('<rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>') + '</button>'
+    + '<button type="button" class="sm-wz nur-zeichen nur-rahmen" id="bandWeg" title="Remove the callout (Delete)" aria-label="Remove the callout">' + SVG(MUELL) + '</button>'
+    // Label
+    + '<label class="set-regler nur-label" title="Size of the label text">Size<span class="platz"></span><span class="wert" id="bandSchriftWert"></span></label>'
+    + auf_("bandLabelBtn", SVG('<rect x="4" y="10" width="13" height="10"/><path d="M4 4h8v3H4z" fill="currentColor"/>'), "Position", "Where the label sits at its rectangle", "nur-label")
+    + auf_("bandStilBtn", SVG('<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>'), "Style", "Fill and border of the label, type color and weight", "nur-label")
+    + '</div>'
+    + '<div class="band-teil" id="bandOv">'
+    + '<span class="set-name" id="bandOvName">Image</span>' + TRENN
+    + '<label class="set-regler" title="Size of the image. Drag it on the canvas to move it">Size<span class="platz"></span><span class="wert" id="bandOvWert"></span></label>'
+    + '<button type="button" class="sm-wz nur-zeichen" id="bandOvWeg" title="Remove the image (Delete)" aria-label="Remove the image">' + SVG(MUELL) + '</button>'
+    + '</div>';
+  document.body.appendChild(band);
+  band.addEventListener("pointerdown", e => e.stopPropagation());
+  const rein = (zielSel, el) => { const z = band.querySelector(zielSel); if(z && el) z.replaceWith(el); };
+
+  /* ---------- Rechtecke ---------- */
+  // Flaechenpunkte (1x) nach Bildschirmpunkten
+  function zuClient(b){
+    const r = view.getBoundingClientRect(), k = r.width / view.width * RES;
+    return {l:r.left + b.x*k, t:r.top + b.y*k, r:r.left + (b.x + b.w)*k, b:r.top + (b.y + b.h)*k};
+  }
+  const huelle = (a, b) => ({x:Math.min(a.x, b.x), y:Math.min(a.y, b.y),
+    w:Math.max(a.x + a.w, b.x + b.w) - Math.min(a.x, b.x), h:Math.max(a.y + a.h, b.y + b.h) - Math.min(a.y, b.y)});
+  const schnitt = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
+  /* Was gerade bearbeitet wird: "anker" ist das Teil, neben dem das Menue stehen soll,
+     "meiden" alles, was dabei frei bleiben muss (Rahmen samt Label). */
+  function boxen(){
+    const art = band.dataset.art;
+    // nichts gewaehlt, leere Flaeche, oder gerade am Bild im Bildschirm: kein Menue
+    if(art === "leer" || buehne.classList.contains("is-empty") || inhaltModus
+       || state.tool === "crop" || state.tool === "erase") return null;
+    if(art === "mark" || art === "label"){
+      const m = MARKS[markSel]; if(!m) return null;
+      const s = m.breite || 0;
+      const R = {x:m.x - s, y:m.y - s, w:m.w + 2*s, h:m.h + 2*s};
+      const L = m.label ? markLabelBox(m) : null;
+      return {anker: art === "label" && L ? L : R, meiden: L ? huelle(R, L) : R};
+    }
+    if(art === "ov"){
+      const o = OVERLAYS[ovSel]; if(!o) return null;
+      const b = {x:o.x, y:o.y, w:o.img.naturalWidth*o.scale, h:o.img.naturalHeight*o.scale};
+      return {anker:b, meiden:b};
+    }
+    const S = frameSlot(act);
+    if(!S || !S.img || !S.img.naturalWidth) return null;
+    const b = geraetBox(act);
+    return {anker:b, meiden:b};
+  }
+
+  /* ---------- Platz suchen ----------
+     Vier Seiten, die naechste zuerst. Eine Seite gilt, wenn das Menue dort ganz auf die
+     Buehne passt und nichts von dem verdeckt, was bearbeitet wird. Passt keine, gewinnt
+     die Lage mit der kleinsten Ueberdeckung. Solange jemand im Menue tippt oder ein
+     Aufklapper offen ist, bleibt es stehen, damit es nicht unter den Fingern wandert. */
+  let versteckt = false;
+  function platz(){
+    const B0 = adv() && !versteckt ? boxen() : null;
+    if(!B0){ band.classList.remove("da"); return; }
+    const A = zuClient(B0.meiden), N = zuClient(B0.anker);
+    const bu = buehne.getBoundingClientRect();
+    const B = {l:bu.left + 10, t:bu.top + 10, r:bu.right - 10, b:bu.bottom - 74};   // unten stehen die Docks
+    const w = band.offsetWidth, h = band.offsetHeight, G = 12;
+    const jetzt = band.getBoundingClientRect();
+    const steht = band.classList.contains("da");
+    if(steht && (band.contains(document.activeElement) || offen)
+       && !schnitt(jetzt, {l:A.l - 4, t:A.t - 4, r:A.r + 4, b:A.b + 4})
+       && jetzt.left >= B.l - 1 && jetzt.right <= B.r + 1 && jetzt.top >= B.t - 1 && jetzt.bottom <= B.b + 1) return;
+    const cx = (N.l + N.r)/2, cy = (N.t + N.b)/2;
+    const kl = (v, a, b) => Math.max(a, Math.min(b, v));
+    const kand = [
+      {x:kl(cx - w/2, B.l, B.r - w), y:A.t - G - h},      // darueber
+      {x:kl(cx - w/2, B.l, B.r - w), y:A.b + G},          // darunter
+      {x:A.r + G, y:kl(cy - h/2, B.t, B.b - h)},          // rechts
+      {x:A.l - G - w, y:kl(cy - h/2, B.t, B.b - h)}       // links
+    ].map((k, n) => Object.assign(k, {n, d:Math.hypot(k.x + w/2 - cx, k.y + h/2 - cy)}))
+     .sort((a, b) => a.d - b.d || a.n - b.n);
+    const passt = k => k.x >= B.l - 1 && k.x + w <= B.r + 1 && k.y >= B.t - 1 && k.y + h <= B.b + 1;
+    let ziel = kand.find(passt);
+    if(!ziel){
+      // nichts passt ganz: auf die Buehne schieben und die Lage mit der kleinsten Ueberdeckung nehmen
+      ziel = kand.map(k => {
+        const x = kl(k.x, B.l, Math.max(B.l, B.r - w)), y = kl(k.y, B.t, Math.max(B.t, B.b - h));
+        return {x, y, n:k.n, u:schnitt({l:x, t:y, r:x + w, b:y + h}, A)};
+      }).sort((a, b) => a.u - b.u || a.n - b.n)[0];
+    }
+    band.style.left = Math.round(ziel.x) + "px"; band.style.top = Math.round(ziel.y) + "px";
+    band.classList.add("da");
+  }
+
+  /* ---------- Aufklapper, einer zur Zeit, ebenfalls neben dem Inhalt ---------- */
+  let offen = null;
+  function popNeu(id, titel){
+    const p = document.createElement("div");
+    p.className = "sm-pop band-pop"; p.id = id; p.hidden = true;
+    p.setAttribute("role", "dialog"); p.setAttribute("aria-label", titel);
+    p.innerHTML = '<div class="sm-pop-kopf"><h3>' + titel + '</h3><button type="button" class="sm-zu" aria-label="Close">' + SVG('<path d="M6 6l12 12M18 6 6 18"/>') + '</button></div><div class="sm-pop-inhalt"></div>';
+    p.querySelector(".sm-zu").addEventListener("click", zu);
+    p.addEventListener("pointerdown", e => e.stopPropagation());
+    document.body.appendChild(p);
+    return p;
+  }
+  function zu(){
+    if(!offen) return;
+    offen.pop.hidden = true; offen.knopf.setAttribute("aria-expanded", "false"); offen = null;
+  }
+  /* Wohin mit dem Aufklapper? Acht Lagen: unter, ueber, rechts und links vom Menue, dazu
+     dieselben vier Seiten um den Inhalt. Es gewinnt die Lage, die den Inhalt und das Menue
+     frei laesst, in voller Hoehe auf die Buehne passt und dem Knopf am naechsten ist. */
+  function popPlatz(p, knopf){
+    const T = (knopf.closest("#advLeiste") || band).getBoundingClientRect(), K = knopf.getBoundingClientRect();
+    const B0 = boxen(), A = B0 ? zuClient(B0.meiden) : null;
+    const bu = buehne.getBoundingClientRect();
+    const M = 12, G = 8;
+    p.style.maxHeight = (innerHeight - 2*M) + "px";
+    const w = p.offsetWidth, nat = p.offsetHeight;
+    const kl = (v, a, b) => Math.max(a, Math.min(b, v));
+    const xk = kl(K.left, M, innerWidth - M - w);
+    const ganz = innerHeight - 2*M, seitlich = h => kl(T.top, M, innerHeight - M - h);
+    const roh = [
+      {x:xk, frei:innerHeight - M - (T.bottom + G), y:h => T.bottom + G},
+      {x:xk, frei:T.top - G - M, y:h => T.top - G - h},
+      {x:T.right + G, frei:ganz, y:seitlich},
+      {x:T.left - G - w, frei:ganz, y:seitlich}
+    ];
+    if(A) roh.push(
+      {x:xk, frei:innerHeight - M - (A.b + G), y:h => A.b + G},
+      {x:xk, frei:A.t - G - M, y:h => A.t - G - h},
+      {x:A.r + G, frei:ganz, y:seitlich},
+      {x:A.l - G - w, frei:ganz, y:seitlich});
+    const kx = (K.left + K.right)/2, ky = (K.top + K.bottom)/2;
+    const kand = roh.map((k, n) => {
+      const h = Math.max(120, Math.min(nat, k.frei)), y = k.y(h);
+      const R = {l:k.x, t:y, r:k.x + w, b:y + h};
+      const imFenster = k.x >= M - 1 && k.x + w <= innerWidth - M + 1 && y >= M - 1 && y + h <= innerHeight - M + 1;
+      return {x:k.x, y, h, n,
+        raus: imFenster ? 0 : 1,                                   // ragt aus dem Fenster
+        eng: h >= Math.min(nat, 260) ? 0 : 1,                      // nur noch ein Schlitz zum Rollen
+        inhalt: A ? schnitt(R, A) : 0,                             // verdeckt, was bearbeitet wird
+        menue: schnitt(R, {l:T.left, t:T.top, r:T.right, b:T.bottom}),
+        knapp: h >= nat ? 0 : 1,                                   // nicht in voller Hoehe
+        rand: k.x >= bu.left && y >= bu.top ? 0 : 1,               // liegt ueber Seitenleiste oder Kopfleiste
+        d: Math.hypot(k.x + w/2 - kx, y + h/2 - ky)};
+    }).sort((a, b) => a.raus - b.raus || a.eng - b.eng || a.inhalt - b.inhalt || a.menue - b.menue || a.knapp - b.knapp || a.rand - b.rand || a.d - b.d);
+    const ziel = kand[0];
+    p.style.left = Math.round(ziel.x) + "px"; p.style.top = Math.round(ziel.y) + "px";
+    p.style.maxHeight = Math.round(ziel.h) + "px";
+  }
+  function auf(p, knopf){
+    if(offen && offen.pop === p){ zu(); return; }
+    zu();
+    // andere offene Aufklapper der Kopfleiste schliessen
+    document.querySelectorAll(".sm-pop:not(.band-pop):not([hidden]) .sm-zu").forEach(b => b.click());
+    p.hidden = false; offen = {pop:p, knopf}; knopf.setAttribute("aria-expanded", "true");
+    popPlatz(p, knopf);
+  }
+  document.addEventListener("pointerdown", e => { if(offen && !offen.knopf.contains(e.target)) zu(); });
+  window.addEventListener("keydown", e => { if(e.key === "Escape") zu(); });
+  document.querySelectorAll(".modusbtn").forEach(b => b.addEventListener("click", zu));
+  const verbinde = (knopfId, p) => $("#" + knopfId).addEventListener("click", () => auf(p, $("#" + knopfId)));
+
+  /* ---------- Geraet ---------- */
+  rein("#bandGeraet .platz", $("#devSize"));
+  const sch = $("#schaerfeGeraet"); if(sch) $("#bandSchaerfe").appendChild(sch);
+  const popLage = popNeu("bandPopLage", "Position");
+  popLage.querySelector(".sm-pop-inhalt").appendChild($("#ebEigenGeraet"));
+  verbinde("bandLageBtn", popLage);
+
+  /* ---------- Markierung: Rahmen und Label ---------- */
+  rein("#bandMark .band-feld .platz", $("#markText"));
+  $("#markText").placeholder = "Label text";
+  rein("#bandMark .set-regler .platz", $("#markSize"));
+  const inPop = (id, titel, ...teile) => { const p = popNeu(id, titel); teile.forEach(t => { if(t){ if(t.tagName === "DETAILS") t.open = true; p.querySelector(".sm-pop-inhalt").appendChild(t); } }); return p; };
+  const gruppe = sel => $(sel) && $(sel).closest(".z-gruppe");
+  const popFarbe = inPop("bandPopFarbe", "Color", gruppe("#markColor"));
+  const popLinie = inPop("bandPopLinie", "Line", $("#markLines"));
+  const popFokus = inPop("bandPopFokus", "Dim the rest", gruppe("#fokusAn"));
+  const popLabel = inPop("bandPopLabel", "Label position", gruppe("#markGap"));
+  const popStil = inPop("bandPopStil", "Label style", $("#markLook"));
+  const popAusr = inPop("bandPopAusr", "Align callouts", $("#markAlign"));
+  verbinde("bandFarbeBtn", popFarbe); verbinde("bandLinieBtn", popLinie); verbinde("bandFokus", popFokus);
+  verbinde("bandLabelBtn", popLabel); verbinde("bandStilBtn", popStil); verbinde("bandAusrBtn", popAusr);
+
+  /* Duplizieren: dieselbe Markierung noch einmal, leicht versetzt. Eine Zahl als Label
+     zaehlt weiter, ein Wort bleibt stehen. */
+  function duplizieren(){
+    const liste = markAuswahl().length ? markAuswahl() : (markSel >= 0 ? [markSel] : []);
+    if(!liste.length) return;
+    snap("dupMark");
+    const neu = [];
+    for(const k of liste){
+      const v = MARKS[k]; if(!v) continue;
+      const m = Object.assign({}, v, {x:v.x + 24, y:v.y + 24, gesperrt:false});
+      if(v.lx !== null){ m.lx = v.lx + 24; m.ly = v.ly + 24; }
+      if(/^\d+$/.test(v.label || "")) m.label = String(Math.max(0, ...MARKS.map(x => /^\d+$/.test(x.label || "") ? +x.label : 0)) + 1);
+      MARKS.push(m); neu.push(MARKS.length - 1);
+    }
+    markSelSet.clear(); neu.forEach(k => markSelSet.add(k)); markSel = neu[neu.length - 1];
+    syncMark(); renderMarkList(); render();
+  }
+  function entfernen(){
+    const liste = (markAuswahl().length ? markAuswahl() : [markSel]).filter(k => k >= 0).sort((a, b) => b - a);
+    liste.forEach(k => markLoeschen(k));
+  }
+  $("#bandDup").addEventListener("click", duplizieren);
+  $("#bandWeg").addEventListener("click", entfernen);
+
+  /* ---------- Bild ---------- */
+  rein("#bandOv .platz", $("#ovScale"));
+  $("#ovScale").style.marginTop = "";
+  $("#bandOvWeg").addEventListener("click", () => {
+    if(ovSel < 0 || ovSel >= OVERLAYS.length) return;
+    snap("delOverlay"); OVERLAYS.splice(ovSel, 1); ovSel = OVERLAYS.length - 1; renderOvList(); render();
+  });
+
+  /* ---------- Leiste oben: dieselben Einstellungen, fest ueber der Flaeche ----------
+     Ein Bedienteil kann nur an einem Ort stehen. Die Originale sitzen im Menue am Objekt,
+     die Leiste traegt Spiegel: ein Feld oder Regler, der seinen Wert ans Original gibt und
+     dessen "input" ausloest. So gibt es weiter nur eine Logik. */
+  const spiegelListe = [];
+  function spiegel(orig){
+    const c = document.createElement("input"); c.type = orig.type;
+    for(const a of ["min", "max", "step", "placeholder"]) if(orig.hasAttribute(a)) c.setAttribute(a, orig.getAttribute(a));
+    if(orig.className) c.className = orig.className;
+    c.value = orig.value;
+    c.addEventListener("input", () => { orig.value = c.value; orig.dispatchEvent(new Event("input", {bubbles:true})); });
+    if(c.type === "text") c.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); c.blur(); } });
+    spiegelListe.push([orig, c]);
+    return c;
+  }
+  const leiste = document.createElement("div");
+  leiste.id = "advLeiste"; leiste.setAttribute("role", "toolbar"); leiste.setAttribute("aria-label", "Settings of the selected element");
+  leiste.dataset.art = "geraet";
+  const ZWEI = SVG('<rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>');
+  leiste.innerHTML =
+    '<div class="band-teil" data-fuer="geraet">'
+    + '<span class="set-name" id="lGeraetName"></span>' + TRENN
+    + '<label class="set-regler" title="Size of the device on the canvas">Size<span class="platz" data-sp="devSize"></span><span class="wert" id="lGroesseWert"></span></label>'
+    + auf_("lLageBtn", AUSR, "Position", "Line the devices up with each other or with the output area")
+    + TRENN + '<span class="l-schaerfe" id="lSchaerfe"><span class="p"></span><b></b></span>'
+    + '</div>'
+    + '<div class="band-teil" data-fuer="mark">'
+    + '<span class="set-name" id="lMarkName">Callout</span>' + TRENN
+    + '<label class="band-feld" title="The text in the label. Leave it empty for the rectangle alone"><span class="platz" data-sp="markText"></span></label>' + TRENN
+    + auf_("lFarbeBtn", '<span class="band-punkt" id="lFarbePunkt"></span>', "Color", "Color of rectangle, line and label")
+    + auf_("lLinieBtn", SVG('<rect x="4" y="6" width="16" height="12" rx="2"/>'), "Line", "Line width, rounded corners and the connector to the label")
+    + TRENN
+    + '<label class="set-regler" title="Size of the label text">Text<span class="platz" data-sp="markSize"></span><span class="wert" id="lSchriftWert"></span></label>'
+    + auf_("lLabelBtn", SVG('<rect x="4" y="10" width="13" height="10"/><path d="M4 4h8v3H4z" fill="currentColor"/>'), "Label position", "Where the label sits at its rectangle")
+    + auf_("lStilBtn", SVG('<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>'), "Label style", "Fill and border of the label, type color and weight")
+    + TRENN
+    + auf_("lAusrBtn", AUSR, "Align", "Line the selected callouts up with each other")
+    + auf_("lFokus", SVG('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none"/>'), "Dim", "Dim everything outside the callouts, so the eye goes to what they show", "sm-an")
+    + '<span class="band-feder"></span>'
+    + '<button type="button" class="sm-wz nur-zeichen" id="lDup" title="Duplicate the callout with the same look (Ctrl+D)" aria-label="Duplicate the callout">' + ZWEI + '</button>'
+    + '<button type="button" class="sm-wz nur-zeichen" id="lWeg" title="Remove the callout (Delete)" aria-label="Remove the callout">' + SVG(MUELL) + '</button>'
+    + '</div>'
+    + '<div class="band-teil" data-fuer="ov">'
+    + '<span class="set-name" id="lOvName">Image</span>' + TRENN
+    + '<label class="set-regler" title="Size of the image. Drag it on the canvas to move it">Size<span class="platz" data-sp="ovScale"></span><span class="wert" id="lOvWert"></span></label>'
+    + '<span class="band-feder"></span>'
+    + '<button type="button" class="sm-wz nur-zeichen" id="lOvWeg" title="Remove the image (Delete)" aria-label="Remove the image">' + SVG(MUELL) + '</button>'
+    + '</div>'
+    + '<div class="band-teil" data-fuer="leer"><span class="band-hinweis">Click a callout to edit it. To draw a new one, pick Callout at the bottom and drag on the image.</span></div>';
+  buehne.parentElement.insertBefore(leiste, buehne);
+  leiste.addEventListener("pointerdown", e => e.stopPropagation());
+  leiste.querySelectorAll(".platz[data-sp]").forEach(z => z.replaceWith(spiegel($("#" + z.dataset.sp))));
+  leiste.addEventListener("scroll", () => { if(offen && leiste.contains(offen.knopf)) zu(); });
+  verbinde("lLageBtn", popLage); verbinde("lFarbeBtn", popFarbe); verbinde("lLinieBtn", popLinie);
+  verbinde("lLabelBtn", popLabel); verbinde("lStilBtn", popStil); verbinde("lAusrBtn", popAusr); verbinde("lFokus", popFokus);
+  $("#lDup").addEventListener("click", duplizieren);
+  $("#lWeg").addEventListener("click", entfernen);
+  $("#lOvWeg").addEventListener("click", () => $("#bandOvWeg").click());
+
+  /* ---------- Rahmen oder Label? ----------
+     Der Griff entscheidet: wer das Label anfasst, bekommt das Label-Menue, wer den Rahmen
+     anfasst, das Rahmen-Menue. Eine neue Markierung beginnt beim Rahmen. */
+  let teil = "rahmen", zahlVorher = MARKS.length;
+  const feld = $("#markText");
+  function trefferTeil(e){
+    const p = evtPoint(e), q = {x:p.x/RES, y:p.y/RES};
+    for(let i = MARKS.length - 1; i >= 0; i--){ const m = MARKS[i]; if(!m.gesperrt && m.label && inRect(q, markLabelBox(m))) return {i, teil:"label"}; }
+    for(let i = MARKS.length - 1; i >= 0; i--){ const m = MARKS[i]; if(!m.gesperrt && inRect(q, markRect(m))) return {i, teil:"rahmen"}; }
+    return null;
+  }
+  view.addEventListener("pointerdown", e => {
+    if(!adv() || e.button !== 0) return;
+    const t = trefferTeil(e); if(t) teil = t.teil;
+  }, true);
+  $("#markList").addEventListener("click", () => { teil = "rahmen"; }, true);
+  /* Label direkt tippen: Doppelklick auf eine Markierung oder Enter oeffnet das Label-Menue,
+     der Zeiger steht im Feld, der Text ist markiert. Enter oder Esc gibt die Tasten frei. */
+  function labelBearbeiten(){
+    if(window.advWaehle) window.advWaehle("mark");
+    teil = "label"; sync();
+    feld.focus(); feld.select();
+  }
+  wrap.addEventListener("dblclick", e => {
+    if(!adv() || e.target !== view) return;
+    const t = trefferTeil(e); if(!t) return;
+    e.stopPropagation(); e.preventDefault();
+    if(markSel !== t.i){ markNurWaehlen(t.i); syncMark(); renderMarkList(); render(); }
+    labelBearbeiten();
+  }, true);
+  feld.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); feld.blur(); platz(); } });
+  window.addEventListener("keydown", e => {
+    const art = band.dataset.art;
+    if(!adv() || (art !== "mark" && art !== "label")) return;
+    const t = e.target, tag = t && t.tagName;
+    if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+    if(document.querySelector("dialog[open]")) return;
+    if(e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); labelBearbeiten(); }
+    else if((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "d"){ e.preventDefault(); duplizieren(); }
+  });
+
+  /* Beim Ziehen ist das Menue weg, danach steht es wieder neben dem Inhalt. */
+  view.addEventListener("pointermove", e => {
+    if(versteckt || !(e.buttons & 1) || !drag) return;
+    versteckt = true; zu(); band.classList.add("weg");
+  });
+  const zeigen = () => { if(!versteckt) return; setTimeout(() => { versteckt = false; band.classList.remove("weg"); platz(); }, 60); };
+  window.addEventListener("pointerup", zeigen); window.addEventListener("pointercancel", zeigen);
+
+  /* ---------- Abgleich ---------- */
+  function sync(){
+    if(!adv()){ band.classList.remove("da"); return; }
+    const wahl = window.advWahlArt ? window.advWahlArt() : "geraet";
+    const m = MARKS[markSel], o = OVERLAYS[ovSel];
+    if(MARKS.length > zahlVorher) teil = "rahmen";       // neu angelegt: zuerst der Rahmen
+    zahlVorher = MARKS.length;
+    if(m && teil === "label" && !m.label && document.activeElement !== feld) teil = "rahmen";
+    const art = wahl === "mark" ? (m ? (teil === "label" ? "label" : "mark") : "leer") : (wahl === "ov" && o ? "ov" : "geraet");
+    if(band.dataset.art !== art){ band.dataset.art = art; zu(); }
+    if(art === "geraet"){
+      const nr = insts.length > 1 ? (insts.indexOf(act) + 1) + ". " : "";
+      $("#bandGeraetName").textContent = nr + (NAMEN[act.device] || act.device);
+      $("#bandGroesseWert").textContent = Math.round(act.devScale*100) + " %";
+      if(document.activeElement !== $("#devSize")) $("#devSize").value = Math.round(act.devScale*100);
+      if(sch){ const t = sch.querySelector(".t"); sch.title = t ? t.textContent : ""; }
+    } else if(art === "mark" || art === "label"){
+      const n = markAuswahl().length;
+      $("#bandSchriftWert").textContent = Math.round(m.groesse) + " px";
+      if(document.activeElement !== $("#markSize")) $("#markSize").value = m.groesse;
+      $("#bandFarbePunkt").style.background = m.linie;
+      $("#bandAusrBtn").hidden = n < 2;
+      $("#bandDup").title = n > 1 ? "Duplicate the " + n + " callouts (Ctrl+D)" : "Duplicate the callout with the same look (Ctrl+D)";
+      $("#bandWeg").title = n > 1 ? "Remove the " + n + " callouts (Delete)" : "Remove the callout (Delete)";
+    } else if(art === "ov"){
+      $("#bandOvName").textContent = o.name ? (o.name.length > 22 ? o.name.slice(0, 20) + "…" : o.name) : "Image";
+      const [W] = stageSize();
+      const v = Math.round(o.scale*o.img.naturalWidth/(W*0.25)*100);
+      if(document.activeElement !== $("#ovScale")) $("#ovScale").value = v;
+      $("#bandOvWert").textContent = v + " %";
+    }
+    $("#bandFokus").setAttribute("aria-pressed", String(!!state.fokus));
+    // Leiste oben: dieselben Angaben, die Spiegel folgen ihren Originalen
+    const la = art === "label" ? "mark" : art;
+    if(leiste.dataset.art !== la){ leiste.dataset.art = la; leiste.scrollLeft = 0; }
+    if(la === "geraet"){
+      $("#lGeraetName").textContent = $("#bandGeraetName").textContent;
+      $("#lGroesseWert").textContent = $("#bandGroesseWert").textContent;
+      const ls = $("#lSchaerfe");
+      ls.hidden = !sch || sch.hidden;
+      if(sch && !sch.hidden){
+        ls.className = "l-schaerfe" + (sch.classList.contains("mittel") ? " mittel" : sch.classList.contains("weich") ? " weich" : "");
+        const fett = sch.querySelector("b"); ls.querySelector("b").textContent = fett ? fett.textContent.replace(/\.$/, "") : "";
+        ls.title = sch.title;
+      }
+    } else if(la === "mark"){
+      const n = markAuswahl().length;
+      $("#lMarkName").textContent = n > 1 ? n + " callouts" : "Callout";
+      $("#lSchriftWert").textContent = $("#bandSchriftWert").textContent;
+      $("#lFarbePunkt").style.background = m.linie;
+      $("#lAusrBtn").hidden = n < 2;
+      $("#lDup").title = $("#bandDup").title; $("#lWeg").title = $("#bandWeg").title;
+    } else if(la === "ov"){
+      $("#lOvName").textContent = $("#bandOvName").textContent;
+      $("#lOvWert").textContent = $("#bandOvWert").textContent;
+    }
+    $("#lFokus").setAttribute("aria-pressed", String(!!state.fokus));
+    for(const [orig, c] of spiegelListe) if(document.activeElement !== c && c.value !== orig.value) c.value = orig.value;
+    platz();
+  }
+  const renderAlt = render;
+  render = function(){ renderAlt(); sync(); };
+  const syncMarkAlt = syncMark;
+  syncMark = function(){ syncMarkAlt(); sync(); };
+  const ansichtAlt = ansichtAnwenden;
+  ansichtAnwenden = function(){ ansichtAlt(); if(adv()) platz(); };
+  // Die Wahl wechselt auch ohne Zeichnen (Klick in die Ebenenliste, Griff auf der Flaeche)
+  new MutationObserver(sync).observe(document.body, {attributes:true, attributeFilter:["class"]});
+  ["#devSize", "#markSize", "#ovScale"].forEach(s => { const el = $(s); if(el) el.addEventListener("input", () => setTimeout(sync, 0)); });
+  window.addEventListener("resize", () => { zu(); platz(); });
+  if(window.ResizeObserver) new ResizeObserver(() => platz()).observe(band);
+  sync();
+  // Die Buehne ist um die Leiste niedriger geworden
+  if(adv()) requestAnimationFrame(() => einpassen());
+})();
+</script>
 </body>
 </html>
