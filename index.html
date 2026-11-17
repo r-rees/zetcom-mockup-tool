@@ -2541,11 +2541,11 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
     <!-- Simple: eine Werkzeugpille wie im Explore Studio (13.10.2026) -->
     <div class="sm-mitte" id="smMitte" role="toolbar" aria-label="Mockup">
       <div class="sm-seg sm-art-seg" role="group" aria-label="Layout">
-        <button type="button" class="sm-art" data-art="einzel" aria-pressed="true" title="One device that takes the shape of your screenshot"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/></svg><span class="lbl">Single</span></button>
+        <button type="button" class="sm-art" data-art="einzel" aria-pressed="true" title="One device that takes the shape of your screenshot"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/></svg><span class="lbl">One device</span></button>
         <button type="button" class="sm-art" data-art="set" aria-pressed="false" title="Monitor, tablet and phone in one scene"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="13" height="9" rx="1.3"/><path d="M6.5 18.5h4M8.5 14v4.5"/><rect x="17" y="8" width="5" height="10.5" rx="1.2"/></svg><span class="lbl">Device set</span></button>
       </div>
       <span class="sm-trenn" aria-hidden="true"></span>
-      <button type="button" class="sm-wz nur-set" id="smSzeneBtn" aria-expanded="false" aria-controls="smPopSzene" title="Choose the scene around the devices"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-4 4 3 4-3 5 4"/></svg><span class="lbl">Scene</span><svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button type="button" class="sm-wz nur-set" id="smSzeneBtn" aria-expanded="false" aria-controls="smPopSzene" title="Choose the background behind the devices"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l5-4 4 3 4-3 5 4"/></svg><span class="lbl">Background</span><svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
       <button type="button" class="sm-wz nur-einzel" id="smShotBtn" aria-expanded="false" aria-controls="smPopShot" title="Screenshot, position, background, crop and erase">
         <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="8.5" r="1.3"/></svg><span class="lbl">Screenshot</span><svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
       </button>
@@ -2583,7 +2583,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
       <button class="z-btn z-btn--text" data-bereich="projekt" id="projektKnopf">Project</button>
       <button class="z-btn z-btn--text" data-bereich="hilfe" id="hilfeKnopf">Help</button>
       <span class="trenner" aria-hidden="true"></span>
-      <button class="z-btn" id="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span id="exportLabel">Export PNG</span></button>
+      <button class="z-btn" id="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span id="exportLabel">Download PNG</span></button>
     </span><nav class="mobile-switch" aria-label="Workspace view"><button id="showSettings" aria-pressed="true">Settings</button><button id="showPreview" aria-pressed="false">Preview</button></nav>
   </header>
 
@@ -2698,8 +2698,8 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
             <div class="option-section"><h3>Screen background</h3>
               <span class="e-farbe e-inline">
-                <input type="color" id="eBgColor" aria-label="Colour behind the image">
-                <button class="z-btn z-btn--outline s-small" id="eBgPipette" aria-pressed="false" title="Press this, then click anywhere in the picture. That colour goes behind your image">Pick colour</button>
+                <input type="color" id="eBgColor" aria-label="Color behind the image">
+                <button class="z-btn z-btn--outline s-small" id="eBgPipette" aria-pressed="false" title="Press this, then click anywhere in the picture. That color goes behind your image">Pick color</button>
               </span>
               <p class="z-hinweis">Shows wherever the screenshot does not cover the screen.</p>
             </div>
@@ -2708,7 +2708,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
                 <span class="e-was">Edit</span>
                 <div class="z-schalter" role="group" aria-label="Change the screenshot">
                   <button class="ewerkzeug" data-tool="crop" aria-pressed="false" title="Press this, then drag a box in the picture. Everything outside the box is cut away"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3v15h15M3 6h15v15"/></svg>Crop</button>
-                  <button class="ewerkzeug" data-tool="erase" aria-pressed="false" title="Press this, then paint over what should disappear. The colour behind the image shows through"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg>Erase</button>
+                  <button class="ewerkzeug" data-tool="erase" aria-pressed="false" title="Press this, then paint over what should disappear. The color behind the image shows through"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg>Erase</button>
                 </div>
               </div>
               <div class="e-zeile hideable" id="ePinselZeile">
@@ -2752,7 +2752,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             <input type="file" id="file" accept="image/*" hidden>
             <span class="z-hinweis" id="bildStand"></span>
             <div class="z-schalter" role="group" aria-label="How the image sits in the screen" style="margin-top:8px">
-              <button class="fitbtn" data-fit="fill" aria-pressed="false" title="Fill the screen, cropping what does not fit">Fill</button>
+              <button class="fitbtn" data-fit="fill" aria-pressed="false" title="Fill the screen, cropping what does not fit">Fill screen</button>
               <button class="fitbtn" data-fit="fit"  aria-pressed="false" title="Show the whole image, leaving bars where it does not reach">Whole image</button>
               <button class="fitbtn" data-fit="orig" aria-pressed="false" title="One image pixel per screen pixel">Actual size</button>
             </div>
@@ -2761,14 +2761,14 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
           </div>
 
           <div class="z-gruppe hideable" id="frameSizeRow">
-            <span class="z-gruppe-titel">Frame proportions</span>
+            <span class="z-gruppe-titel">Screen shape</span>
             <div class="z-schalter" role="group" aria-label="Frame proportions">
               <button class="framesizebtn" data-framesize="standard" aria-pressed="true"
-                title="The shape the frame was built in">Standard</button>
+                title="The shape the device really has">Original</button>
               <button class="framesizebtn" data-framesize="custom" aria-pressed="false"
                 title="Type a width and a height, the frame takes that shape">Custom</button>
               <button class="framesizebtn" data-framesize="shot" aria-pressed="false"
-                title="The device takes the shape of the screenshot, so nothing is cropped">Fit screenshot</button>
+                title="The device takes the shape of the screenshot, so nothing is cropped">Match screenshot</button>
             </div>
             <div class="free" id="frameSizeFree">
               <input type="number" class="z-field" id="frameW" value="1600" min="100" max="8000" step="10" aria-label="Frame width">
@@ -2784,10 +2784,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             <div class="z-gruppe">
               <span class="z-gruppe-titel">Size on the canvas</span>
               <div class="z-schalter" role="group" aria-label="Size">
-                <button class="sizebtn" data-size="100" aria-pressed="false">100 %</button>
-                <button class="sizebtn" data-size="80"  aria-pressed="true">80 %</button>
-                <button class="sizebtn" data-size="75"  aria-pressed="false">75 %</button>
-                <button class="sizebtn" data-size="custom" aria-pressed="false">Free</button>
+                <button class="sizebtn" data-size="100" aria-pressed="false">Full</button>
+                <button class="sizebtn" data-size="80"  aria-pressed="true">Large</button>
+                <button class="sizebtn" data-size="75"  aria-pressed="false">Medium</button>
+                <button class="sizebtn" data-size="custom" aria-pressed="false">Custom</button>
               </div>
               <div class="hideable" id="devSizeRow">
                 <input type="range" class="z-regler" id="devSize" min="10" max="400" value="80">
@@ -2796,11 +2796,11 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
 
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Centre on the canvas</span>
+              <span class="z-gruppe-titel">Center on the canvas</span>
               <div class="z-ausrichten z-ausrichten--text">
-                <button id="centerBoth" title="Centre horizontally and vertically">Both</button>
-                <button id="centerH" title="Centre horizontally only">Across</button>
-                <button id="centerV" title="Centre vertically only">Down</button>
+                <button id="centerBoth" title="Center horizontally and vertically">Middle</button>
+                <button id="centerH" title="Center horizontally only">Horizontally</button>
+                <button id="centerV" title="Center vertically only">Vertically</button>
               </div>
               <button class="z-btn z-btn--text" id="resetLayout" style="margin-top:6px">Reset size and position</button>
             </div>
@@ -2810,10 +2810,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <span class="z-hinweis" id="devAlignHint"></span>
               <div class="z-ausrichten">
                 <button data-da="left"    title="Left edges on one line">&#8676;</button>
-                <button data-da="hcenter" title="Centre across">&#8596;</button>
+                <button data-da="hcenter" title="Center across">&#8596;</button>
                 <button data-da="right"   title="Right edges on one line">&#8677;</button>
                 <button data-da="top"     title="Top edges on one line">&#10514;</button>
-                <button data-da="vmiddle" title="Centre down">&#8597;</button>
+                <button data-da="vmiddle" title="Center down">&#8597;</button>
                 <button data-da="bottom"  title="Bottom edges on one line">&#10515;</button>
               </div>
               <div class="z-ausrichten z-ausrichten--text">
@@ -2848,10 +2848,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
           <details class="z-mehr">
             <summary>Screen and browser bar</summary>
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Colour behind the screenshot</span>
+              <span class="z-gruppe-titel">Color behind the screenshot</span>
               <div class="z-farbzeile">
-                <input type="color" id="bgColor" aria-label="Colour behind the screenshot">
-                <input type="text" class="z-field" id="bgHex" aria-label="Colour value">
+                <input type="color" id="bgColor" aria-label="Color behind the screenshot">
+                <input type="text" class="z-field" id="bgHex" aria-label="Color value">
               </div>
               <span class="z-hinweis">Shows wherever the screenshot does not cover the screen, and wherever you erased something.</span>
             </div>
@@ -2860,8 +2860,8 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <label class="z-haken"><input type="checkbox" id="chromeToggle"> Draw a browser bar in the screen</label>
               <input type="text" class="z-field" id="url" value="zetcom.com" style="margin-top:6px" aria-label="Address in the browser bar">
               <div class="z-farbzeile" style="margin-top:6px">
-                <input type="color" id="acColor" aria-label="Colour of the browser bar">
-                <input type="text" class="z-field" id="acHex" aria-label="Colour value">
+                <input type="color" id="acColor" aria-label="Color of the browser bar">
+                <input type="text" class="z-field" id="acHex" aria-label="Color value">
               </div>
               <div class="z-farben" id="chromeSwatches"></div>
             </div>
@@ -2889,7 +2889,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <input type="range" class="z-regler" id="fokusStaerke" min="10" max="90" value="55" style="margin-top:6px">
               <span class="z-hinweis" id="fokusLabel"></span>
             </div>
-            <span class="z-hinweis">Every rectangle stays bright, everything around it goes dark. Rectangles, lines and labels are drawn on top and keep their colour. Without a callout nothing is dimmed.</span>
+            <span class="z-hinweis">Every rectangle stays bright, everything around it goes dark. Rectangles, lines and labels are drawn on top and keep their color. Without a callout nothing is dimmed.</span>
           </div>
 
           <div class="hideable" id="markEdit">
@@ -2900,10 +2900,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
 
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Colour of rectangle and line</span>
+              <span class="z-gruppe-titel">Color of rectangle and line</span>
               <div class="z-farbzeile">
-                <input type="color" id="markColor" aria-label="Colour of rectangle and line">
-                <input type="text" class="z-field" id="markHex" aria-label="Colour value">
+                <input type="color" id="markColor" aria-label="Color of rectangle and line">
+                <input type="text" class="z-field" id="markHex" aria-label="Color value">
               </div>
               <div class="z-farben" id="markSwatches"></div>
             </div>
@@ -2922,10 +2922,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <span class="z-hinweis" id="markAlignHint"></span>
               <div class="z-ausrichten">
                 <button data-ra="left"    title="Left edges on one line">&#8676;</button>
-                <button data-ra="hcenter" title="Centre across">&#8596;</button>
+                <button data-ra="hcenter" title="Center across">&#8596;</button>
                 <button data-ra="right"   title="Right edges on one line">&#8677;</button>
                 <button data-ra="top"     title="Top edges on one line">&#10514;</button>
-                <button data-ra="vmiddle" title="Centre down">&#8597;</button>
+                <button data-ra="vmiddle" title="Center down">&#8597;</button>
                 <button data-ra="bottom"  title="Bottom edges on one line">&#10515;</button>
               </div>
               <div class="z-ausrichten z-ausrichten--text">
@@ -2939,20 +2939,20 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
 
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Label to its own rectangle</span>
-              <span class="z-hinweis">Across: outside left, left edge, centred, right edge, outside right.</span>
+              <span class="z-gruppe-titel">Label position</span>
+              <span class="z-hinweis">Across: outside left, left edge, centered, right edge, outside right.</span>
               <div class="z-ausrichten">
                 <button data-lr="xout-left"  title="Label to the left of the rectangle">&#9668;</button>
                 <button data-lr="xleft"      title="Left edges flush">&#8676;</button>
-                <button data-lr="xcenter"    title="Centred across the rectangle">&#8596;</button>
+                <button data-lr="xcenter"    title="Centered across the rectangle">&#8596;</button>
                 <button data-lr="xright"     title="Right edges flush">&#8677;</button>
                 <button data-lr="xout-right" title="Label to the right of the rectangle">&#9658;</button>
               </div>
-              <span class="z-hinweis">Down: above, top edge, centred, bottom edge, below.</span>
+              <span class="z-hinweis">Down: above, top edge, centered, bottom edge, below.</span>
               <div class="z-ausrichten">
                 <button data-lr="yabove"  title="Label above the rectangle">&#9650;</button>
                 <button data-lr="ytop"    title="Top edges flush">&#10514;</button>
-                <button data-lr="ymiddle" title="Centred down the rectangle">&#8597;</button>
+                <button data-lr="ymiddle" title="Centered down the rectangle">&#8597;</button>
                 <button data-lr="ybottom" title="Bottom edges flush">&#10515;</button>
                 <button data-lr="ybelow"  title="Label below the rectangle">&#9660;</button>
               </div>
@@ -2961,14 +2961,14 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
 
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Labels to each other</span>
+              <span class="z-gruppe-titel">Line up the labels</span>
               <span class="z-hinweis" id="markLabelAlignHint"></span>
               <div class="z-ausrichten">
                 <button data-la="left"    title="Left label edges on one line">&#8676;</button>
-                <button data-la="hcenter" title="Labels centred across each other">&#8596;</button>
+                <button data-la="hcenter" title="Labels centered across each other">&#8596;</button>
                 <button data-la="right"   title="Right label edges on one line">&#8677;</button>
                 <button data-la="top"     title="Top label edges on one line">&#10514;</button>
-                <button data-la="vmiddle" title="Labels centred down each other">&#8597;</button>
+                <button data-la="vmiddle" title="Labels centered down each other">&#8597;</button>
                 <button data-la="bottom"  title="Bottom label edges on one line">&#10515;</button>
               </div>
               <div class="z-ausrichten z-ausrichten--text">
@@ -2983,11 +2983,11 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             <div class="z-gruppe">
               <span class="z-gruppe-titel">Fill and border</span>
               <label class="z-haken"><input type="checkbox" id="markFillOn" checked> Fill behind the label</label>
-              <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markFillAuto" checked> Same colour as the rectangle</label>
+              <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markFillAuto" checked> Same color as the rectangle</label>
               <div class="hideable" id="markFillRow">
                 <div class="z-farbzeile" style="margin-top:6px">
-                  <input type="color" id="markFill" aria-label="Colour of the label fill">
-                  <input type="text" class="z-field" id="markFillHex" aria-label="Colour value">
+                  <input type="color" id="markFill" aria-label="Color of the label fill">
+                  <input type="text" class="z-field" id="markFillHex" aria-label="Color value">
                 </div>
                 <div class="z-farben" id="markFillSwatches"></div>
               </div>
@@ -2996,11 +2996,11 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <div class="hideable" id="markBorderCtl">
                 <input type="range" class="z-regler" id="markBorderWidth" min="1" max="12" value="2" style="margin-top:6px">
                 <span class="z-hinweis" id="markBorderWidthLabel"></span>
-                <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markBorderAuto" checked> Same colour as the rectangle</label>
+                <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markBorderAuto" checked> Same color as the rectangle</label>
                 <div class="hideable" id="markBorderRow">
                   <div class="z-farbzeile" style="margin-top:6px">
-                    <input type="color" id="markBorder" aria-label="Colour of the label border">
-                    <input type="text" class="z-field" id="markBorderHex" aria-label="Colour value">
+                    <input type="color" id="markBorder" aria-label="Color of the label border">
+                    <input type="text" class="z-field" id="markBorderHex" aria-label="Color value">
                   </div>
                   <div class="z-farben" id="markBorderSwatches"></div>
                 </div>
@@ -3008,10 +3008,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             </div>
 
             <div class="z-gruppe">
-              <span class="z-gruppe-titel">Type colour</span>
+              <span class="z-gruppe-titel">Type color</span>
               <div class="z-farbzeile">
-                <input type="color" id="markTextColor" aria-label="Type colour">
-                <input type="text" class="z-field" id="markTextHex" aria-label="Colour value">
+                <input type="color" id="markTextColor" aria-label="Type color">
+                <input type="text" class="z-field" id="markTextHex" aria-label="Color value">
               </div>
               <div class="z-farben" id="markTextSwatches"></div>
               <span class="z-hinweis" id="markKontrast"></span>
@@ -3039,11 +3039,11 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <span class="z-hinweis">Appears only while the label sits outside the rectangle.</span>
               <input type="range" class="z-regler" id="markConnWidth" min="1" max="12" value="1" style="margin-top:6px">
               <span class="z-hinweis" id="markConnWidthLabel"></span>
-              <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markConnAuto" checked> Same colour as the rectangle</label>
+              <label class="z-haken" style="margin-top:6px"><input type="checkbox" id="markConnAuto" checked> Same color as the rectangle</label>
               <div class="hideable" id="markConnRow">
                 <div class="z-farbzeile" style="margin-top:6px">
-                  <input type="color" id="markConnColor" aria-label="Colour of the connector">
-                  <input type="text" class="z-field" id="markConnHex" aria-label="Colour value">
+                  <input type="color" id="markConnColor" aria-label="Color of the connector">
+                  <input type="text" class="z-field" id="markConnHex" aria-label="Color value">
                 </div>
                 <div class="z-farben" id="markConnSwatches"></div>
               </div>
@@ -3060,12 +3060,12 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
             <input type="file" id="ovFile" accept="image/*" multiple hidden>
             <div class="z-objekte" id="ovList" style="margin-top:6px"></div>
             <div id="ovLeer" class="z-leer">
-              <p><strong>No overlays.</strong></p>
-              <p>An overlay sits on top of every device and is not projected into a screen. A logo, a badge or a sticker belongs here.</p>
+              <p><strong>No images.</strong></p>
+              <p>An overlay sits on top of everything and does not go into a screen. Use it for a logo, a badge or a sticker.</p>
             </div>
             <div class="hideable" id="ovScaleRow">
-              <input type="range" class="z-regler" id="ovScale" min="5" max="300" value="100" style="margin-top:6px">
-              <span class="z-hinweis">Size of the selected overlay. Drag it on the canvas to move it.</span>
+              <span class="z-gruppe-titel">Size</span><input type="range" class="z-regler" id="ovScale" min="5" max="300" value="100" style="margin-top:6px">
+              <span class="z-hinweis">Size of the selected image. Drag it on the canvas to move it.</span>
             </div>
           </div>
         </section>
@@ -3108,12 +3108,12 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <span class="z-gruppe-titel">Background of the output area</span>
               <div class="z-schalter" role="group" aria-label="Background">
                 <button class="bgbtn" data-bg="transparent" aria-pressed="true">Transparent</button>
-                <button class="bgbtn" data-bg="color" aria-pressed="false">Colour</button>
+                <button class="bgbtn" data-bg="color" aria-pressed="false">Color</button>
               </div>
               <div class="hideable" id="canvasColorRow">
                 <div class="z-farbzeile" style="margin-top:6px">
-                  <input type="color" id="canvasColor" aria-label="Background colour">
-                  <input type="text" class="z-field" id="canvasHex" aria-label="Colour value">
+                  <input type="color" id="canvasColor" aria-label="Background color">
+                  <input type="text" class="z-field" id="canvasHex" aria-label="Color value">
                 </div>
                 <div class="z-farben" id="canvasSwatches"></div>
               </div>
@@ -3146,7 +3146,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <button class="z-btn z-btn--outline" id="openProject">Open</button>
             </div>
             <input type="file" id="projectFile" accept=".json,.zdm.json,application/json" hidden>
-            <span class="z-hinweis" id="projectNote">Saved are the devices with their angle, shadow, position and zoom, the screenshots including anything rubbed out, every callout, every overlay, and the output size, background and settings. The file is called <strong>.zdm.json</strong> and can be dropped onto the canvas. The images travel inside it, which makes it large.</span>
+            <span class="z-hinweis" id="projectNote">Saved are the devices with their angle, shadow, position and zoom, the screenshots including anything erased, every callout, every overlay, and the output size, background and settings. The file is called <strong>.zdm.json</strong> and can be dropped onto the canvas. The images travel inside it, which makes it large.</span>
           </div>
 
           <div class="z-gruppe">
@@ -3183,10 +3183,10 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
               <dt>Hold the space bar</dt><dd>Move the view</dd>
               <dt>Scroll wheel</dt><dd>Zoom the view</dd>
               <dt>0</dt><dd>Fit the whole output area</dd>
-              <dt>1</dt><dd>View at 100 per cent</dd>
+              <dt>1</dt><dd>View at 100 percent</dd>
               <dt>V, H, M, E</dt><dd>Select, Pan, Callout, Erase</dd>
-              <dt>Escape</dt><dd>Stops the colour picker and the crop</dd>
-              <dt>Delete</dt><dd>Remove the selected callout or overlay</dd>
+              <dt>Escape</dt><dd>Stops the color picker and the crop</dd>
+              <dt>Delete</dt><dd>Remove the selected callout or image</dd>
               <dt>Ctrl and V</dt><dd>Paste a screenshot from the clipboard</dd>
               <dt>Double click on a screen</dt><dd>Move and zoom the image inside its frame</dd>
               <dt>Escape</dt><dd>Leave that image mode again</dd>
@@ -3215,9 +3215,9 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
         </div>
       </div>
     <nav class="z-werkzeuge tool-dock" id="werkzeugleiste" aria-label="Tools">
-      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an overlay (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7L5 3Z"/></svg><span class="tool-word">Select</span></button>
+      <button class="toolbtn" data-tool="move"  aria-pressed="true"  title="Select and move a device, a callout or an image (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7L5 3Z"/></svg><span class="tool-word">Select</span></button>
       <button class="toolbtn" data-tool="crop" aria-pressed="false" title="Crop the screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M6 3v15h15M3 6h15v15"/></svg><span class="tool-word">Crop</span></button>
-      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the colour behind it shows through (E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg><span class="tool-word">Erase</span></button>
+      <button class="toolbtn" data-tool="erase" aria-pressed="false" title="Erase part of the screenshot, the color behind it shows through (E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="m15 3 6 6-11 11H5l-3-3L15 3ZM7 12l6 6m-3 2h11"/></svg><span class="tool-word">Erase</span></button>
       <button class="toolbtn" data-tool="mark"  aria-pressed="false" title="Drag a new callout on the image (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><rect x="3" y="4" width="18" height="13"/><path d="m7 17-1 4 6-4"/></svg><span class="tool-word">Callout</span></button>
       <button class="toolbtn" data-tool="hand"  aria-pressed="false" title="Move the view. Holding the space bar does the same in any tool (H)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M8 12V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-4a2 2 0 0 1 4 0v9c0 4-3 6-6 6h-2c-3 0-4-2-6-5l-3-4a2 2 0 0 1 3-2l2 2"/></svg><span class="tool-word">Pan</span></button>
       <div class="z-option hideable" id="brushOption">
@@ -3248,7 +3248,7 @@ body:not(.einfach) .tool-dock{bottom:16px;left:16px;transform:none;background:#f
     <label class="set-regler nur-bild" id="setBZeile" hidden>Width<input type="range" id="setB" min="20" max="400" aria-label="Width of the screenshot"><span id="setBWert"></span></label>
     <label class="set-regler nur-bild" id="setHZeile" hidden>Height<input type="range" id="setH" min="20" max="400" aria-label="Height of the screenshot"><span id="setHWert"></span></label>
     <span class="sm-trenn" aria-hidden="true"></span>
-    <label class="set-farbe" title="Colour behind the screenshot in this screen"><input type="color" id="setGrund" value="#ffffff" aria-label="Screen background"><span class="lbl">Background</span></label>
+    <label class="set-farbe" title="Color behind the screenshot in this screen"><input type="color" id="setGrund" value="#ffffff" aria-label="Screen background"><span class="lbl">Background</span></label>
     <span class="sm-trenn nur-bild" aria-hidden="true"></span>
     <button type="button" class="sm-wz nur-bild" id="setFuellen" title="Fill the screen, top aligned">Fill</button>
     <button type="button" class="sm-wz nur-bild" id="setGanz" title="Show the whole screenshot">Fit</button>
@@ -3374,7 +3374,7 @@ function winCanvas(w, h){
   c.naturalWidth = c.width; c.naturalHeight = c.height; c.complete = true;
   return c;
 }
-/* the far edge keeps its vertical centre and loses height — that is exactly the projection of a
+/* the far edge keeps its vertical center and loses height — that is exactly the projection of a
    flat plane turned about its vertical axis, so the homography does the foreshortening itself. */
 function winQuad(v, rect){
   const R = rect || WIN_RECT, yc = R.y + R.h/2, near = R.h/2, far = R.h*(1 - WIN_TILT)/2;
@@ -3672,7 +3672,9 @@ function adaptRatio(i){
   else if(i.frameSize === "shot") r = (i.img && i.w && i.h) ? clamp(i.w / i.h * (i.chromeOn ? 0.938 : 1), 0.1, 10) : 0;
   /* Gedreht ist der Bildschirm nie im Grundverhaeltnis, dort wird immer angepasst. */
   const gedreht = i.view !== "front" && i.device !== "browser";
-  return r && (gedreht || Math.abs(r - NATIV_VERH(i.device)) > 0.005) ? r : 0;
+  // 0,0005 statt 0,005 (17.11.2026): schon ein halbes Prozent Abweichung zwang den Screenshot
+  // unter 1:1, beim Phone wurde jeder Bildpunkt umgerechnet und die Schrift weich
+  return r && (gedreht || Math.abs(r - NATIV_VERH(i.device)) > 0.0005) ? r : 0;
 }
 /* Einziger Ort, an dem ein Rahmen nachgeschlagen wird: statisch aus DEVICES oder
    angepasst aus dem Cache. Quad, bb, Silhouette und Hintergrund kommen mit.          */
@@ -3768,7 +3770,16 @@ function layout(i){
   const gs = Math.min(W/bb.w, H/bb.h) * i.devScale;   // frame px -> output px, 1.0 = bbox fills canvas
   const ox = W/2 - (bb.x + bb.w/2)*gs + i.devX;
   const oy = H/2 - (bb.y + bb.h/2)*gs + i.devY;
-  const Q = outsetQuad(S.quad).map(([x,y]) => [(ox + x*gs)*RES, (oy + y*gs)*RES]);
+  let Q = outsetQuad(S.quad).map(([x,y]) => [(ox + x*gs)*RES, (oy + y*gs)*RES]);
+  /* Gerader Bildschirm auf ganze Punkte legen (17.11.2026). Vorher lag er auf Bruchteilen,
+     und die Verzerrung rechnete jeden Bildpunkt um: der Screenshot wurde ueberall weich,
+     auch wenn er 1:1 hineinpasste. Eine halbe Punktbreite Versatz sieht niemand. */
+  const gerade = Math.abs(Q[0][1] - Q[1][1]) < 0.5 && Math.abs(Q[3][1] - Q[2][1]) < 0.5
+              && Math.abs(Q[0][0] - Q[3][0]) < 0.5 && Math.abs(Q[1][0] - Q[2][0]) < 0.5;
+  if(gerade){
+    const x0 = Math.round(Q[0][0]), y0 = Math.round(Q[0][1]), x1 = Math.round(Q[1][0]), y1 = Math.round(Q[3][1]);
+    Q = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  }
   const xs = Q.map(p=>p[0]), ys = Q.map(p=>p[1]);
   const bbox = {
     x: Math.floor(Math.min(...xs)) - 2, y: Math.floor(Math.min(...ys)) - 2,
@@ -3850,18 +3861,49 @@ function drawChrome(c, w, h, i){
   c.fillText(i.url, fx + h*0.36, cy + 1);
   c.restore();
 }
+/* Verkleinern in Halbschritten (17.11.2026). Ein Screenshot, der in einem kleinen
+   Bildschirm auf ein Drittel schrumpft, wurde in einem Zug verkleinert und sah grob aus,
+   besonders Schrift im Phone. Halbieren bis kurz ueber das Ziel, dann der Rest: so
+   gehen keine Bildpunkte verloren. Gemerkt je Quelle, Massstab und Bildstand.         */
+let BILD_VER = 0;
+const KLEIN = new WeakMap();
+function kleinBild(src, s){
+  if(!(s < 0.7)) return {bild:src, k:1};
+  const W = src.naturalWidth || src.width, H = src.naturalHeight || src.height;
+  let k = 1;
+  while(k*0.5 >= s*1.001) k *= 0.5;
+  const key = k + "|" + W + "|" + H + "|" + BILD_VER;
+  const alt = KLEIN.get(src);
+  if(alt && alt.key === key) return alt;
+  let bild = src, b = W, h = H;
+  while(b*0.5 >= W*k - 0.5 && b > 1){
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(b/2)); c.height = Math.max(1, Math.round(h/2));
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+    x.drawImage(bild, 0, 0, c.width, c.height);
+    bild = c; b = c.width; h = c.height;
+  }
+  const neu = {bild, k: b / W, key};
+  KLEIN.set(src, neu);
+  return neu;
+}
 function drawContent(L, i){
   cont.width = L.cw; cont.height = L.chh;
   const c = cctx, ch = chromeH(L, i), e = effRect(L, i);
   c.fillStyle = i.screenBg; c.fillRect(0, 0, L.cw, L.chh);
   if(i.img){
     c.save(); c.beginPath(); c.rect(e.x, e.y, e.w, e.h); c.clip();
-    c.translate(i.ix, i.iy); c.scale(i.is, i.is);
-    c.drawImage(i.edit || i.img, 0, 0);
+    c.translate(i.ix, i.iy);
+    const kl = kleinBild(i.edit || i.img, i.is);
+    c.scale(i.is / kl.k, i.is / kl.k);
+    c.imageSmoothingEnabled = true; c.imageSmoothingQuality = "high";
+    c.drawImage(kl.bild, 0, 0);
     c.restore();
   } else {
     // Im Simple-Modus steht die Startkarte darueber, der Satz wuerde an ihren Raendern vorschauen
-    let ruhig = false; try { ruhig = modus === "einfach"; } catch(err){}
+    let ruhig = false; try { ruhig = modus === "einfach" || i.leerOk || i === act; } catch(err){}
+    /* leerOk: bewusst ohne Screenshot (weiss, Farbe, aus). Das gewaehlte leere Geraet traegt
+       in Advanced eine Karte mit der Auswahl, darunter steht kein Satz (17.11.2026). */
     if(ruhig){ if(ch) drawChrome(c, L.cw, ch, i); return; }
     c.fillStyle = CHROME_LEER;
     c.font = `300 ${Math.round(L.cw*0.028)}px "DM Sans", system-ui, sans-serif`;
@@ -3938,8 +3980,15 @@ function drawInstance(i){
       applyFit(i.fitMode, i, L);
       // Keep the chosen alignment when the renderer recalculates the layout.
       const area = effRect(L, i);
+      /* Fast 1:1 heisst 1:1 (17.11.2026): der Bildschirm reicht ein paar Punkte unter den
+         Rahmen (OUTSET), dadurch kam ein Massstab von 1,005 heraus, und jeder Bildpunkt
+         wurde neu gerechnet. Passt der Unterschied in diesen Rand, wird nicht skaliert,
+         und das Bild liegt auf ganzen Punkten: Schrift bleibt so scharf wie im Original. */
+      const rand = OUTSET * L.gs * RES * 2 + 1;
+      if(Math.abs(i.is - 1) < 0.03 && Math.abs(i.w - area.w) <= rand && Math.abs(i.h - area.h) <= rand) i.is = 1;
       i.ix = area.x + (area.w - i.w*i.is)*i.alignH;
       i.iy = area.y + (area.h - i.h*i.is)*i.alignV;
+      if(i.is === 1){ i.ix = Math.round(i.ix); i.iy = Math.round(i.iy); }
     }
     else if(i.lastContentW && Math.abs(i.lastContentW - L.cw) > 1){
       const f = L.cw / i.lastContentW;
@@ -4029,7 +4078,7 @@ function drawSelection(){
     const r = inhaltsRahmen();
     if(r){
       sctx.save();
-      sctx.strokeStyle = TOKEN("--accent"); sctx.lineWidth = 2*RES; sctx.setLineDash([12*RES, 8*RES]);
+      sctx.strokeStyle = "rgba(14,17,22,.22)"; sctx.lineWidth = 1.5*RES; sctx.setLineDash([10*RES, 8*RES]);
       sctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
       sctx.restore();
     }
@@ -4105,7 +4154,7 @@ function updateBtns(){
 }
 
 /* ---------------- device manager ---------------- */
-const DEV_NAMES = {desktop:"Desktop", laptop:"Laptop", phone:"Phone", window:"Window", browser:"Browser"};
+const DEV_NAMES = {desktop:"Monitor", laptop:"Laptop", phone:"Phone", window:"Frame", browser:"Browser"};
 /* Eine Objektzeile, dreimal gebraucht: Geraet, Markierung, Overlay. Sie ist ein Knopf,
    kein div mit Klickhandler, damit sie mit der Tastatur erreichbar ist. Das Kreuz zum
    Entfernen ist ein eigener Knopf darin und traegt die Glyphe des Iconsatzes.        */
@@ -4133,7 +4182,7 @@ function objektZeile({name, neben, gewaehlt, mit, punktFarbe, aufKlick, wegKlick
     const sch = document.createElement("button"); sch.type = "button";
     sch.className = "schloss" + (gesperrt ? " zu" : "");
     const wort = gesperrt ? "Locked. Click to unlock"
-                          : "Lock this one. A locked object cannot be picked up on the canvas";
+                          : "Lock it: it cannot be moved or picked on the canvas";
     sch.title = wort; sch.setAttribute("aria-label", wort);
     sch.setAttribute("aria-pressed", gesperrt ? "true" : "false");
     sch.innerHTML = GLYPH_SCHLOSS(!!gesperrt);
@@ -4432,14 +4481,22 @@ const inRect = (p,r) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r
    sonst waere die Sperre eine Falle.                                                */
 function pickDevice(p){
   for(let k = insts.length-1; k >= 0; k--){
-    const i = insts[k], L = i.L; if(!L || i.gesperrt) continue;
+    const i = insts[k], L = i.L; if(!L) continue;
     const cp = toContentL(p, L);
-    if(cp.x >= 0 && cp.x <= L.cw && cp.y >= 0 && cp.y <= L.chh) return {inst:i, type:"screen", cp, L};
+    if(cp.x >= 0 && cp.x <= L.cw && cp.y >= 0 && cp.y <= L.chh){
+      // Gesperrt heisst: dieses Geraet nimmt den Klick, und es passiert nichts (17.11.2026).
+      // Vorher griff man durch es hindurch das Geraet darunter.
+      if(i.gesperrt) return null;
+      return {inst:i, type:"screen", cp, L};
+    }
   }
   for(let k = insts.length-1; k >= 0; k--){
-    const i = insts[k], L = i.L; if(!L || i.gesperrt) continue;
-    const fp = toFrameL(p, L);
-    if(fp.x >= 0 && fp.x <= L.fw && fp.y >= 0 && fp.y <= L.fh) return {inst:i, type:"frame", fp, L};
+    const i = insts[k], L = i.L; if(!L) continue;
+    const fp = toFrameL(p, L), hb = L.bb || {x:0, y:0, w:L.fw, h:L.fh};
+    if(i.gesperrt){ if(fp.x >= hb.x && fp.x <= hb.x + hb.w && fp.y >= hb.y && fp.y <= hb.y + hb.h) return null; continue; }
+    // nur die sichtbare Huelle zaehlt (17.11.2026): sonst griff man durch ein gesperrtes Geraet
+    // hindurch das Nachbargeraet an dessen durchsichtigem Bildrand
+    if(fp.x >= hb.x && fp.x <= hb.x + hb.w && fp.y >= hb.y && fp.y <= hb.y + hb.h) return {inst:i, type:"frame", fp, L};
   }
   return null;
 }
@@ -4618,7 +4675,7 @@ $("#size").addEventListener("change", e => {
    einer Stelle. Bei "An den Inhalt anpassen" ist das Freimass die Arbeitsflaeche,
    nicht das Ergebnis: das sagt der Hinweis, sonst sucht man den Zuschnitt hier.      */
 function syncGroesse(){
-  const nachMass = state.ratio === "free" || state.ratio === "content";
+  const nachMass = state.ratio === "free";   // bei "Crop to the content" bestimmt der Inhalt das Mass (17.11.2026)
   $("#freeRow").classList.toggle("show", nachMass);
   $("#freeHint").textContent = state.ratio === "content"
     ? "Working area. The file keeps only what is actually drawn: devices, callouts and overlays including their shadows. The dashed line on the canvas shows the crop."
@@ -4674,21 +4731,27 @@ $("#chromeToggle").addEventListener("change", e => { act.chromeOn = e.target.che
    Ausgabemass sind: neben "Size on the canvas" waere das sonst genau die Verwechslung,
    die man einmal macht und dann nicht mehr findet.                                     */
 function syncFrameSize(){
-  const dev = act.device, nat = NATIV_VERH(dev).toFixed(2);
+  const dev = act.device, nat = verhText(NATIV_VERH(dev));
   const wort = {browser:"browser frame", window:"frame", desktop:"monitor", laptop:"laptop", phone:"phone"}[dev] || "device";
   $("#frameSizeFree").classList.toggle("show", act.frameSize === "custom");
   $("#frameW").value = act.frameW; $("#frameH").value = act.frameH;
   $("#frameSizeHint").textContent =
     act.frameSize === "custom"
-      ? "Read as a ratio, not as an output size: " + (act.frameW/act.frameH).toFixed(2)
-        + " to 1. How big it comes out stays with Size and position."
+      ? "Only the shape counts here (" + verhText(act.frameW/act.frameH)
+        + "), not the pixels. How big it comes out stays with the size slider."
       : act.frameSize === "shot"
         ? (act.img
             ? "Follows the screenshot, " + act.w + " by " + act.h + " ("
-              + (act.w/act.h).toFixed(2) + " to 1), so nothing is cropped."
-            : "No screenshot loaded, the " + wort + " stays at " + nat + " to 1.") + " The " + wort + " grows where its frame is plain, nothing is distorted."
-        : "The shape the " + wort + " was built in, " + nat + " to 1. A screenshot of a"
-          + " different shape is cropped or gets bars, depending on the setting above.";
+              + verhText(act.w/act.h) + "), so nothing is cropped."
+            : "No screenshot loaded, the " + wort + " stays " + nat + ".") + " The " + wort + " grows where its frame is plain, nothing is distorted."
+        : "The real shape of the " + wort + " (" + nat + "). A screenshot of another"
+          + " shape is cropped or gets bars, depending on the setting above.";
+}
+/* Verhaeltnis in Worten, die man kennt: 16:9 statt 1.78 to 1 (17.11.2026). */
+function verhText(r){
+  const BEKANNT = [[16,9],[16,10],[3,2],[4,3],[5,4],[1,1],[4,5],[3,4],[2,3],[10,16],[9,16],[9,19.5],[19.5,9],[21,9]];
+  for(const [a, b] of BEKANNT) if(Math.abs(r - a/b) / (a/b) < 0.02) return a + ":" + b;
+  return r >= 1 ? r.toFixed(2) + ":1" : "1:" + (1/r).toFixed(2);
 }
 function setFrameSize(mode){
   snap("frameSize");
@@ -4805,6 +4868,7 @@ function eraseStroke(a, b, i){
   x.lineWidth = Math.max(1, state.brush / i.is);
   x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
   x.restore();
+  BILD_VER++;
 }
 function setTool(t){
   state.tool = t;
@@ -4846,7 +4910,7 @@ function renderOvList(){
         if(ovSel >= OVERLAYS.length) ovSel = OVERLAYS.length - 1;
         renderOvList(); render();
       },
-      wegTitel: "Remove overlay"
+      wegTitel: "Remove image"
     }));
   });
   $("#ovCount").textContent = OVERLAYS.length || "";
@@ -4859,9 +4923,12 @@ $("#ovFile").addEventListener("change", e => {
     const im = new Image();
     im.onload = () => {
       const [W, H] = stageSize();
-      const scale = (W*0.25) / im.naturalWidth;
+      /* Ein Fuenftel der Breite des gewaehlten Geraets, oben rechts darauf (17.11.2026).
+         Vorher ein Viertel der Flaeche, ein Logo war damit groesser als der Monitor. */
+      const gb = act && act.L ? geraetBox(act) : {x:0, y:0, w:W, h:H};
+      const scale = Math.min(gb.w*0.2 / im.naturalWidth, gb.h*0.2 / im.naturalHeight);
       OVERLAYS.push({img:im, name:f.name,
-        x:W/2 - im.naturalWidth*scale/2, y:H/2 - im.naturalHeight*scale/2, scale});
+        x:gb.x + gb.w*0.94 - im.naturalWidth*scale, y:gb.y + gb.h*0.06, scale});
       ovSel = OVERLAYS.length - 1;
       $("#ovScale").value = 100;
       beruehrt(); renderOvList(); render();
@@ -5163,6 +5230,17 @@ function markHit(p, e){
       return {t:"markMove", m, alle, q0:q};
     }
   }
+  /* Auch die Flaeche innen faellt die Markierung an (17.11.2026): wer sie verschieben will,
+     greift in die Mitte, nicht auf die drei Punkte breite Linie. */
+  for(let i = MARKS.length - 1; i >= 0; i--){
+    const m = MARKS[i]; if(m.gesperrt) continue;
+    if(inRect(q, markRect(m))){
+      if(!markSelSet.has(i) || (e && (e.ctrlKey || e.metaKey || e.shiftKey))) markWaehlen(i, e);
+      else { markSel = i; syncMark(); renderMarkList(); render(); }
+      const alle = markAuswahl().map(k => { const mm = MARKS[k]; return {m:mm, x0:mm.x, y0:mm.y, lx0:mm.lx, ly0:mm.ly}; });
+      return {t:"markMove", m, alle, q0:q};
+    }
+  }
   return null;
 }
 /* Nur im Werkzeug Markieren, und nur auf leerer Flaeche: eine neue Markierung aufziehen. */
@@ -5400,7 +5478,7 @@ function syncMark(){
     ? "One callout: the label aligns to the edge of the output area."
     : "The labels of " + n + " callouts align to each other.";
   $("#markMulti").textContent = n > 1
-    ? n + " selected. The label text applies to this one only; colours, sizes and aligning "
+    ? n + " selected. The label text applies to this one only; colors, sizes and aligning "
       + "apply to all of them."
     : "";
   document.querySelectorAll("[data-rv],[data-lv]").forEach(b => b.disabled = n < 3);
@@ -5543,6 +5621,7 @@ function anwenden(h){
       const x = c.getContext("2d");
       x.clearRect(0, 0, c.width, c.height);
       x.drawImage(e.pixel, 0, 0);
+      BILD_VER++;
     }
     insts.push(e.ref);
   }
@@ -5650,7 +5729,7 @@ function exportFilename(){
     .replace(/\.(png|webp|jpe?g)$/i, "");
   const desc = insts.length > 1
     ? `layout-${insts.length}devices`
-    : `${act.device}-${act.view}-${act.frame}`;
+    : `${(DEV_NAMES[act.device] || act.device).toLowerCase()}-${act.view}-${act.frame}`;
   const skala = state.exportScale === 2 ? "@2x" : "";
   const base = custom || `zetcom-mockup-${desc}-${R.w}x${R.h}${skala}`;
   return `${base}.${ext}`;
@@ -5840,7 +5919,7 @@ function projektName(){
   const roh = (state.exportName || "").trim()
     .replace(/[\\/:*?"<>|]/g, "").replace(/\.(png|webp|jpe?g|json)$/i, "")
     .replace(/\.zdm$/i, "");
-  return (roh || "zetcom-mockup-projekt") + ".zdm.json";
+  return (roh || "zetcom-mockup-project") + ".zdm.json";
 }
 async function projektSpeichern(){
   let json;
@@ -5948,6 +6027,9 @@ async function projektAnwenden(P){
   render(); einpassen(); updateSizePreview();
 }
 async function projektLaden(f){
+  /* Ungesicherte Arbeit nicht stillschweigend ersetzen (17.11.2026). */
+  if(schmutzig && insts.some(i => i.img) &&
+     !confirm("Open this project? Your current mockup has unsaved changes and will be replaced.")) return;
   let P;
   try{ P = JSON.parse(await f.text()); }
   catch(err){ $("#projectNote").textContent = "That file is not readable JSON."; return; }
@@ -6364,7 +6446,7 @@ window.addEventListener("beforeunload", e => {
 const GERAET_HINWEIS = {
   desktop: "A monitor on a stand. The usual choice for website shots.",
   laptop:  "A notebook with the lid open.",
-  phone:   "A phone, portrait. Tilt left and right are not mirrored, the buttons really do sit like that.",
+  phone:   "A phone, upright. A wide screenshot turns it on its side.",
   window:  "A floating window frame without a device, for a part of an interface.",
   browser: "No device at all: the screenshot itself, with a browser bar, barely rounded corners and an optional soft shadow."
 };
@@ -6395,7 +6477,7 @@ function syncFokus(){
   f.checked = state.fokus;
   $("#fokusRow").classList.toggle("show", state.fokus);
   $("#fokusStaerke").value = Math.round(state.fokusStaerke * 100);
-  $("#fokusLabel").textContent = "Darkness " + Math.round(state.fokusStaerke * 100) + " per cent"
+  $("#fokusLabel").textContent = "Darkness " + Math.round(state.fokusStaerke * 100) + " percent"
     + (MARKS.length ? "" : ". No callout yet, so nothing is dimmed.");
 }
 $("#fokusAn").addEventListener("change", e => {
@@ -6501,7 +6583,20 @@ function frameBBox(im){
    enclosed by the bezel, so it stays part of the silhouette. Used to clip content on green-screen
    devices whose bezel is too thin/rounded to hide the OUTSET overshoot (prevents bleed past the edge).
    Works on cutout frames as well as green-screened ones — it only ever reads alpha. */
-function frameSil(im){
+/* Schwelle (17.11.2026): beim Phone zaehlt auch der halbdurchsichtige Aussenrand zur
+   Umgebung. Vorher lag die Ecke des Screenshots unter diesen Randpunkten und schien als
+   blaue Ecke durch den Stahlrahmen (Robin: "die Ecken schauen ueber den Rand raus").
+   Der Bildschirm bleibt drin, weil der schwarze Rand dazwischen ganz deckend ist; wenn
+   nicht, faellt frameSilSicher auf die alte Schwelle zurueck.                        */
+function frameSilSicher(im, quad){
+  const c = frameSil(im, 250);
+  if(!quad) return c;
+  const mx = Math.round((quad[0][0] + quad[2][0])/2), my = Math.round((quad[0][1] + quad[2][1])/2);
+  const a = c.getContext("2d").getImageData(mx, my, 1, 1).data[3];
+  return a ? c : frameSil(im);
+}
+function frameSil(im, schwelle){
+  schwelle = schwelle || 8;
   const w = im.naturalWidth, h = im.naturalHeight;
   const c = document.createElement("canvas");
   c.width = w; c.height = h;
@@ -6510,7 +6605,7 @@ function frameSil(im){
   const img = x.getImageData(0, 0, w, h), d = img.data;
   const ext = new Uint8Array(w*h);      // 1 = exterior (transparent, border-connected)
   const stack = [];
-  const push = (px, py) => { const i = py*w+px; if(!ext[i] && d[i*4+3] < 8){ ext[i] = 1; stack.push(i); } };
+  const push = (px, py) => { const i = py*w+px; if(!ext[i] && d[i*4+3] < schwelle){ ext[i] = 1; stack.push(i); } };
   for(let px = 0; px < w; px++){ push(px, 0); push(px, h-1); }
   for(let py = 0; py < h; py++){ push(0, py); push(w-1, py); }
   while(stack.length){
@@ -6550,7 +6645,7 @@ for(const [key, dev] of Object.entries(DEVICES)){
       const im = new Image();
       im.onload = () => {
         slot.bb = frameBBox(im);
-        if(braucht_sil) slot.sil = frameSil(im);
+        if(braucht_sil) slot.sil = dev === PHONE ? frameSilSicher(im, dev[vk].quad) : frameSil(im);
         if(--pending === 0){
           zeichneMiniaturen();
           syncControls(); render(); einpassen();
@@ -6669,7 +6764,7 @@ function pipette(an){
   const b = $("#eBgPipette");
   b.setAttribute("aria-pressed", an ? "true" : "false");
   b.classList.toggle("sel", an);
-  b.textContent = an ? "Click image" : "Pick colour";
+  b.textContent = an ? "Click image" : "Pick color";
 }
 /* Der Griff sitzt vor allem anderen im pointerdown der Flaeche, siehe dort. */
 function pipetteGriff(p){
@@ -6712,7 +6807,12 @@ function einfachNeuEinpassen(){
    Bedienteile, die der erweiterte Modus zeigt, damit dort nichts anderes steht als das,
    was wirklich herauskommt.                                                            */
 function einfachAusgabe(){
-  state.freeW = E_FLAECHE[0]; state.freeH = E_FLAECHE[1];
+  /* Mehrere Geraete: die Flaeche bleibt, wie sie ist, sonst aendern sich Groesse und Lage
+     der Anordnung (17.11.2026, seit einfachAusgabe bei jedem Wechsel laeuft). */
+  if(insts.length > 1){
+    const [w, h] = stageSize();
+    state.freeW = Math.round(w); state.freeH = Math.round(h);
+  } else { state.freeW = E_FLAECHE[0]; state.freeH = E_FLAECHE[1]; }
   $("#freeW").value = state.freeW; $("#freeH").value = state.freeH;
   state.ratio = "content"; $("#size").value = "content";
   state.bgMode = "transparent";
@@ -6778,7 +6878,7 @@ $("#eGanz").addEventListener("change", e => {
 /* Neun Felder, drei mal drei. Der Anteil steht im Markup, damit die Reihenfolge auf dem
    Bildschirm und die Zahl dahinter dieselbe Quelle haben. */
 const E_LAGEN = [[0,0,"Top left"],   [0.5,0,"Top"],    [1,0,"Top right"],
-                 [0,0.5,"Left"],     [0.5,0.5,"Centre"], [1,0.5,"Right"],
+                 [0,0.5,"Left"],     [0.5,0.5,"Center"], [1,0.5,"Right"],
                  [0,1,"Bottom left"],[0.5,1,"Bottom"], [1,1,"Bottom right"]];
 (function bauePad(){
   const w = document.querySelector(".e-pad"); if(!w) return;
@@ -6898,7 +6998,10 @@ function setModus(m){
   try { localStorage.setItem(MODUS_SCHLUESSEL, modus); } catch(e){ /* privates Fenster */ }
   if(modus === "einfach"){
     setTool("move");
-    if(!uiInitialised) einfachAusgabe();
+    /* Immer, nicht nur beim ersten Mal (17.11.2026): wer zuletzt im erweiterten Modus war,
+       startet dort und kam beim Wechsel nach Simple mit 1200 x 800 und 80 % an, der Download
+       war dann die ganze Flaeche statt des zugeschnittenen Mockups. */
+    einfachAusgabe();
     zeichneMiniaturen();
     zeigeBereich("einfach");
   } else {
@@ -6931,7 +7034,7 @@ function mobileView(preview){
   requestAnimationFrame(() => { einpassen(); zeichneMiniaturen(); });
 }
 function syncStudio(){
-  const hasImage = !!act.img, empty = insts.every(i => !i.img) && !OVERLAYS.length && !MARKS.length;
+  const hasImage = !!act.img, empty = insts.every(i => !i.img && !i.leerOk) && !OVERLAYS.length && !MARKS.length;
   document.body.classList.toggle("has-image", hasImage);
   $("#buehne").classList.toggle("is-empty", empty);
   $("#canvasDevice").textContent = (insts.length > 1 ? insts.length + " devices · " : "") + (act.device === "desktop" ? "Monitor" : DEV_NAMES[act.device]);
@@ -6940,13 +7043,13 @@ function syncStudio(){
   $("#exportSummary").textContent = fmt + " · " + (transparent ? "Transparent background" : "Solid background");
   $("#eLadenHinweis").textContent = empty ? "Add an image to enable export." : R.w + " × " + R.h + " px" + (R.zugeschnitten ? " · Cropped to content" : "");
   $("#export").disabled = empty || exportBusy;
-  $("#export").title = empty ? "Add an image first" : "Export mockup as " + fmt;
-  $("#exportLabel").textContent = exportBusy ? "Exporting…" : "Export " + fmt;
+  $("#export").title = empty ? "Add an image first" : "Download the mockup as " + fmt;
+  $("#exportLabel").textContent = exportBusy ? "Exporting…" : "Download " + fmt;
   $("#eLaden").disabled = empty || exportBusy;
   document.querySelectorAll('.ewerkzeug, .toolbtn[data-tool="crop"], .toolbtn[data-tool="erase"], #eGanz, #eBgPipette, .epad').forEach(b => b.disabled = !hasImage);
   if(hasImage){ $("#eBildStand").textContent = act.w + " × " + act.h + " px"; }
   const help = $("#canvasHelp");
-  help.textContent = empty ? "Drop an image · Ctrl+V to paste" : pipetteAn ? "Click a colour in your image · Esc to cancel" : state.tool === "crop" ? "Drag to crop · Ctrl+Z to undo" : state.tool === "erase" ? "Paint to erase · Ctrl+Z to undo" : state.tool === "mark" ? "Drag to draw a callout" : modus === "einfach" || inhaltModus ? "Drag image to position · Scroll to zoom view" : "Drag to move · Double-click screen to edit";
+  help.textContent = empty ? "Drop an image · Ctrl+V to paste" : pipetteAn ? "Click a color in your image · Esc to cancel" : state.tool === "crop" ? "Drag to crop · Ctrl+Z to undo" : state.tool === "erase" ? "Paint to erase · Ctrl+Z to undo" : state.tool === "mark" ? "Drag to draw a callout" : modus === "einfach" || inhaltModus ? "Drag image to position · Scroll to zoom view" : "Drag to move · Double-click screen to edit";
   syncSimpleGuide();
 }
 $("#canvasUpload").addEventListener("click", () => $("#file").click());
@@ -7012,7 +7115,9 @@ function einfachFlaeche(){
   const i = act, S = frameSlot(i), img = S.img;
   if(!i.img || !img || !img.naturalWidth) return false;
   const bb = S.bb || {x:0, y:0, w:img.naturalWidth, h:img.naturalHeight};
-  const q = S.quad, sw = Math.max(dist(q[0], q[1]), dist(q[3], q[2]));
+  // gemessen am Bildschirm samt OUTSET, so wie layout() ihn zeichnet: dann ist er genau so
+  // breit wie der Screenshot, und der kommt 1:1 hinein (17.11.2026)
+  const q = outsetQuad(S.quad), sw = Math.max(dist(q[0], q[1]), dist(q[3], q[2]));
   const gs = i.w / (sw * state.exportScale);
   let W = bb.w*gs/E_GROESSE, H = bb.h*gs/E_GROESSE;
   const k = clamp(Math.max(W, H), 900, 3000) / Math.max(W, H);
@@ -7051,7 +7156,7 @@ function syncSimpleGuide(){
   const tool = state.tool === "crop" || state.tool === "erase";
   $("#eDoneEditing").hidden = !tool;
   $("#simpleEditBar").hidden = modus !== "einfach" || (!tool && !pipetteAn);
-  $("#simpleEditLabel").textContent = pipetteAn ? "Click a colour in the image" : state.tool === "crop" ? "Drag around the area to keep" : "Paint over the detail to hide";
+  $("#simpleEditLabel").textContent = pipetteAn ? "Click a color in the image" : state.tool === "crop" ? "Drag around the area to keep" : "Paint over the detail to hide";
   $("#eLaden").textContent = exportBusy ? "Preparing download…" : "Download mockup";
   if(modus === "einfach"){
     $("#exportSummary").textContent = state.exportFormat === "png" && state.bgMode === "transparent" ? "Transparent PNG · Ready for slides & documents" : FMT_NAME[state.exportFormat] + " · Using your Advanced export settings";
@@ -7183,6 +7288,7 @@ einpassen();
   /* Simple heisst immer: das Geraet passt sich dem Screenshot an. */
   function simplePasst(){
     if(modus !== "einfach" || act.frameSize === "shot") return;
+    if(act.frameSize === "standard" && act.simpleFitChosen) return;   // "Real shape" bleibt (17.11.2026)
     act.frameSize = "shot"; einfachPassformSetzen(act); einfachNeuEinpassen();
     render(); einpassen();
   }
@@ -7440,8 +7546,8 @@ einpassen();
   window.zuschnittOeffnen = oeffnen;
 })();
 </script>
-<div class="sm-pop" id="smPopSzene" role="dialog" aria-label="Scene" hidden>
-  <div class="sm-pop-kopf"><h3>Scene</h3><button type="button" class="sm-zu" id="smSzeneZu" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+<div class="sm-pop" id="smPopSzene" role="dialog" aria-label="Background" hidden>
+  <div class="sm-pop-kopf"><h3>Background</h3><button type="button" class="sm-zu" id="smSzeneZu" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="sm-pop-inhalt"><div class="set-szenen" id="setSzenen"></div></div>
 </div>
 <input type="file" id="setDatei" accept="image/*" hidden>
@@ -8067,7 +8173,7 @@ body.set-modus.zieht-datei #buehne:after{display:none}
     <ul class="hd-liste">
       <li><strong>Angle</strong>: turn the device a little to the left or right. Not available for the phone.</li>
       <li><strong>Shadow and browser bar</strong>: switch them on or off. Type the address that should show in the bar into the field next to it.</li>
-      <li><strong>Screenshot menu</strong>: replace the image, crop it, erase parts of it or pick the colour behind it.</li>
+      <li><strong>Screenshot menu</strong>: replace the image, crop it, erase parts of it or pick the color behind it.</li>
       <li><strong>Device set</strong>: monitor, laptop, tablet and phone in one scene. Click a screen to add its screenshot, drag to move it, scroll to resize it.</li>
       <li><strong>Advanced</strong>, bottom right: several devices on one canvas, callouts, overlays and exact output sizes.</li>
     </ul>
@@ -8109,5 +8215,1191 @@ body.set-modus.zieht-datei #buehne:after{display:none}
   if(location.hash === "#hilfe"){ history.replaceState(null, "", "#einfach"); knopf.classList.remove("sel"); }
 })();
 </script>
+<style id="studio-einfacher-1711">
+/* Simple einfacher (Robin, 17.11.2026): unter 1440 px Breite stand die Geraetewahl nur als
+   fuenf Symbole ohne Namen da, dazu Winkel und zwei Schalter, also zehn Symbole in einer Reihe.
+   Jetzt: ein Knopf "Laptop" mit Menue (Name und ein Satz je Geraet), dadurch ist Platz fuer
+   die Namen von Schatten und Browserleiste. Keine Funktion faellt weg, die alten Knoepfe
+   wandern nur ins Menue. Steht nach studio-hilfe-1711 und gewinnt. */
+.sm-wz .lbl{display:inline!important}
+.sm-wz{padding:0 11px!important}
+.sm-art .lbl{display:inline!important}.sm-art{padding:0 11px!important}
+@media(max-width:1440px){.sm-mitte:has(#smUrl:not([hidden])) :is(#smShadow,#smBar) .lbl{display:none!important}}
+@media(max-width:1360px){.brand-product,.brand-divider{display:none!important}#smShotBtn .pfeil,#smGeraetBtn .pfeil{display:none}.sm-trenn{margin:0 3px}}
+@media(max-width:1180px){#smShadow .lbl,#smBar .lbl{display:none!important}#smShadow,#smBar{padding:0 9px!important}}
+@media(max-width:1100px){.sm-art .lbl{display:none!important}.sm-art{padding:0 9px!important}}
+@media(max-width:1100px){#smShotBtn .lbl,#smGeraetBtn .lbl{display:none!important}}
+#smGeraetBtn .pfeil{width:14px;height:14px;opacity:.6}
+#smPopGeraet{width:340px}
+#smPopGeraet .sm-seg{display:grid;gap:4px}
+#smPopGeraet .sm-dev{display:grid;grid-template-columns:24px 1fr;column-gap:12px;align-items:center;height:auto;padding:10px 12px;text-align:left;white-space:normal;border-radius:10px;font-size:14px}
+#smPopGeraet .sm-dev .i{grid-row:span 2}
+#smPopGeraet .sm-dev .lbl{display:block!important;font-weight:600;color:var(--v8-ink)}
+#smPopGeraet .sm-dev .was{display:block;font-size:12.5px;line-height:1.4;font-weight:400;color:var(--v8-muted)}
+#smPopGeraet .sm-dev:hover{background:var(--v8-sunken)}
+#smPopGeraet .sm-dev[aria-pressed=true]{background:var(--v8-accent-soft);box-shadow:none}
+</style>
+<div class="sm-pop" id="smPopGeraet" role="dialog" aria-label="Device" hidden>
+  <div class="sm-pop-kopf"><h3>Device</h3><button type="button" class="sm-zu" id="smGeraetZu" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sm-pop-inhalt" id="smGeraetInhalt"></div>
+</div>
+<script id="studio-einfacher-1711-js">
+(function geraeteMenue(){
+  const seg = document.querySelector('.sm-seg[aria-label="Device"]');
+  const pop = document.getElementById("smPopGeraet");
+  if(!seg || !pop) return;
+  const WAS = {
+    desktop: "A screen on a stand. Good for websites.",
+    laptop:  "A notebook with the lid open.",
+    phone:   "For apps and mobile pages. A wide screenshot turns it on its side.",
+    browser: "No device. Your screenshot with a browser bar and a soft shadow.",
+    window:  "A glass frame around part of a screen."
+  };
+  // Knopf an die Stelle der Symbolreihe, die Symbolreihe ins Menue
+  const knopf = document.createElement("button");
+  knopf.type = "button"; knopf.className = "sm-wz nur-einzel"; knopf.id = "smGeraetBtn";
+  knopf.setAttribute("aria-expanded", "false"); knopf.setAttribute("aria-controls", "smPopGeraet");
+  knopf.title = "Choose the device";
+  seg.parentNode.insertBefore(knopf, seg);
+  document.getElementById("smGeraetInhalt").appendChild(seg);
+  seg.querySelectorAll(".sm-dev").forEach(b => {
+    const s = document.createElement("span"); s.className = "was"; s.textContent = WAS[b.dataset.dev] || ""; b.appendChild(s);
+    b.removeAttribute("title");
+  });
+  const PFEIL = '<svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  function zeige(){
+    const b = seg.querySelector('.sm-dev[aria-pressed="true"]') || seg.querySelector(".sm-dev");
+    knopf.innerHTML = b.querySelector("svg").outerHTML + '<span class="lbl">' + b.querySelector(".lbl").textContent + "</span>" + PFEIL;
+  }
+  new MutationObserver(zeige).observe(seg, {subtree:true, attributes:true, attributeFilter:["aria-pressed"]});
+  zeige();
+  function auf(an){
+    pop.hidden = !an; knopf.setAttribute("aria-expanded", String(an));
+    if(an){
+      const r = knopf.getBoundingClientRect();
+      pop.style.left = Math.max(12, Math.min(r.left, innerWidth - pop.offsetWidth - 12)) + "px";
+      pop.style.top = (r.bottom + 10) + "px";
+    }
+  }
+  knopf.addEventListener("click", () => auf(pop.hidden));
+  document.getElementById("smGeraetZu").addEventListener("click", () => auf(false));
+  seg.addEventListener("click", e => { if(e.target.closest(".sm-dev")) setTimeout(() => auf(false), 120); });
+  document.addEventListener("pointerdown", e => { if(!pop.hidden && !pop.contains(e.target) && !knopf.contains(e.target)) auf(false); });
+  window.addEventListener("keydown", e => { if(e.key === "Escape" && !pop.hidden) auf(false); });
+  // Wechsel nach Advanced oder ins Device set schliesst das Menue
+  document.querySelectorAll(".modusbtn,.sm-art").forEach(b => b.addEventListener("click", () => auf(false)));
+})();
+</script>
+<style id="studio-perfekt-1711">
+/* Durchgang "perfekt" (Robin, 17.11.2026). Drei Teile:
+   1. Vorschau scharf: die Arbeitsflaeche wird doppelt so fein gerechnet wie gezeigt und
+      vom Browser beim Zoomen grob verkleinert, Schrift wirkte pixelig. Eine eigene
+      Vorschauflaeche in Bildschirmaufloesung liegt darueber, #view bleibt fuer Zeiger
+      und Export und ist nur unsichtbar.
+   2. Simple: Schalter "Fit to screenshot" oder "Real shape" im Geraetemenue und im
+      Hinweis unten.
+   3. Advanced, "Crop to the content": die Arbeitsflaeche waechst mit, wenn ein Geraet
+      an den Rand gezogen wird, und zieht sich nach dem Loslassen um den Inhalt zusammen.
+      Ein neues Geraet kommt neben die anderen statt darauf.                         */
+#stageWrap{position:relative}
+#vorschau{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}
+#stageWrap.mit-vorschau #view{opacity:0}
+#stageWrap.mit-vorschau #vorschau{display:block}
+#sel{z-index:2}
+.sm-form{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--v8-line)}
+.sm-form h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--v8-muted)}
+.sm-form-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;background:var(--v8-sunken);border:1px solid var(--v8-line);border-radius:10px}
+.sm-form-seg button{height:34px;border:0;border-radius:8px;background:none;font:inherit;font-size:13px;font-weight:500;color:var(--v8-ink-2)}
+.sm-form-seg button[aria-pressed=true]{background:#fff;color:var(--v8-ink);font-weight:600;box-shadow:0 1px 3px rgba(14,17,22,.12)}
+.sm-form p{margin:8px 0 0;font-size:12.5px;line-height:1.4;color:var(--v8-muted)}
+.sm-hinweis .sm-hw-knopf{margin-left:4px;padding:4px 10px;border:1px solid var(--v8-line);border-radius:99px;background:var(--v8-sunken);font:inherit;font-size:12.5px;font-weight:600;color:var(--v8-ink);cursor:pointer;white-space:nowrap}
+.sm-hinweis .sm-hw-knopf:hover{background:#fff;border-color:var(--v8-ink-2)}
+</style>
+<script id="studio-perfekt-1711-js">
+(function perfekt(){
+  /* ================= 1. Scharfe Vorschau ================= */
+  const vor = document.createElement("canvas");
+  vor.id = "vorschau"; vor.setAttribute("aria-hidden", "true");
+  wrap.insertBefore(vor, sel);
+  const vctx2 = vor.getContext("2d");
+  let vorPlan = 0;
+  function vorschauZeichnen(){
+    vorPlan = 0;
+    const dpr = window.devicePixelRatio || 1;
+    const [W, H] = stageSize();
+    const fein = ANSICHT.z * dpr / RES;            // Bildschirmpunkte je Rechenpunkt
+    if(fein > 0.75 || !view.width){ wrap.classList.remove("mit-vorschau"); return; }
+    const b = Math.max(1, Math.round(W * ANSICHT.z * dpr)), h = Math.max(1, Math.round(H * ANSICHT.z * dpr));
+    if(vor.width !== b || vor.height !== h){ vor.width = b; vor.height = h; }
+    vctx2.clearRect(0, 0, b, h);
+    vctx2.imageSmoothingEnabled = true; vctx2.imageSmoothingQuality = "high";
+    // In Halbschritten, sonst gehen bei starkem Verkleinern Bildpunkte verloren
+    let quelle = view, qb = view.width, qh = view.height;
+    while(qb / 2 >= b && qh / 2 >= h){
+      const c = document.createElement("canvas");
+      c.width = Math.ceil(qb / 2); c.height = Math.ceil(qh / 2);
+      const x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+      x.drawImage(quelle, 0, 0, c.width, c.height);
+      quelle = c; qb = c.width; qh = c.height;
+    }
+    vctx2.drawImage(quelle, 0, 0, b, h);
+    wrap.classList.add("mit-vorschau");
+  }
+  const vorschauBald = () => { if(!vorPlan) vorPlan = requestAnimationFrame(vorschauZeichnen); };
+  const renderAlt = render;
+  render = function(){ renderAlt(); vorschauBald(); };
+  const ansichtAlt = ansichtAnwenden;
+  ansichtAnwenden = function(){ ansichtAlt(); vorschauBald(); };
+  window.addEventListener("resize", vorschauBald);
+
+  /* ================= 2. Simple: Form des Geraets ================= */
+  const inhalt = document.getElementById("smGeraetInhalt");
+  if(inhalt){
+    const f = document.createElement("div");
+    f.className = "sm-form";
+    f.innerHTML = '<h4>Shape</h4><div class="sm-form-seg" role="group" aria-label="Shape">'
+      + '<button type="button" data-form="shot">Fit to screenshot</button>'
+      + '<button type="button" data-form="standard">Real shape</button></div>'
+      + '<p id="smFormText"></p>';
+    inhalt.appendChild(f);
+    f.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      if(b.getAttribute("aria-pressed") === "true") return;
+      einfachPassform(b.dataset.form);
+    }));
+  }
+  function formSync(){
+    const echt = act.frameSize === "standard";
+    document.querySelectorAll(".sm-form-seg button").forEach(b =>
+      b.setAttribute("aria-pressed", String((b.dataset.form === "standard") === echt)));
+    const t = document.getElementById("smFormText");
+    if(t) t.textContent = echt
+      ? "The device keeps its real proportions. The screenshot fills the screen, drag it to show the right part."
+      : "The device takes the shape of your screenshot, so nothing is cut off.";
+    const h = document.getElementById("smHinweisText");
+    if(!h || modus !== "einfach" || !act.img) return;
+    const quer = act.device === "phone" && echt === false && PHONE_QUER(act.w / act.h);
+    h.innerHTML = (echt
+      ? "<b>Real shape:</b> drag the screenshot to show the right part."
+      : quer ? "<b>Wide screenshot:</b> the phone lies on its side. Nothing is cut off."
+             : "<b>Fits automatically:</b> the device takes the shape of your screenshot.")
+      + ' <button type="button" class="sm-hw-knopf" id="smHwForm">'
+      + (echt ? "Fit to screenshot" : "Use real shape") + "</button>";
+    document.getElementById("smHwForm").addEventListener("click", () => einfachPassform(echt ? "shot" : "standard"));
+  }
+  const guideAlt = syncSimpleGuide;
+  syncSimpleGuide = function(){ guideAlt(); formSync(); };
+  formSync();
+
+  /* ================= 3. Advanced: Flaeche waechst mit ================= */
+  const MAX_SEITE = 3200;   // Rechenflaeche hoechstens 6400 Punkte je Seite (RES 2)
+  const MIN_SEITE = 2000;   // und nach dem Zusammenziehen mindestens so viel
+  function inhaltBox(){
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const nimm = (x, y, w, h) => {
+      if(!(w > 0) || !(h > 0)) return;
+      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h);
+    };
+    for(const i of insts){ const S = frameSlot(i); if(S.img && S.img.naturalWidth){ const b = geraetBox(i); nimm(b.x, b.y, b.w, b.h); } }
+    for(const o of OVERLAYS) nimm(o.x, o.y, o.img.naturalWidth*o.scale, o.img.naturalHeight*o.scale);
+    for(const m of MARKS){
+      nimm(m.x - m.breite, m.y - m.breite, m.w + 2*m.breite, m.h + 2*m.breite);
+      if(m.label){ const L = markLabelBox(m); nimm(L.x, L.y, L.w, L.h); }
+    }
+    return isFinite(x0) ? {x:x0, y:y0, w:x1 - x0, h:y1 - y0} : null;
+  }
+  /* Neue Flaeche T (in alten Flaechenpunkten), optional mit Faktor f fuer alles. Geraete
+     liegen relativ zur Mitte, Markierungen und Overlays absolut: beides wird umgerechnet,
+     die Ansicht wird nachgeschoben, damit auf dem Bildschirm nichts springt.          */
+  function flaecheSetzen(T, f){
+    f = f || 1;
+    const [aW, aH] = stageSize();
+    const nW = Math.max(200, Math.round(T.w * f)), nH = Math.max(200, Math.round(T.h * f));
+    const gsAlt = insts.map(i => { const g = geraetFit(i, aW, aH); return g > 0 ? g * i.devScale : 0; });
+    for(const [k, i] of insts.entries()){
+      const cx = (aW/2 + i.devX - T.x) * f, cy = (aH/2 + i.devY - T.y) * f;
+      i.devX = cx - nW/2; i.devY = cy - nH/2;
+    }
+    const neuX = v => (v - T.x) * f, neuY = v => (v - T.y) * f;
+    for(const m of MARKS){
+      m.x = neuX(m.x); m.y = neuY(m.y); m.w *= f; m.h *= f;
+      if(m.lx !== null) m.lx = neuX(m.lx);
+      if(m.ly !== null) m.ly = neuY(m.ly);
+    }
+    for(const o of OVERLAYS){ o.x = neuX(o.x); o.y = neuY(o.y); o.scale *= f; }
+    state.freeW = nW; state.freeH = nH;
+    $("#freeW").value = nW; $("#freeH").value = nH;
+    insts.forEach((i, k) => {
+      const g = geraetFit(i, nW, nH);
+      if(g > 0 && gsAlt[k] > 0){ i.devScale = clamp(gsAlt[k] * f / g, 0.02, 20); i.sizeMode = "custom"; }
+    });
+    // Ansicht: derselbe Inhalt bleibt an derselben Bildschirmstelle
+    ANSICHT.x += T.x * ANSICHT.z; ANSICHT.y += T.y * ANSICHT.z;
+    if(f !== 1){ ANSICHT.z /= f; }
+    return {aW, aH, nW, nH};
+  }
+  const istInhalt = () => modus !== "einfach" && state.ratio === "content";
+  const rand = b => Math.max(40, Math.round(Math.max(b.w, b.h) * 0.06));
+  /* nurWachsen: waehrend des Ziehens wird nur groesser, nach dem Loslassen passt sich die
+     Flaeche dem Inhalt an. Zu gross wird alles gemeinsam kleiner gerechnet.          */
+  function flaecheAnpassen(nurWachsen){
+    if(!istInhalt()) return false;
+    const b = inhaltBox(); if(!b) return false;
+    const [W, H] = stageSize(), r = rand(b);
+    let T = {x:b.x - r, y:b.y - r, w:b.w + 2*r, h:b.h + 2*r};
+    if(nurWachsen){
+      const x0 = Math.min(0, T.x), y0 = Math.min(0, T.y);
+      const x1 = Math.max(W, T.x + T.w), y1 = Math.max(H, T.y + T.h);
+      T = {x:x0, y:y0, w:x1 - x0, h:y1 - y0};
+    }
+    if(Math.abs(T.x) < 1 && Math.abs(T.y) < 1 && Math.abs(T.w - W) < 1 && Math.abs(T.h - H) < 1) return false;
+    /* Zu klein wird groesser gerechnet: Rahmen und Screenshots kommen jedes Mal frisch aus
+       ihren Quellen, ein groesserer Massstab kostet also nichts und haelt den Export scharf,
+       auch nachdem die Anordnung einmal auf ein kleines festes Mass gelegt war. */
+    const seite = Math.max(T.w, T.h);
+    const f = nurWachsen ? Math.min(1, MAX_SEITE / seite) : clamp(MIN_SEITE / seite, Math.min(1, MAX_SEITE / seite), MAX_SEITE / seite);
+    const d = drag && drag.t === "dev" ? drag : null;
+    const vorDX = d ? d.i.devX : 0, vorDY = d ? d.i.devY : 0;
+    const m = flaecheSetzen(T, f);
+    if(d){
+      // der Zug laeuft weiter: Startpunkt und Startlage in die neue Flaeche umrechnen
+      d.dx = (m.aW/2 + d.dx - T.x) * f - m.nW/2;
+      d.dy = (m.aH/2 + d.dy - T.y) * f - m.nH/2;
+      d.p0 = {x:(d.p0.x/RES - T.x) * f * RES, y:(d.p0.y/RES - T.y) * f * RES};
+      d.fakt = (d.fakt || 1) * f;
+    }
+    return true;
+  }
+  window.flaecheAnpassen = flaecheAnpassen;
+  let waechst = 0;
+  view.addEventListener("pointermove", () => {
+    if(!drag || drag.t !== "dev" || drag.fest || !drag.moved || !istInhalt()) return;
+    if(waechst) return;
+    waechst = requestAnimationFrame(() => { waechst = 0; if(flaecheAnpassen(true)) renderAlt2(); });
+  });
+  view.addEventListener("pointerup", () => {
+    const war = drag && (drag.t === "dev" || drag.t === "ov" || (drag.t && drag.t.indexOf("mark") === 0)) && drag.moved !== false;
+    if(war) setTimeout(() => { if(flaecheAnpassen(false)) renderAlt2(); }, 0);
+  }, true);
+  const renderAlt2 = () => { render(); };
+
+  /* Ein neues Geraet kommt rechts neben die anderen, in einer zum Geraet passenden Groesse:
+     ein Monitor ist groesser als ein Laptop, der groesser als ein Phone ist.
+     Bei festem Ausgabemass bleibt das alte Verhalten, dort ordnet Arrange.           */
+  const HOEHE = {desktop:1, laptop:0.62, phone:0.5, browser:0.78, window:0.78};
+  const addAlt = addInst;
+  addInst = function(){
+    if(!istInhalt()){ addAlt(); return; }
+    const vorbild = act;
+    const boxen = insts.map(geraetBox);
+    const rechts = Math.max(...boxen.map(b => b.x + b.w));
+    const oben = Math.min(...boxen.map(b => b.y)), unten = Math.max(...boxen.map(b => b.y + b.h));
+    const vb = geraetBox(vorbild);
+    addAlt();                                   // legt act neu an (Monitor), setActive rendert
+    const i = act, [W, H] = stageSize();
+    const zielH = vb.h * (HOEHE[i.device] || 1) / (HOEHE[vorbild.device] || 1);
+    const S = frameSlot(i), bb = S.bb || {w:S.img.naturalWidth, h:S.img.naturalHeight};
+    i.devScale = clamp(zielH / (Math.min(W/bb.w, H/bb.h) * bb.h), 0.02, 20); i.sizeMode = "custom";
+    const nb = geraetBox(i), luecke = Math.max(24, vb.w * 0.08);
+    i.devX += (rechts + luecke) - nb.x;
+    i.devY += ((oben + unten)/2) - (nb.y + nb.h/2);   // auf derselben Mittellinie
+    flaecheAnpassen(false);
+    syncControls(); render(); einpassen();
+  };
+  const arrangeAlt = arrangeDevices;
+  arrangeDevices = function(){ arrangeAlt(); if(flaecheAnpassen(false)){ render(); einpassen(); } };
+  // Wechsel auf "Crop to the content": gleich um den Inhalt legen
+  $("#size").addEventListener("change", () => { if(flaecheAnpassen(false)){ render(); einpassen(); } });
+})();
+</script>
+<style id="studio-perfekt2-1711">
+/* Advanced wie ein Gestaltungsprogramm (Robin, 17.11.2026, nach einer Pruefung mit
+   echten Klicks): Markierungen und Overlays wandern mit ihrem Geraet, Pfeiltasten und
+   Entf wirken auf das Geraet, der Bildmodus ist sichtbar, feste Ausgabemasse nehmen die
+   Anordnung mit, statt sie abzuschneiden. Steht nach studio-perfekt-1711.          */
+.bild-modus-pille{position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:26;display:none;align-items:center;gap:12px;padding:8px 8px 8px 16px;background:var(--v8-ink,#14161a);color:#fff;border-radius:99px;box-shadow:var(--v8-shadow-l);font-size:13px;white-space:nowrap}
+.bild-modus-pille.an{display:flex}
+.bild-modus-pille button{height:30px;padding:0 14px;border:0;border-radius:99px;background:#fff;color:var(--v8-ink,#14161a);font:inherit;font-weight:600;cursor:pointer}
+</style>
+<div class="bild-modus-pille" id="bildModusPille" role="status"><span><b>Editing the screenshot.</b> Drag to move it, scroll to zoom. Esc or a click outside ends it.</span><button type="button" id="bildModusFertig">Done</button></div>
+<script id="studio-perfekt2-1711-js">
+(function perfekt2(){
+  const erweitert = () => modus !== "einfach";
+
+  /* ============ 1. Markierungen und Overlays haengen am Geraet ============
+     Gebunden ist, was mit seiner Mitte auf einem Geraet liegt (das oberste gewinnt).
+     Gemerkt wird die Lage beim Start, umgerechnet wird jedes Mal vom Start aus: so
+     sammelt sich bei vielen kleinen Schritten kein Rundungsfehler.                  */
+  function boxVon(i){ const S = frameSlot(i); return S.img && S.img.naturalWidth ? geraetBox(i) : null; }
+  function geraetUnter(cx, cy, nur){
+    const reihe = [...insts.filter(i => i !== act), act];   // act liegt oben
+    for(let k = reihe.length - 1; k >= 0; k--){
+      const i = reihe[k]; if(nur && !nur.includes(i)) continue;
+      const b = boxVon(i);
+      if(b && cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h) return i;
+    }
+    return null;
+  }
+  function binden(nur){
+    const liste = [];
+    for(const m of MARKS){
+      const i = geraetUnter(m.x + m.w/2, m.y + m.h/2, nur); if(!i) continue;
+      liste.push({art:"m", o:m, i, b:boxVon(i), x:m.x, y:m.y, w:m.w, h:m.h, lx:m.lx, ly:m.ly});
+    }
+    for(const o of OVERLAYS){
+      const w = o.img.naturalWidth*o.scale, h = o.img.naturalHeight*o.scale;
+      const i = geraetUnter(o.x + w/2, o.y + h/2, nur); if(!i) continue;
+      liste.push({art:"o", o, i, b:boxVon(i), x:o.x, y:o.y, s:o.scale});
+    }
+    return liste;
+  }
+  function nachziehen(liste){
+    for(const e of liste){
+      const nb = boxVon(e.i); if(!nb || !insts.includes(e.i)) continue;
+      const k = nb.w / e.b.w, X = v => nb.x + (v - e.b.x)*k, Y = v => nb.y + (v - e.b.y)*k;
+      if(e.art === "m"){
+        e.o.x = X(e.x); e.o.y = Y(e.y); e.o.w = e.w*k; e.o.h = e.h*k;
+        if(e.lx !== null) e.o.lx = X(e.lx);
+        if(e.ly !== null) e.o.ly = Y(e.ly);
+      } else { e.o.x = X(e.x); e.o.y = Y(e.y); e.o.scale = e.s*k; }
+    }
+  }
+  const mitnehmen = (fn, nur) => function(){ const l = binden(nur && nur()); const r = fn.apply(this, arguments); nachziehen(l); render(); return r; };
+  arrangeDevices   = mitnehmen(arrangeDevices);
+  geraetAusrichten = mitnehmen(geraetAusrichten);
+  geraetVerteilen  = mitnehmen(geraetVerteilen);
+  geraetAngleichen = mitnehmen(geraetAngleichen);
+  if(typeof setDevPreset === "function") setDevPreset = mitnehmen(setDevPreset, () => [act]);
+  // Groessenregler: vorher binden (Fangphase), nachher nachziehen
+  const regler = $("#devSize");
+  if(regler){
+    let l = null;
+    regler.addEventListener("pointerdown", () => { l = binden([act]); }, true);
+    regler.addEventListener("input", () => { if(!l) l = binden([act]); }, true);
+    regler.addEventListener("input", () => { if(l){ nachziehen(l); render(); } });
+    regler.addEventListener("change", () => { l = null; });
+  }
+  // Ziehen eines Geraets
+  let zug = null;
+  view.addEventListener("pointerdown", () => { zug = null; }, true);
+  view.addEventListener("pointermove", () => {
+    if(!drag || drag.t !== "dev" || drag.fest || !erweitert()) return;
+    if(!zug || zug.d !== drag){
+      // Lage beim Start: drag.dx/dy ist die Startlage, also kurz dorthin, binden, zurueck
+      const i = drag.i, jx = i.devX, jy = i.devY;
+      i.devX = drag.dx; i.devY = drag.dy;
+      zug = {d:drag, l:binden([i])};
+      i.devX = jx; i.devY = jy;
+    }
+    nachziehen(zug.l); render();
+  });
+  // Wenn die Flaeche waechst, rechnet flaecheSetzen alles um: die Bindung neu aufnehmen
+  if(window.flaecheAnpassen){
+    const fa = window.flaecheAnpassen;
+    window.flaecheAnpassen = function(){ const r = fa.apply(this, arguments); if(r) zug = null; return r; };
+  }
+
+  /* ============ 2. Feste Ausgabemasse nehmen die Anordnung mit ============
+     Vorher blieb jedes Geraet in seiner Punktgroesse stehen; auf einem flachen Banner hing
+     dann alles oben und unten heraus. Jetzt wird, was nicht passt, gemeinsam kleiner und
+     in die Mitte gelegt. Was passt, bleibt, wo es ist.                              */
+  function inhaltBox(){
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const nimm = (x, y, w, h) => { if(!(w > 0) || !(h > 0)) return; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); };
+    for(const i of insts){ const b = boxVon(i); if(b) nimm(b.x, b.y, b.w, b.h); }
+    for(const o of OVERLAYS) nimm(o.x, o.y, o.img.naturalWidth*o.scale, o.img.naturalHeight*o.scale);
+    for(const m of MARKS){ nimm(m.x, m.y, m.w, m.h); if(m.label){ const L = markLabelBox(m); nimm(L.x, L.y, L.w, L.h); } }
+    return isFinite(x0) ? {x:x0, y:y0, w:x1 - x0, h:y1 - y0} : null;
+  }
+  function ragtHeraus(){
+    const b = inhaltBox(), [W, H] = stageSize();
+    return !!b && (b.x < -1 || b.y < -1 || b.x + b.w > W + 1 || b.y + b.h > H + 1);
+  }
+  function inFlaecheLegen(){
+    const b = inhaltBox(); if(!b) return;
+    const [W, H] = stageSize(), r = Math.round(Math.min(W, H)*0.05);
+    const f = Math.min(1, (W - 2*r)/b.w, (H - 2*r)/b.h);
+    const cx = b.x + b.w/2, cy = b.y + b.h/2;
+    const X = v => W/2 + (v - cx)*f, Y = v => H/2 + (v - cy)*f;
+    for(const i of insts){
+      const g = geraetFit(i, W, H); if(!(g > 0)) continue;
+      // Geraetemitte liegt bei W/2 + devX
+      const mx = W/2 + i.devX, my = H/2 + i.devY;
+      i.devX = X(mx) - W/2; i.devY = Y(my) - H/2;
+      i.devScale = clamp(i.devScale*f, 0.02, 20); i.sizeMode = "custom";
+    }
+    for(const m of MARKS){
+      m.x = X(m.x); m.y = Y(m.y); m.w *= f; m.h *= f;
+      if(m.lx !== null) m.lx = X(m.lx);
+      if(m.ly !== null) m.ly = Y(m.ly);
+    }
+    for(const o of OVERLAYS){ o.x = X(o.x); o.y = Y(o.y); o.scale *= f; }
+  }
+  $("#size").addEventListener("change", () => {
+    if(state.ratio !== "content" && ragtHeraus()){
+      inFlaecheLegen(); syncControls(); render();
+      studioToast("The layout was scaled to fit the new size.");
+    }
+    einpassen();   // die neue Flaeche ganz zeigen
+  });
+  // Nach dem Loslassen auf festem Mass: sagen, wenn etwas abgeschnitten wird
+  view.addEventListener("pointerup", () => {
+    const war = drag && drag.t === "dev" && drag.moved;
+    if(!war || !erweitert() || state.ratio === "content") return;
+    setTimeout(() => { if(ragtHeraus()) studioToast("Part of the mockup is outside the image and will be cut off. Size “Crop to the content” keeps everything.", false); }, 0);
+  }, true);
+
+  /* ============ 3. Tastatur wie in einem Gestaltungsprogramm ============
+     Pfeile schieben (Shift zehn Punkte), Entf loescht das Geraet, wenn zuletzt ein Geraet
+     angefasst wurde. E ist der Radierer wie in der Hilfe, R bleibt.                  */
+  let zuletzt = "geraet";
+  view.addEventListener("pointerdown", () => {
+    setTimeout(() => {
+      if(!drag) return;
+      zuletzt = drag.t === "dev" || drag.t === "pan" ? "geraet" : drag.t === "ov" ? "ov" : drag.t && drag.t.indexOf("mark") === 0 ? "mark" : zuletzt;
+    }, 0);
+  });
+  $("#devList")?.addEventListener("click", () => { zuletzt = "geraet"; }, true);
+  let schubSnap = 0;
+  window.addEventListener("keydown", e => {
+    const t = e.target;
+    if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+    if(t && t.closest && t.closest('[role=tablist],[role=tab],[role=radiogroup]')) return;
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+    if(document.querySelector("dialog[open]")) return;
+    const k = e.key;
+    if(k.toLowerCase() === "e" && erweitert()){ setTool("erase"); e.preventDefault(); return; }
+    if(!erweitert()) return;
+    const pfeil = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1]}[k];
+    if(pfeil){
+      const s = e.shiftKey ? 10 : 1, [dx, dy] = [pfeil[0]*s, pfeil[1]*s];
+      if(Date.now() - schubSnap > 1500) snap("nudge");
+      schubSnap = Date.now();
+      const art = window.advWahlArt ? window.advWahlArt() : zuletzt;
+      if(art === "mark" && markAuswahl().length){
+        for(const n of markAuswahl()){ const m = MARKS[n]; m.x += dx; m.y += dy; if(m.lx !== null){ m.lx += dx; m.ly += dy; } }
+      } else if(art === "ov" && OVERLAYS[ovSel]){
+        OVERLAYS[ovSel].x += dx; OVERLAYS[ovSel].y += dy;
+      } else if(!act.gesperrt){
+        const l = binden([act]);
+        act.devX += dx; act.devY += dy;
+        nachziehen(l);
+      }
+      e.preventDefault(); e.stopImmediatePropagation(); render(); return;
+    }
+    if(k === "Delete" || k === "Backspace"){
+      const art = window.advWahlArt ? window.advWahlArt() : zuletzt;
+      if(art === "mark" && markSel >= 0 && markSel < MARKS.length){ e.preventDefault(); e.stopImmediatePropagation(); markLoeschen(markSel); return; }
+      if(art === "ov" && ovSel >= 0 && ovSel < OVERLAYS.length){
+        e.preventDefault(); e.stopImmediatePropagation(); snap("delOverlay"); OVERLAYS.splice(ovSel, 1);
+        ovSel = OVERLAYS.length - 1; renderOvList(); render(); return;
+      }
+      if(art === "geraet" && insts.length > 1){
+        e.preventDefault(); e.stopImmediatePropagation();
+        const hatte = !!act.img;
+        removeInst(act);
+        if(hatte) studioToast("Device removed. Ctrl+Z brings it back.");
+        return;
+      }
+      if(art === "geraet"){ e.preventDefault(); e.stopImmediatePropagation(); return; }   // das letzte Geraet bleibt
+    }
+  }, true);
+
+  /* ============ 4. Bildmodus sichtbar ============ */
+  const pille = $("#bildModusPille");
+  const anAlt = inhaltAn, ausAlt = inhaltAus;
+  inhaltAn = function(i){ anAlt(i); pille.classList.add("an"); };
+  inhaltAus = function(){ ausAlt(); pille.classList.remove("an"); };
+  $("#bildModusFertig").addEventListener("click", () => inhaltAus());
+  // Ein Klick neben das Bild beendet den Bildmodus wie in jedem Gestaltungsprogramm
+  view.addEventListener("pointerdown", e => {
+    if(!inhaltModus) return;
+    const hit = pickDevice(evtPoint(e));
+    if(!hit || hit.inst !== inhaltModus.inst || hit.type !== "screen") inhaltAus();
+  }, true);
+
+  /* ============ 5. Simple mit mehreren Geraeten ehrlich sagen ============ */
+  const guideAlt = syncSimpleGuide;
+  syncSimpleGuide = function(){
+    guideAlt();
+    const h = document.getElementById("smHinweisText"), box = document.getElementById("smHinweis");
+    if(!h || !box || modus !== "einfach" || insts.length < 2) return;
+    box.hidden = false;
+    h.innerHTML = "<b>" + insts.length + " devices:</b> Simple changes the selected one. "
+      + '<button type="button" class="sm-hw-knopf" id="smHwAdv">Edit the layout in Advanced</button>';
+    document.getElementById("smHwAdv").addEventListener("click", () => setModus("erweitert"));
+  };
+})();
+</script>
+<style id="studio-advanced-neu-1711">
+/* Advanced neu (Robin, 17.11.2026: "Seitenleiste und Menueband kombinieren, dass es
+   einfacher ist"). Aufbau wie in einem Gestaltungsprogramm:
+   - OBEN dieselbe Leiste wie in Simple, fuer das gewaehlte Geraet: Hinzufuegen, Screenshot,
+     Geraet, Winkel, Schatten, Browserleiste. Rechts Projekt, Hilfe, Download mit Pfeil fuer
+     die Ausgabe.
+   - LINKS nur noch Ebenen (Geraete, Markierungen, Overlays) und darunter die Einstellungen
+     des Gewaehlten. Keine Reiter mehr.
+   Keine Funktion faellt weg: die Bedienteile werden nur umgehaengt, ihre Handler bleiben.
+   Die Sektionen bleiben im Dokument (Simple und alter Code greifen darauf zu), sie sind in
+   Advanced nur unsichtbar. Steht zuletzt und gewinnt.                                  */
+body:not(.einfach) .sm-mitte{display:flex!important}
+body:not(.einfach) .sm-art-seg,body:not(.einfach) .sm-art-seg + .sm-trenn{display:none!important}
+body:not(.einfach) .sm-hinweis{display:none!important}
+body:not(.einfach) .sm-form{display:none!important}
+body.einfach .nur-adv{display:none!important}
+body:not(.einfach) #quickSaveProject,body:not(.einfach) #quickOpenProject,body:not(.einfach) #speicherstand,body:not(.einfach) #speichertrenner{display:none!important}
+body:not(.einfach) #panel > nav.z-tabs,body:not(.einfach) #panel > section,body:not(.einfach) #backToEditor{display:none!important}
+body:not(.einfach) .sidebar-footer{display:none!important}
+#ebenenPanel{display:none}
+body:not(.einfach) #ebenenPanel{display:block;padding:14px 14px 28px}
+#ebenenPanel h2{margin:0 0 10px;font-size:13px;font-weight:650;color:var(--v8-muted);letter-spacing:0;text-transform:none}
+.eb-gruppe{margin:0 0 14px}
+.eb-titel{display:flex;align-items:center;justify-content:space-between;margin:0 0 6px;font-size:12px;font-weight:600;color:var(--v8-ink-2)}
+.eb-titel .eb-zahl{color:var(--v8-muted);font-weight:500;margin-left:6px}
+.eb-plus{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--v8-line);border-radius:8px;background:#fff;color:var(--v8-ink);font-size:17px;line-height:1;cursor:pointer}
+.eb-plus:hover{border-color:var(--v8-ink-2)}
+.eb-leer{margin:0;padding:8px 10px;border:1px dashed var(--v8-line);border-radius:8px;font-size:12.5px;color:var(--v8-muted)}
+.eb-arrange{margin-top:6px;width:100%}
+#ebEigen{margin-top:6px;padding-top:14px;border-top:1px solid var(--v8-line)}
+#ebEigen > div{display:none}
+body.adv-w-geraet #ebEigenGeraet,body.adv-w-mark #ebEigenMark,body.adv-w-ov #ebEigenOv{display:block}
+#ebEigen details.z-mehr > summary{display:none}
+#ebEigen .z-gruppe{margin-top:0}
+.adv-pop{width:380px}
+#advPopShot .sm-pop-inhalt > .z-gruppe:first-child > .z-gruppe-titel{display:none}
+.adv-pop details.z-mehr > summary{display:none}
+.adv-pop .z-gruppe + .z-gruppe,.adv-pop .z-gruppe + details,.adv-pop details + .z-gruppe{margin-top:16px;padding-top:16px;border-top:1px solid var(--v8-line)}
+.adv-menue .sm-pop-inhalt{display:grid;gap:4px;padding:4px 10px 12px}
+.adv-menue .adv-eintrag{display:grid;grid-template-columns:24px 1fr;column-gap:12px;align-items:center;padding:10px 12px;border:0;border-radius:10px;background:none;text-align:left;font:inherit;font-size:14px;font-weight:600;color:var(--v8-ink);cursor:pointer}
+.adv-menue .adv-eintrag:hover{background:var(--v8-sunken)}
+.adv-menue .adv-eintrag .i{grid-row:span 2}
+.adv-menue .adv-eintrag small{display:block;font-size:12.5px;font-weight:400;color:var(--v8-muted)}
+#outKnopf{margin-left:-6px;padding:0 9px;border-left:1px solid rgba(255,255,255,.25)}
+#export{border-top-right-radius:0;border-bottom-right-radius:0}
+body:not(.einfach) #outKnopf{display:inline-flex}
+#outKnopf{display:none;border-top-left-radius:0;border-bottom-left-radius:0;background:rgb(14,17,22)!important;color:#fff!important;height:38px;min-height:38px;border:0}
+#outKnopf:hover{background:#000!important}
+#smAddBtn{background:var(--v8-ink);color:#fff;font-weight:600}
+#smAddBtn:hover{background:#000;color:#fff}
+@media(max-width:1360px){body:not(.einfach) #projektKnopf{padding:0 8px}}
+</style>
+<script id="studio-advanced-neu-1711-js">
+(function advancedNeu(){
+  const adv = () => modus !== "einfach";
+  const $$ = s => document.querySelectorAll(s);
+  const SVG = d => '<svg class="i" viewBox="0 0 24 24">' + d + '</svg>';
+  const PFEIL = '<svg class="i pfeil" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+  const zuSVG = SVG('<path d="M6 6l12 12M18 6 6 18"/>');
+
+  /* ---------- Aufklapper, einer zur Zeit ---------- */
+  const offen = {pop:null, knopf:null};
+  function popNeu(id, titel, klasse){
+    const p = document.createElement("div");
+    p.className = "sm-pop adv-pop" + (klasse ? " " + klasse : ""); p.id = id; p.hidden = true;
+    p.setAttribute("role", "dialog"); p.setAttribute("aria-label", titel);
+    p.innerHTML = '<div class="sm-pop-kopf"><h3>' + titel + '</h3><button type="button" class="sm-zu" aria-label="Close">' + zuSVG + '</button></div><div class="sm-pop-inhalt"></div>';
+    p.querySelector(".sm-zu").addEventListener("click", () => zu());
+    p.addEventListener("pointerdown", e => e.stopPropagation());
+    document.body.appendChild(p);
+    return p;
+  }
+  function auf(p, knopf, rechts){
+    if(offen.pop === p){ zu(); return; }
+    zu();
+    p.hidden = false; offen.pop = p; offen.knopf = knopf;
+    knopf.setAttribute("aria-expanded", "true");
+    const r = knopf.getBoundingClientRect();
+    const seite = document.querySelector(".sidebar"), sr = seite && seite.getBoundingClientRect();
+    if(p.classList.contains("adv-links") && sr && sr.width > 200){
+      // ueber der Seitenleiste: das Bild bleibt sichtbar, waehrend man einstellt (17.11.2026)
+      p.style.width = Math.min(400, sr.width - 16) + "px";
+      p.style.left = (sr.left + 8) + "px";
+      p.style.top = (sr.top + 8) + "px";
+      p.style.maxHeight = (innerHeight - sr.top - 16) + "px";
+      return;
+    }
+    const x = rechts ? r.right - p.offsetWidth : r.left;
+    p.style.left = Math.max(12, Math.min(x, innerWidth - p.offsetWidth - 12)) + "px";
+    p.style.top = (r.bottom + 10) + "px";
+  }
+  function zu(){
+    if(!offen.pop) return;
+    offen.pop.hidden = true; offen.knopf && offen.knopf.setAttribute("aria-expanded", "false");
+    offen.pop = offen.knopf = null;
+  }
+  document.addEventListener("pointerdown", e => { if(offen.pop && !offen.pop.contains(e.target) && !(offen.knopf && offen.knopf.contains(e.target))) zu(); });
+  window.addEventListener("keydown", e => { if(e.key === "Escape") zu(); });
+  document.querySelectorAll(".modusbtn").forEach(b => b.addEventListener("click", () => zu()));
+
+  const gruppeVon = sel => { const el = $(sel); return el && (el.closest(".z-gruppe") || el); };
+  const details = sel => { const el = $(sel); const d = el && el.closest("details"); if(d) d.open = true; return d; };
+
+  /* ---------- Hinzufuegen ---------- */
+  const mitte = $("#smMitte");
+  const addKnopf = document.createElement("button");
+  addKnopf.type = "button"; addKnopf.id = "smAddBtn"; addKnopf.className = "sm-wz nur-adv";
+  addKnopf.setAttribute("aria-expanded", "false"); addKnopf.title = "Add a device, a callout or an image";
+  addKnopf.innerHTML = SVG('<path d="M12 5v14M5 12h14"/>') + '<span class="lbl">Add</span>' + PFEIL;
+  const addTrenn = document.createElement("span"); addTrenn.className = "sm-trenn nur-adv"; addTrenn.setAttribute("aria-hidden", "true");
+  mitte.insertBefore(addTrenn, mitte.firstChild); mitte.insertBefore(addKnopf, addTrenn);
+  const addPop = popNeu("advPopAdd", "Add", "adv-menue");
+  const EINTRAG = [
+    ["geraet", '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>', "Device", "Another device next to the others", () => $("#addDevice").click()],
+    ["mark", '<rect x="4" y="7" width="12" height="9"/><path d="M16 7l4-3"/>', "Callout", "A frame and a label that point at something", () => $("#addMark").click()],
+    ["ov", '<rect x="3" y="3" width="18" height="18"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>', "Image", "A logo, a badge or a sticker on top", () => $("#ovFile").click()]
+  ];
+  for(const [art, ic, name, was, tun] of EINTRAG){
+    const b = document.createElement("button"); b.type = "button"; b.className = "adv-eintrag";
+    b.innerHTML = SVG(ic) + "<span>" + name + "<small>" + was + "</small></span>";
+    b.addEventListener("click", () => { zu(); waehle(art); tun(); });
+    addPop.querySelector(".sm-pop-inhalt").appendChild(b);
+  }
+  addKnopf.addEventListener("click", () => auf(addPop, addKnopf));
+
+  /* ---------- Screenshot (Advanced) ---------- */
+  const shotPop = popNeu("advPopShot", "Screenshot", "adv-links");
+  const shotIn = shotPop.querySelector(".sm-pop-inhalt");
+  [gruppeVon("#bildWaehlen"), $("#frameSizeRow"), details("#bgColor")].forEach(el => el && shotIn.appendChild(el));
+  $("#smShotBtn").addEventListener("click", e => {
+    if(!adv()) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    if(!act.img){ $("#file").click(); return; }
+    auf(shotPop, $("#smShotBtn"));
+  }, true);
+
+  /* ---------- Leiste in Advanced: direkt auf die Advanced-Bedienteile ----------
+     In Simple gehen dieselben Knoepfe ueber die Simple-Bedienteile, die dabei das Bild
+     neu einpassen. In Advanced soll ein gesetzter Zoom oder Zuschnitt stehen bleiben. */
+  const fang = (sel, fn) => document.querySelectorAll(sel).forEach(b => b.addEventListener("click", e => {
+    if(!adv()) return;
+    e.stopImmediatePropagation(); e.preventDefault(); fn(b);
+  }, true));
+  fang(".sm-dev", b => { $('.devicebtn[data-device="' + b.dataset.dev + '"]').click(); const z = $("#smGeraetZu"); if(z && !$("#smPopGeraet").hidden) z.click(); });
+  fang(".sm-view", b => { if(!b.disabled) $('.viewbtn[data-view="' + b.dataset.view + '"]').click(); });
+  fang("#smShadow", () => { $('.framebtn[data-frame="' + (act.frame === "shadow" ? "plain" : "shadow") + '"]').click(); });
+  fang("#smBar", () => { $("#chromeToggle").click(); });
+  $("#smUrl").addEventListener("input", e => {
+    if(!adv()) return;
+    e.stopImmediatePropagation();
+    $("#url").value = e.target.value; $("#url").dispatchEvent(new Event("input", {bubbles:true}));
+  }, true);
+
+  /* ---------- Ausgabe: Pfeil am Download ---------- */
+  const outKnopf = document.createElement("button");
+  outKnopf.type = "button"; outKnopf.className = "z-btn"; outKnopf.id = "outKnopf";
+  outKnopf.title = "Size, format and background of the file"; outKnopf.setAttribute("aria-label", "Output settings");
+  outKnopf.setAttribute("aria-expanded", "false");
+  outKnopf.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg>';
+  $("#export").after(outKnopf);
+  const outPop = popNeu("advPopOut", "Output", "adv-links");
+  const ausgabe = $("#section-ausgabe");
+  [...ausgabe.children].forEach(el => { if(el.tagName !== "H2") outPop.querySelector(".sm-pop-inhalt").appendChild(el); });
+  outPop.querySelectorAll("details").forEach(d => d.open = true);
+  outKnopf.addEventListener("click", () => auf(outPop, outKnopf, true));
+
+  /* ---------- Projekt ---------- */
+  const projPop = popNeu("advPopProjekt", "Project");
+  const projSec = document.querySelector('#panel > section[data-bereich="projekt"]');
+  if(projSec) [...projSec.children].forEach(el => { if(el.tagName !== "H2") projPop.querySelector(".sm-pop-inhalt").appendChild(el); });
+  const stand = document.createElement("p"); stand.className = "z-hinweis"; stand.id = "advStand"; stand.style.margin = "0 0 12px";
+  projPop.querySelector(".sm-pop-inhalt").prepend(stand);
+  $("#projektKnopf").addEventListener("click", e => {
+    if(!adv()) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    stand.textContent = $("#speicherstand").textContent;
+    auf(projPop, $("#projektKnopf"), true);
+  }, true);
+  $("#projektKnopf").setAttribute("aria-expanded", "false");
+
+  /* ---------- Seitenleiste: Ebenen und Gewaehltes ---------- */
+  const panel = $("#panel");
+  const eb = document.createElement("div"); eb.id = "ebenenPanel";
+  const gruppe = (id, titel, plusTitel) =>
+    '<div class="eb-gruppe" id="' + id + '"><div class="eb-titel"><span>' + titel + '<span class="eb-zahl"></span></span>'
+    + '<button type="button" class="eb-plus" title="' + plusTitel + '" aria-label="' + plusTitel + '">+</button></div>'
+    + '<p class="eb-leer" hidden></p></div>';
+  eb.innerHTML = '<h2>Layers</h2>'
+    + gruppe("ebGeraete", "Devices", "Add a device")
+    + gruppe("ebMarks", "Callouts", "Add a callout")
+    + gruppe("ebOvs", "Images", "Add an image")
+    + '<div id="ebEigen"><h2 id="ebEigenTitel"></h2><div id="ebEigenGeraet"></div><div id="ebEigenMark"></div><div id="ebEigenOv"></div></div>';
+  panel.prepend(eb);
+  const plus = (id, art, tun) => eb.querySelector("#" + id + " .eb-plus").addEventListener("click", () => { waehle(art); tun(); });
+  plus("ebGeraete", "geraet", () => $("#addDevice").click());
+  plus("ebMarks", "mark", () => $("#addMark").click());
+  plus("ebOvs", "ov", () => $("#ovFile").click());
+  $("#ebGeraete").append($("#devList"));
+  const arr = $("#arrangeDevices"); arr.classList.add("eb-arrange"); arr.textContent = "Arrange side by side"; $("#ebGeraete").append(arr);
+  $("#ebMarks").append($("#markList"));
+  $("#ebOvs").append($("#ovList"));
+  $("#ebGeraete .eb-leer").textContent = "";
+  $("#ebMarks .eb-leer").textContent = "None yet. Press + to point at something.";
+  $("#ebOvs .eb-leer").textContent = "None yet. For a logo or a badge.";
+  // Gewaehltes Geraet: Groesse, Lage, Ausrichten
+  const lage = details("#devSize"); if(lage) $("#ebEigenGeraet").append(lage);
+  // Gewaehlte Markierung: alles, was die Markierung kann
+  [$("#markEdit"), gruppeVon("#fokusAn"), $("#markAlign"), $("#markLook"), $("#markLines")]
+    .forEach(el => el && $("#ebEigenMark").append(el));
+  ["#markAlign", "#markLook", "#markLines"].forEach(s => { const d = $(s); if(d) d.open = false; });
+  // die drei Markierungsgruppen bleiben aufklappbar, sie sind lang
+  const ovRow = $("#ovScaleRow"); if(ovRow) $("#ebEigenOv").append(ovRow);
+
+  /* ---------- Was ist gewaehlt? ---------- */
+  let wahl = "geraet";
+  function waehle(art){
+    wahl = art;
+    document.body.classList.toggle("adv-w-geraet", art === "geraet");
+    document.body.classList.toggle("adv-w-mark", art === "mark");
+    document.body.classList.toggle("adv-w-ov", art === "ov");
+    sync();
+  }
+  window.advWaehle = waehle;
+  window.advWahlArt = () => wahl;
+  /* Geraetetyp wechseln mit mehreren Geraeten: die Groesse folgt dem echten Verhaeltnis
+     (ein Phone neben einem Monitor ist kleiner), die Mitte bleibt stehen. */
+  const HOEHE = {desktop:1, laptop:0.62, phone:0.5, browser:0.78, window:0.78};
+  let typVorher = null;
+  document.querySelectorAll(".devicebtn").forEach(b => {
+    b.addEventListener("click", () => {
+      typVorher = adv() && insts.length > 1 ? {d:act.device, h:geraetBox(act).h} : null;
+    }, true);
+    b.addEventListener("click", () => {
+      if(!typVorher || typVorher.d === act.device) return;
+      const S = frameSlot(act); if(!S.img || !S.img.naturalWidth) return;
+      const ziel = typVorher.h * (HOEHE[act.device] || 1) / (HOEHE[typVorher.d] || 1);
+      const jetzt = geraetBox(act).h;
+      if(jetzt > 0){ act.devScale = clamp(act.devScale * ziel / jetzt, 0.02, 20); act.sizeMode = "custom"; }
+      typVorher = null;
+      if(window.flaecheAnpassen) window.flaecheAnpassen(false);
+      syncControls(); render();
+    });
+  });
+  /* Advanced startet mit "Crop to the content": die Datei ist dann das Mockup selbst, und
+     die Flaeche waechst mit. Ein festes Mass waehlt man bewusst unter Output. */
+  if(state.ratio === "1200,800" && !insts.some(i => i.img)){
+    state.ratio = "content"; $("#size").value = "content"; syncGroesse();
+  }
+  const addVorher = addInst;
+  addInst = function(){
+    const fest = state.ratio !== "content";
+    addVorher.apply(this, arguments);
+    if(fest && insts.length > 1) arrangeDevices();   // nebeneinander und passend, statt uebereinander
+  };
+  $("#devList").addEventListener("click", () => waehle("geraet"), true);
+  $("#markList").addEventListener("click", () => waehle("mark"), true);
+  $("#ovList").addEventListener("click", () => waehle("ov"), true);
+  $("#addDevice").addEventListener("click", () => waehle("geraet"), true);
+  $("#addMark").addEventListener("click", () => waehle("mark"), true);
+  $("#ovFile").addEventListener("change", () => waehle("ov"), true);
+  view.addEventListener("pointerdown", () => setTimeout(() => {
+    if(!drag) return;
+    const t = drag.t || "";
+    if(t === "dev" || t === "pan" || t === "crop" || t === "erase") waehle("geraet");
+    else if(t === "ov") waehle("ov");
+    else if(t.indexOf("mark") === 0) waehle("mark");
+  }, 0));
+
+  /* ---------- Abgleich nach jedem Zeichnen ---------- */
+  const NAMEN = {desktop:"Monitor", laptop:"Laptop", phone:"Phone", browser:"Browser", window:"Frame"};
+  const vorher = {m:0, o:0};
+  function sync(){
+    if(!adv()) return;
+    $$(".sm-dev").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dev === act.device)));
+    $$(".sm-view").forEach(b => { b.disabled = !DEVICES[act.device][b.dataset.view]; b.setAttribute("aria-pressed", String(b.dataset.view === act.view)); });
+    $("#smShadow").setAttribute("aria-pressed", String(act.frame === "shadow"));
+    $("#smBar").setAttribute("aria-pressed", String(!!act.chromeOn));
+    $("#smUrl").hidden = !act.chromeOn;
+    if(document.activeElement !== $("#smUrl")) $("#smUrl").value = act.url;
+    const hat = !!act.img;
+    $("#smShotBtn").querySelector(".lbl").textContent = hat ? "Screenshot" : "Add screenshot";
+    $("#smShotBtn").classList.toggle("sm-leer", !hat);
+    const zahl = (id, n) => { const z = $("#" + id + " .eb-zahl"); z.textContent = n ? " " + n : ""; const l = $("#" + id + " .eb-leer"); l.hidden = !!n || !l.textContent; };
+    zahl("ebGeraete", insts.length); zahl("ebMarks", MARKS.length); zahl("ebOvs", OVERLAYS.length);
+    // Letzte Markierung oder letztes Bild geloescht: zurueck zum Geraet
+    if(wahl === "mark" && !MARKS.length && vorher.m) wahl = "geraet";
+    if(wahl === "ov" && !OVERLAYS.length && vorher.o) wahl = "geraet";
+    vorher.m = MARKS.length; vorher.o = OVERLAYS.length;
+    arr.hidden = insts.length < 2;
+    document.body.classList.toggle("adv-w-geraet", wahl === "geraet");
+    document.body.classList.toggle("adv-w-mark", wahl === "mark");
+    document.body.classList.toggle("adv-w-ov", wahl === "ov");
+    $("#ebEigenTitel").textContent = wahl === "mark" ? "Selected callout"
+      : wahl === "ov" ? "Selected image" : "Selected device: " + (NAMEN[act.device] || act.device);
+  }
+  const renderAlt = render;
+  render = function(){ renderAlt(); sync(); };
+  sync();
+})();
+</script>
+<style id="studio-klar-1711">
+/* Zweite Pruefrunde Advanced (17.11.2026): eine Auswahl zur Zeit, alle Markierungs-
+   einstellungen erreichbar, Begriffe, die man ohne Erklaerung versteht. Steht zuletzt. */
+/* Nur die Zeile der gewaehlten Art leuchtet */
+body:not(.einfach):not(.adv-w-geraet) #devList .z-objekt.sel,
+body:not(.einfach):not(.adv-w-mark) #markList .z-objekt.sel,
+body:not(.einfach):not(.adv-w-ov) #ovList .z-objekt.sel{background:transparent!important;box-shadow:none!important;border-color:var(--v8-line)!important}
+body:not(.einfach):not(.adv-w-geraet) #devList .z-objekt.sel *,
+body:not(.einfach):not(.adv-w-mark) #markList .z-objekt.sel *,
+body:not(.einfach):not(.adv-w-ov) #ovList .z-objekt.sel *{font-weight:inherit}
+/* Markierung: die drei langen Gruppen als aufklappbare Zeilen */
+#ebEigenMark details.z-mehr > summary{display:flex!important;align-items:center;justify-content:space-between;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;border-top:1px solid var(--v8-line);list-style:none}
+#ebEigenMark details.z-mehr > summary::-webkit-details-marker{display:none}
+#ebEigenMark details.z-mehr > summary::after{content:"+";font-weight:400;color:var(--v8-muted)}
+#ebEigenMark details.z-mehr[open] > summary::after{content:"\2013"}
+#ebEigenMark details.z-mehr{height:auto!important;overflow:visible!important}
+/* Bei "Crop to the content" bestimmt der Inhalt die Flaeche: Groessenstufen und Mitte waeren dort ohne Sinn */
+body.adv-inhalt #ebEigenGeraet .z-schalter:has(.sizebtn),body.adv-inhalt #ebEigenGeraet .z-gruppe:has(#centerBoth){display:none!important}
+body.adv-inhalt #devSizeRow{display:block!important}
+/* Ausrichten: Symbol und Wort */
+#ebEigenGeraet .z-ausrichten button[data-kurz]{display:inline-flex;flex-direction:column;align-items:center;gap:2px;height:auto;padding:6px 2px;font-size:15px;line-height:1}
+#ebEigenGeraet .z-ausrichten button[data-kurz]::after{content:attr(data-kurz);font-size:10.5px;color:var(--v8-muted)}
+/* Schloss sichtbar */
+#devList .z-objekt button[aria-label*="ock"],#ovList .z-objekt button[aria-label*="ock"]{opacity:.55}
+#devList .z-objekt button[aria-pressed="true"][aria-label*="ock"],#ovList .z-objekt button[aria-pressed="true"][aria-label*="ock"]{opacity:1;color:var(--v8-accent)}
+/* Fokusring nur bei Tastatur */
+button:focus:not(:focus-visible){outline:none!important;box-shadow:none}
+/* Schatten und Browserleiste behalten ihren Namen bis 1360 px */
+@media(min-width:1361px){.sm-mitte:has(#smUrl:not([hidden])) :is(#smShadow,#smBar) .lbl{display:inline!important}}
+#hilfeDialog .hd-adv{margin-top:22px;padding:14px 16px;background:var(--v8-sunken);border-radius:var(--v8-r-l)}
+#hilfeDialog .hd-adv h3{margin-top:0}
+</style>
+<script id="studio-klar-1711-js">
+(function klar(){
+  const adv = () => modus !== "einfach";
+  // Inhalt-Modus als Klasse, damit CSS Groessenstufen und Mitte ausblenden kann
+  const renderAlt = render;
+  render = function(){ renderAlt(); document.body.classList.toggle("adv-inhalt", state.ratio === "content"); };
+
+  // Ausrichten: kurze Woerter unter die Symbole
+  const KURZ = {left:"Left", hcenter:"Center", right:"Right", top:"Top", vmiddle:"Middle", bottom:"Bottom"};
+  document.querySelectorAll("#ebEigenGeraet button[data-da]").forEach(b => b.dataset.kurz = KURZ[b.dataset.da] || "");
+  const alignTitel = [...document.querySelectorAll("#ebEigenGeraet .z-gruppe-titel")].find(t => /Align the devices/.test(t.textContent));
+  if(alignTitel) alignTitel.textContent = "Line up the devices";
+
+  /* Neue Markierung auf den Bildschirm des gewaehlten Geraets statt in die Flaechenmitte */
+  $("#addMark").addEventListener("click", () => {
+    const m = MARKS[MARKS.length - 1], L = act && act.L;
+    if(!m || !L || !L.Q) return;
+    const xs = L.Q.map(q => q[0]/RES), ys = L.Q.map(q => q[1]/RES);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const w = (x1 - x0)*0.42, h = (y1 - y0)*0.2;
+    const dx = (x0 + (x1 - x0)/2 - w/2) - m.x, dy = (y0 + (y1 - y0)*0.4 - h/2) - m.y;
+    m.x += dx; m.y += dy; m.w = w; m.h = h;
+    const lb = markLabelBox(m);
+    m.lx = m.x; m.ly = m.y - lb.h - m.abstand;
+    if(m.ly < y0 + 4) m.ly = m.y + m.h + m.abstand;
+    syncMark(); render();
+  });
+
+  /* Bildmodus endet auch mit einem Klick auf die graue Flaeche neben der Leinwand */
+  $("#buehne").addEventListener("pointerdown", e => {
+    if(inhaltModus && e.target !== view && !e.target.closest(".tool-dock,.sm-dock,#bildModusPille")) inhaltAus();
+  });
+
+  /* Waechst die Flaeche ueber den sichtbaren Bereich, nach dem Loslassen neu einpassen */
+  view.addEventListener("pointerup", () => setTimeout(() => {
+    if(!adv()) return;
+    const b = $("#buehne").getBoundingClientRect(), w = wrap.getBoundingClientRect();
+    if(w.left < b.left - 2 || w.top < b.top - 2 || w.right > b.right + 2 || w.bottom > b.bottom + 2) einpassen();
+  }, 30));
+
+  /* Bildschirmform aendern: die Hoehe des Geraets bleibt, die Nachbarn bleiben, wo sie sind */
+  let formVorher = null;
+  const formFang = () => { formVorher = adv() ? {i:act, h:geraetBox(act).h} : null; };
+  const formHalten = () => {
+    if(!formVorher || formVorher.i !== act) return;
+    const S = frameSlot(act); if(!S.img || !S.img.naturalWidth) return;
+    const jetzt = geraetBox(act).h;
+    if(jetzt > 0 && Math.abs(jetzt - formVorher.h) > 0.5){ act.devScale = clamp(act.devScale*formVorher.h/jetzt, 0.02, 20); act.sizeMode = "custom"; render(); }
+  };
+  document.querySelectorAll(".framesizebtn").forEach(b => { b.addEventListener("click", formFang, true); b.addEventListener("click", formHalten); });
+  ["#frameW", "#frameH"].forEach(s => { const el = $(s); if(!el) return; el.addEventListener("input", formFang, true); el.addEventListener("input", formHalten); });
+
+  /* Neu anfangen: einmal fragen, danach wieder "Crop to the content" */
+  $("#neuStarten").addEventListener("click", e => {
+    if(insts.some(i => i.img) && !confirm("Start over? Everything on the canvas is removed. Ctrl+Z brings it back.")){
+      e.stopImmediatePropagation(); e.preventDefault();
+    }
+  }, true);
+  $("#neuStarten").addEventListener("click", () => {
+    state.ratio = "content"; $("#size").value = "content"; syncGroesse();
+    if(window.advWaehle) window.advWaehle("geraet");
+    render(); einpassen();
+    document.querySelectorAll(".sm-pop:not([hidden])").forEach(p => p.hidden = true);
+  });
+
+  /* Hilfe: was Advanced kann, und was nur in Simple gilt */
+  const d = $("#hilfeDialog");
+  if(d){
+    d.querySelectorAll(".hd-liste li").forEach(li => {
+      li.innerHTML = li.innerHTML
+        .replace("Not available for the phone.", "In Simple not available for the phone.")
+        .replace("<strong>Device set</strong>:", "<strong>Device set</strong> (Simple):");
+    });
+    const adv = document.createElement("div"); adv.className = "hd-adv";
+    adv.innerHTML = '<h3>In Advanced</h3><ul class="hd-liste">'
+      + '<li><strong>Add</strong>, top left: another device, a callout that points at something, or an image like a logo.</li>'
+      + '<li><strong>Layers</strong>, on the left: click a device, callout or image to select it. Its settings appear below the list.</li>'
+      + '<li><strong>The bar at the top</strong> changes the selected device: screenshot, device, angle, shadow, browser bar.</li>'
+      + '<li><strong>Move</strong> things by dragging, or with the arrow keys (Shift for bigger steps). <kbd>Delete</kbd> removes the selected thing.</li>'
+      + '<li><strong>Double-click a screen</strong> to move or zoom the screenshot inside it. Esc ends it.</li>'
+      + '<li><strong>Arrow next to Download</strong>: size, format and background of the file. "Crop to the content" makes the file exactly as big as the mockup.</li>'
+      + '<li><strong>Project</strong>: save your work as a file and open it again later.</li></ul>';
+    const tasten = [...d.querySelectorAll("h3")].find(h => h.textContent.trim() === "Keys");
+    if(tasten) tasten.before(adv); else d.querySelector(".hd-inhalt").appendChild(adv);
+    const dl = d.querySelector("dl");
+    if(dl) dl.insertAdjacentHTML("beforeend",
+      '<dt><kbd>Delete</kbd></dt><dd>Remove the selected thing (Advanced)</dd>'
+      + '<dt>Arrow keys</dt><dd>Move the selected thing (Advanced)</dd>'
+      + '<dt><kbd>Space</kbd> + drag</dt><dd>Move the view</dd>'
+      + '<dt><kbd>V</kbd> <kbd>M</kbd> <kbd>E</kbd> <kbd>H</kbd></dt><dd>Select, callout, erase, pan</dd>');
+  }
+})();
+</script>
+<style id="studio-klar2-1711">
+/* Dritte Pruefrunde (17.11.2026): ruhige Ebenenliste, Abstaende, Woerter unter den Pfeilen der Markierung. */
+body:not(.einfach) #ebenenPanel .z-objekt{background:#fff!important}
+body.adv-w-geraet #devList .z-objekt.sel,body.adv-w-mark #markList .z-objekt.sel,body.adv-w-ov #ovList .z-objekt.sel{background:var(--v8-accent-soft)!important}
+#ebEigenGeraet .z-gruppe + .z-gruppe,#ebEigenGeraet #devSizeRow + .z-gruppe{margin-top:18px}
+#ebEigenGeraet .z-gruppe{margin-bottom:6px}
+#ebEigenMark .z-ausrichten button[data-kurz]{display:inline-flex;flex-direction:column;align-items:center;gap:2px;height:auto;padding:6px 2px;line-height:1}
+#ebEigenMark .z-ausrichten button[data-kurz]::after{content:attr(data-kurz);font-size:10px;color:var(--v8-muted);white-space:nowrap}
+</style>
+<script id="studio-klar2-1711-js">
+(function klar2(){
+  const adv = () => modus !== "einfach";
+  // Woerter unter den Pfeilen der Markierung
+  const KURZ = {xleft:"Left", xcenter:"Center", xright:"Right", yabove:"Above", ytop:"Top", ymiddle:"Middle", ybottom:"Bottom", ybelow:"Below",
+                left:"Left", hcenter:"Center", right:"Right", top:"Top", vmiddle:"Middle", bottom:"Bottom"};
+  document.querySelectorAll("#ebEigenMark button[data-lr], #ebEigenMark button[data-la]").forEach(b => {
+    const k = b.dataset.lr || b.dataset.la; if(KURZ[k]) b.dataset.kurz = KURZ[k];
+  });
+  document.querySelectorAll("#ebEigenMark button[data-lr]").forEach(b => {
+    const t = (b.title || "").toLowerCase();
+    if(/outside left|left of/.test(t)) b.dataset.kurz = "Outside";
+    if(/outside right|right of/.test(t)) b.dataset.kurz = "Outside";
+  });
+
+  /* Das Ausgabemass aus Advanced ueberlebt einen Abstecher nach Simple */
+  let advMass = null;
+  const setAlt = setModus;
+  setModus = function(m){
+    const nach = m === "erweitert" ? "erweitert" : "einfach";
+    if(nach === "einfach" && modus !== "einfach" && state.ratio !== "content") advMass = {r:state.ratio, w:state.freeW, h:state.freeH};
+    setAlt(m);
+    if(nach === "erweitert" && advMass){
+      const a = advMass; advMass = null;
+      if(a.r === "free"){ state.freeW = a.w; state.freeH = a.h; $("#freeW").value = a.w; $("#freeH").value = a.h; }
+      const sz = $("#size"); sz.value = a.r; sz.dispatchEvent(new Event("change"));
+    }
+  };
+
+  /* Eine zweite Markierung nicht genau auf die erste legen */
+  $("#addMark").addEventListener("click", () => {
+    const m = MARKS[MARKS.length - 1]; if(!m) return;
+    let n = 0;
+    for(const o of MARKS) if(o !== m && Math.abs(o.x - m.x) < 2 && Math.abs(o.y - m.y) < 2) n++;
+    if(!n) return;
+    const d = (m.h + 30) * n;
+    m.y += d; if(m.ly !== null) m.ly += d;
+    syncMark(); render();
+  });
+
+  /* Anordnen: ein gesperrtes Geraet bleibt stehen; auf festem Mass liegt danach alles mittig */
+  const arrAlt = arrangeDevices;
+  arrangeDevices = function(){
+    const fest = insts.filter(i => i.gesperrt).map(i => ({i, x:i.devX, y:i.devY, s:i.devScale}));
+    const r = arrAlt.apply(this, arguments);
+    for(const f of fest){ f.i.devX = f.x; f.i.devY = f.y; f.i.devScale = f.s; }
+    if(adv() && state.ratio !== "content"){
+      const boxen = insts.map(geraetBox), [W, H] = stageSize();
+      const x0 = Math.min(...boxen.map(b => b.x)), x1 = Math.max(...boxen.map(b => b.x + b.w));
+      const y0 = Math.min(...boxen.map(b => b.y)), y1 = Math.max(...boxen.map(b => b.y + b.h));
+      const dx = W/2 - (x0 + x1)/2, dy = H/2 - (y0 + y1)/2;
+      if(Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5){
+        insts.forEach(i => { if(!i.gesperrt){ i.devX += dx; i.devY += dy; } });
+        for(const m of MARKS){ m.x += dx; m.y += dy; if(m.lx !== null){ m.lx += dx; m.ly += dy; } }
+        for(const o of OVERLAYS){ o.x += dx; o.y += dy; }
+      }
+    }
+    render();
+    return r;
+  };
+})();
+</script>
+<style id="studio-schaerfe-1711">
+/* Robin, 17.11.2026: "Wo sehe ich die Aufloesung?", leeres Geraet mit Auswahl, Form-Schalter
+   sichtbar in der Leiste statt im Menue. Steht zuletzt.                              */
+.schaerfe{display:grid;grid-template-columns:10px 1fr;gap:4px 10px;align-items:start;margin:0 0 16px;padding:10px 12px;border:1px solid var(--v8-line);border-radius:10px;background:#fff;font-size:12.5px;line-height:1.45;color:var(--v8-ink-2)}
+.schaerfe .p{width:10px;height:10px;border-radius:50%;margin-top:3px;background:#2e9d5b}
+.schaerfe.mittel .p{background:#e0a100}
+.schaerfe.weich .p{background:#d93a2b}
+.schaerfe b{color:var(--v8-ink)}
+#advPopOut .schaerfe-liste{margin:0 0 14px;display:grid;gap:6px}
+#advPopOut .schaerfe{margin:0}
+/* Form-Schalter in der Leiste */
+.sm-form-leiste{display:flex;gap:2px;padding:2px;background:#fff;border:1px solid var(--v8-line);border-radius:9px}
+.sm-form-leiste button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 9px;border:0;border-radius:7px;background:none;font:inherit;font-size:13px;font-weight:500;color:var(--v8-ink-2);white-space:nowrap;cursor:pointer}
+.sm-form-leiste button[aria-pressed=true]{background:var(--v8-ink);color:#fff;font-weight:600}
+.sm-form-leiste .i{width:15px;height:15px}
+.sm-form{display:none!important}
+@media(max-width:1360px){.sm-form-leiste .lbl{display:none}}
+/* Karte auf einem leeren Geraet */
+.leer-karte{position:fixed;z-index:22;display:none;flex-direction:column;align-items:center;gap:10px;padding:16px 18px;background:#fff;border-radius:16px;box-shadow:var(--v8-shadow-l);transform:translate(-50%,-50%);text-align:center;min-width:250px}
+.leer-karte.an{display:flex}
+.leer-karte b{font-size:14px}
+.leer-karte .reihe{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.leer-karte button,.leer-karte label{height:32px;padding:0 12px;border:1px solid var(--v8-line);border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:500;color:var(--v8-ink);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.leer-karte .haupt{background:var(--v8-accent);border-color:var(--v8-accent);color:#fff;font-weight:600;height:36px;padding:0 16px}
+.leer-karte input[type=color]{width:18px;height:18px;padding:0;border:0;background:none}
+.leer-karte small{font-size:12px;color:var(--v8-muted)}
+</style>
+<div class="leer-karte" id="leerKarte" role="group" aria-label="Empty device">
+  <b>What goes on this screen?</b>
+  <button type="button" class="haupt" id="lkBild">Add screenshot</button>
+  <small>or paste with Ctrl+V, or drop a file here</small>
+  <div class="reihe">
+    <button type="button" id="lkWeiss">White</button>
+    <label title="Pick a color for the screen">Color <input type="color" id="lkFarbe" value="#1a2b4c"></label>
+    <button type="button" id="lkAus">Screen off</button>
+  </div>
+</div>
+<script id="studio-schaerfe-1711-js">
+(function schaerfe(){
+  const adv = () => modus !== "einfach";
+  const NAMEN = {desktop:"Monitor", laptop:"Laptop", phone:"Phone", browser:"Browser", window:"Frame"};
+
+  /* ============ 1. Schaerfe ============
+     Gemessen wird, wie viele Dateipunkte auf einen Bildpunkt des Screenshots fallen.
+     Bis 1 ist es scharf (der Screenshot wird kleiner gerechnet), darueber wird er
+     vergroessert. Der Rahmen ist ein Foto mit fester Groesse und wird eigens geprueft. */
+  function bewertung(i){
+    if(!i.img || !i.L) return null;
+    const k = state.exportScale / RES;
+    const bildF = i.is * k;                       // Dateipunkte je Screenshotpunkt
+    const rahmenF = i.L.gs * state.exportScale;   // Dateipunkte je Rahmenpunkt
+    const breite = Math.round(i.L.cw * k);
+    const stufe = bildF <= 1.05 ? "scharf" : bildF <= 1.5 ? "mittel" : "weich";
+    let text;
+    if(stufe === "scharf") text = "<b>Sharp.</b> The screen is " + breite + " px wide in the file, the screenshot has enough pixels for it.";
+    else if(stufe === "mittel") text = "<b>Slightly soft.</b> The screenshot is enlarged to " + Math.round(bildF*100) + " %. A slightly smaller device or a larger screenshot fixes it.";
+    else text = "<b>Soft.</b> The screenshot is enlarged to " + Math.round(bildF*100) + " %. Make the device smaller, use a larger screenshot, or download at 1x.";
+    if(rahmenF > 1.6) text += " The " + (NAMEN[i.device] || "device").toLowerCase() + " frame itself is enlarged, its edge may look a little soft.";
+    return {stufe, text};
+  }
+  const box = document.createElement("div"); box.className = "schaerfe"; box.id = "schaerfeGeraet";
+  box.innerHTML = '<span class="p"></span><span class="t"></span>';
+  const eigen = $("#ebEigenGeraet"); if(eigen) eigen.prepend(box);
+  const liste = document.createElement("div"); liste.className = "schaerfe-liste";
+  const outIn = document.querySelector("#advPopOut .sm-pop-inhalt"); if(outIn) outIn.prepend(liste);
+  function schaerfeSync(){
+    const b = bewertung(act);
+    box.hidden = !b;
+    if(b){ box.className = "schaerfe " + (b.stufe === "scharf" ? "" : b.stufe); box.querySelector(".t").innerHTML = b.text; }
+    liste.innerHTML = insts.map((i, n) => {
+      const x = bewertung(i); if(!x) return "";
+      return '<div class="schaerfe ' + (x.stufe === "scharf" ? "" : x.stufe) + '"><span class="p"></span><span>' + (n + 1) + ". " + (NAMEN[i.device] || i.device) + ": " + x.text + "</span></div>";
+    }).join("");
+  }
+
+  /* ============ 2. Form-Schalter in der Leiste ============ */
+  const seg = document.createElement("button");
+  seg.type = "button"; seg.id = "smFit"; seg.className = "sm-wz sm-an nur-einzel";
+  seg.title = "On: the device takes the shape of your screenshot, nothing is cut off. Off: the device keeps its real shape and the screenshot fills the screen.";
+  seg.innerHTML = '<svg class="i" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="10"/><path d="M2 12h3M19 12h3M12 2v3M12 19v3"/></svg><span class="lbl">Fit screenshot</span>';
+  const geraetKnopf = $("#smGeraetBtn");
+  if(geraetKnopf) geraetKnopf.after(seg);
+  seg.addEventListener("click", () => {
+    const ziel = act.frameSize === "shot" ? "standard" : "shot";
+    if(adv()){ const z = $('.framesizebtn[data-framesize="' + ziel + '"]'); if(z) z.click(); }
+    else einfachPassform(ziel);
+    formSync();
+  });
+  function formSync(){
+    seg.setAttribute("aria-pressed", String(act.frameSize === "shot"));
+  }
+
+  /* ============ 3. Leeres Geraet: Karte auf dem Bildschirm ============ */
+  const karte = $("#leerKarte");
+  function karteSync(){
+    const zeigen = adv() && !act.img && !act.leerOk && act.L && insts.length > 0 && !$("#buehne").classList.contains("is-empty");
+    karte.classList.toggle("an", !!zeigen);
+    if(!zeigen) return;
+    const r = view.getBoundingClientRect(), k = r.width / view.width;
+    const xs = act.L.Q.map(q => q[0]), ys = act.L.Q.map(q => q[1]);
+    karte.style.left = (r.left + (Math.min(...xs) + Math.max(...xs))/2 * k) + "px";
+    karte.style.top = (r.top + (Math.min(...ys) + Math.max(...ys))/2 * k) + "px";
+  }
+  const leer = (farbe) => { snap("leer"); act.leerOk = true; act.screenBg = farbe; $("#bgColor").value = farbe; $("#bgHex").value = farbe; beruehrt(); render(); };
+  $("#lkBild").addEventListener("click", () => $("#file").click());
+  $("#lkWeiss").addEventListener("click", () => leer("#ffffff"));
+  $("#lkAus").addEventListener("click", () => leer("#0b0c0e"));
+  $("#lkFarbe").addEventListener("input", e => leer(e.target.value));
+  karte.addEventListener("dragover", e => e.preventDefault());
+
+  /* ============ Abgleich ============ */
+  const renderAlt = render;
+  render = function(){ renderAlt(); schaerfeSync(); formSync(); karteSync(); };
+  const ansAlt = ansichtAnwenden;
+  ansichtAnwenden = function(){ ansAlt(); karteSync(); };
+  window.addEventListener("resize", karteSync);
+  // Groessenregler und Ausgabe-Knoepfe aendern die Schaerfe sofort
+  ["#devSize", "#size"].forEach(s => { const el = $(s); if(el) el.addEventListener("input", schaerfeSync); });
+  document.querySelectorAll(".scalebtn").forEach(b => b.addEventListener("click", () => setTimeout(schaerfeSync, 0)));
+  schaerfeSync(); formSync();
+})();
+</script>
+<style id="studio-dock-info-1711">
+/* Unten rechts: wie gross die Datei wird und ob sie scharf ist (Robin, 17.11.2026). */
+.dock-info{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:0;border-radius:9px;background:var(--v8-sunken);font:inherit;font-size:12.5px;font-weight:500;color:var(--v8-ink-2);white-space:nowrap;cursor:default}
+body:not(.einfach) .dock-info{cursor:pointer}
+body:not(.einfach) .dock-info:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--v8-line)}
+.dock-info b{color:var(--v8-ink);font-weight:650}
+.dock-info .p{width:8px;height:8px;border-radius:50%;background:#2e9d5b}
+.dock-info.mittel .p{background:#e0a100}
+.dock-info.weich .p{background:#d93a2b}
+.dock-info[hidden]{display:none}
+@media(max-width:1100px){.dock-info .wort{display:none}}
+</style>
+<script id="studio-dock-info-1711-js">
+(function dockInfo(){
+  const dock = $("#smDock"); if(!dock) return;
+  const b = document.createElement("button"); b.type = "button"; b.className = "dock-info"; b.id = "dockInfo";
+  b.innerHTML = '<span class="p"></span><span><b class="mass"></b> <span class="verh"></span></span><span class="wort"></span>';
+  dock.prepend(b);
+  b.addEventListener("click", () => { if(modus !== "einfach"){ const o = $("#outKnopf"); if(o) o.click(); } });
+  const stufe = i => {
+    if(!i.img || !i.L) return 0;
+    const f = i.is * state.exportScale / RES;
+    return f <= 1.05 ? 1 : f <= 1.5 ? 2 : 3;
+  };
+  function sync(){
+    const mitBild = insts.filter(i => i.img);
+    if(document.body.classList.contains("set-modus") || (!mitBild.length && !insts.some(i => i.leerOk))){ b.hidden = true; return; }
+    b.hidden = false;
+    const R = exportRahmen();
+    b.querySelector(".mass").textContent = R.w + " × " + R.h + " px";
+    const v = typeof verhText === "function" ? verhText(R.w / R.h) : "";
+    b.querySelector(".verh").textContent = /^\d/.test(v) && v.indexOf(".") < 0 ? "· " + v : "";
+    const s = Math.max(0, ...mitBild.map(stufe));
+    b.className = "dock-info" + (s === 2 ? " mittel" : s === 3 ? " weich" : "");
+    b.querySelector(".wort").textContent = s === 3 ? "Soft" : s === 2 ? "Slightly soft" : "Sharp";
+    b.title = (s <= 1 ? "Sharp: every screenshot has enough pixels for its size in the file."
+      : "A screenshot is enlarged in the file. Make that device smaller, use a larger screenshot, or download at 1x.")
+      + " The file will be " + R.w + " by " + R.h + " pixels.";
+  }
+  const renderAlt = render;
+  render = function(){ renderAlt(); sync(); };
+  document.querySelectorAll(".scalebtn").forEach(x => x.addEventListener("click", () => setTimeout(sync, 0)));
+  sync();
+})();
+</script>
+<style id="studio-eine-leiste-1711">
+/* Eine Leiste (Robin, 17.11.2026): alles in einer Zeile. Was zuerst weicht: der Schriftzug
+   neben dem Logo, dann die Pfeile an den Menues, dann die Woerter an Schatten, Leiste, Form. */
+@media(max-width:1600px){.brand-product,.brand-divider{display:none!important}#smShotBtn .pfeil,#smGeraetBtn .pfeil,#smAddBtn .pfeil{display:none!important}}
+@media(max-width:1440px){.sm-mitte .sm-trenn{margin:0 3px!important}.sm-mitte{gap:1px!important}}
+@media(max-width:1360px){#smShadow .lbl,#smBar .lbl{display:none!important}#smShadow,#smBar{padding:0 9px!important}}
+@media(max-width:1180px){#smFit .lbl{display:none!important}#smFit{padding:0 9px!important}}
+</style>
 </body>
 </html>
